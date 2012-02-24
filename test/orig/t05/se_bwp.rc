@@ -1,0 +1,125 @@
+##############################################################################
+## VERSID:   "$Header: /cvsrootb/ALPLA/llr/src/prewmp/src/menurc/se_bwp.rc,v 1.2 2004/06/21 07:33:33 mwirnsp Exp $$Locker:  $";
+## PROJECT:  ALPLA/
+## PACKAGE:  package name
+## FILE:     se_bwp.rc
+## CONTENTS:
+## NOTES:
+## COPYRIGHT NOTICE:
+##          (c) Copyright 2001 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Stuebing
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## REVISION HISTORY:
+##  $Log: se_bwp.rc,v $
+##  Revision 1.2  2004/06/21 07:33:33  mwirnsp
+##  added NoConfig=1 to all selektormasks (bug #2543)
+##
+##  Revision 1.1.1.1  2004/05/28 08:15:12  mwirnsp
+##  COPIED FROM WAMAS-A/llr/src WK32_LVSWA_005
+##
+##############################################################################
+
+MSKDIALOG SE_BWP [
+  NoConfig = 1
+  Unique = 0
+  ShellRealize = 1
+  KeepPos = 0
+  KeepSize = 0
+  SuOnly = 0
+  NoTopPlate = 1
+  ButtonOk = 1
+  ButtonHelp = 1
+  ButtonClose = 1
+  MSKATOM [
+    Version = "$Header: /cvsrootb/ALPLA/llr/src/prewmp/src/menurc/se_bwp.rc,v 1.2 2004/06/21 07:33:33 mwirnsp Exp $"
+  ]
+  MSKDESCR BWP_ProtZeit_t []
+  MSKDESCR BWP_TaNr_t [
+   MSKATOM [
+	 ListOrderBy = "BWP.TaNr,BWP.ProtZeit"
+     OpmEfDbName = "BWP.TaNr"
+     OpmPorderBy1 = "BWP.TaNr"
+     OpmTable = "BWP"
+     OwCallback1 = CbSqlOm
+   ]
+  ]
+  MSKDESCR BWP_TpmId_t [
+   MSKATOM [
+     OpmEfDbName = "TMSK.TpmId"
+     OpmPorderBy1 = "TMSK.TpmId"
+     OpmTable = "TMSK"
+     OwCallback1 = CbSqlOm
+	 ListOrderBy = "BWP.TpmId,BWP.ProtZeit"
+    ]
+  ]
+  MSKDESCR BWP_TeId_t [
+    MSKATOM [
+	  OpmEfDbName = "BWP.TeId"
+	  OpmPorderBy1 = "BWP.TeId"
+	  OpmTable = "BWP"
+	  OwCallback1 = CbSqlOm
+	  ListOrderBy = "BWP.TeId,BWP.ProtZeit"
+	]
+  ]
+  MSKDESCR BWP_Quelle_FeldId_t [
+    MSKATOM [
+      OpmEfDbName = "FES.FeldId"
+      OpmPorderBy1 = "FES.FeldId"
+      OpmTable = "FES"
+      OpmPcheck = 1
+      ListLabel="Quelle"
+      OwCallback1 = CbSqlOm
+      OpmPconsEfContent = 1
+     ListOrderBy ="BWP.Quelle_FeldId"
+    ]
+  ]
+  MSKDESCR BWP_TeilQPos_FeldId_t [
+    MSKATOM [
+      OpmEfDbName = "FES.FeldId"
+      OpmPorderBy1 = "FES.FeldId"
+      OpmTable = "FES"
+      OpmPcheck = 1
+      ListLabel="Quelle Teiltransport"
+      OwCallback1 = CbSqlOm
+      OpmPconsEfContent = 1
+     ListOrderBy ="BWP.Quelle_TeilQuellPos"
+    ]
+  ]
+  MSKDESCR BWP_Nextpos_FeldId_t [
+    MSKATOM [
+      OpmEfDbName = "FES.FeldId"
+      OpmPorderBy1 = "FES.FeldId"
+      OpmTable = "FES"
+      OpmPcheck = 1
+      ListLabel="Nächste Position"
+      OwCallback1 = CbSqlOm
+      OpmPconsEfContent = 1
+     ListOrderBy = "BWP.Nextpos_FeldId"
+    ]
+  ]  
+  MSKDESCR BWP_Ziel_FeldId_t [
+    MSKATOM [
+      OpmEfDbName = "FES.FeldId"
+      OpmPorderBy1 = "FES.FeldId"
+      OpmTable = "FES"
+      OpmPcheck = 1
+      ListLabel="Ziel"
+      OwCallback1 = CbSqlOm
+      OpmPconsEfContent = 1
+     ListOrderBy = "BWP.Ziel_FeldId"
+    ]
+  ]  
+  MSKDESCR BWP_PersNr_t [
+    MSKATOM [
+	  OpmEfDbName = "BWP.PersNr"
+	  OpmPorderBy1 = "BWP.PersNr"
+	  OpmTable = "BWP"
+	  OwCallback1 = CbSqlOm
+	 ListOrderBy = "BWP.PersNr"
+	]
+  ]
+  MSKDESCR BWP_BwpError_sh_sc []
+]

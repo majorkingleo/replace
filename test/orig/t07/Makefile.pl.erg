@@ -1,0 +1,9 @@
+
+#$Locker:  $
+
+&Installdir('data');
+&Installdir('etc');
+&Installdir('log');
+&Installdir('data/log');
+
+$eof;

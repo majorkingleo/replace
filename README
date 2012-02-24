@@ -1,0 +1,11 @@
+Für diese Programm werden die cpputils benötig.
+Entweder in diesem Verzeichnis auschecken
+	cvs -d :pserver:wamas@salxsource01.salomon.at:/cvsrootb co cpputils
+und dann
+	./configure && make
+oder den pmm benutzen und die cpputils sonstwo ausgecheckt haben.
+
+Die tools stammen von der https://svn.hoffer.cx/repos/redeye/tools/trunk/tools
+
+
+

@@ -1,0 +1,39 @@
+##############################################################################
+## PROJECT:  ALPLA/
+## PACKAGE:  DBTEP
+## FILE:     tes.pdl
+## CONTENTS: table TES (Transporteinheit Sperre)
+## COPYRIGHT NOTICE:
+##          (c) Copyright 2001 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Stuebing
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## 
+##############################################################################
+
+
+&Include('defs.pdl');
+&Include('tep.pdl');
+&Include('tesg.pdl');
+&Insert('tab_tes.pds');
+
+##### project specific fields ########
+
+&Structmore('TES', 'MORE1',
+	     'PosNr,         POSNR,      	   Positionsnummer',
+'$');
+
+
+&Table(     'TES', 'TES', 'Transporteinheit-Sperre');
+&Primkey(	'TES', 'TeId, PosNr, SpKz');
+&Forkey(    'TES', 'TeId, PosNr', 'TEP');
+&Forkey(    'TES', 'SpKz', 'TESG');
+&Count (    'TES', 1000);
+
+&Index ('TESTEIDMIDIDX', 'TES', 'TeId, MId_AId_Mand, MId_AId_ArtNr, MId_AId_Var,MId_Charge, SpFlag_SPAUS, SpFlag_SPTOT');
+
+&Sql('GRANT_TES',"grant select on tes to $WA_DB_USER;");
+
+$EOF;
