@@ -1,0 +1,28 @@
+##############################################################################
+## PROJECT:  PISTOR-KCL
+## PACKAGE:  RBG
+## FILE:     rbg_lasmore.pds
+## CONTENTS: Additional RBG-Elements for the LAS-table
+## COPYRIGHT NOTICE:
+##          (c) Copyright 2001 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Friesach bei Graz
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## 
+##############################################################################
+
+
+
+
+##########  Constants  ######################################################
+
+
+##########  Flags & Enums  ##################################################
+
+
+##########  Structures  #####################################################
+
+
+1;
