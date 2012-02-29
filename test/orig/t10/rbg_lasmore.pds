@@ -1,0 +1,34 @@
+##############################################################################
+## PROJECT:  PISTOR-KCL
+## PACKAGE:  RBG
+## FILE:     rbg_lasmore.pds
+## CONTENTS: Additional RBG-Elements for the LAS-table
+## COPYRIGHT NOTICE:
+##          (c) Copyright 2001 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Friesach bei Graz
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## REVISION HISTORY:
+##
+##   $Log: rbg_lasmore.pds,v $
+##   Revision 1.2  2001/11/27 19:52:39  matl
+##   Fileheader standardised
+##
+##   Revision 1.1  2001/09/21 06:05:09  matl
+##   Initial revision
+##
+##############################################################################
+
+&Versionid('$Header: /cvsroot/PISTOR-KCL/llr/src/rbg/rbgdbcfg/rbg_lasmore.pds,v 1.2 2001/11/27 19:52:39 matl Exp $$Locker:  $');
+
+
+##########  Constants  ######################################################
+
+
+##########  Flags & Enums  ##################################################
+
+
+##########  Structures  #####################################################
+

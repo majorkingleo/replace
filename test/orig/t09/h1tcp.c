@@ -1,0 +1,978 @@
+#if !defined(__lint) && !defined(__LINT__) && !defined(lint)
+/**********************************************************************
++*/ static char VERSID[]
+#if defined (__GNUC__)
+__attribute__ ((unused))
+#endif
+= "$Header: /cvsroot/PISTOR-KCL/llr/src/comm/h1tcp/h1tcp.c,v 1.3 2003/06/18 10:39:55 kw Exp $$Locker:  $";
+#endif
+/*
++* PACKAGE:   PISTOR-KCL
++* FILE:      COMM
++* CONTENTS:  Kommunikationsfunktion fuer H1TCP
++* PURPOSE:
++* COPYRIGHT NOTICE:
++*          (c) Copyright 2001 by
++*                  Salomon Automationstechnik Ges.m.b.H
++*                  Friesachstrasse 15
++*                  A-8114 Stuebing
++*                  Tel.: ++43 3127 200-0
++*                  Fax.: ++43 3127 200-22
++* REVISION HISTORY:
++*   $Log: h1tcp.c,v $
++*   Revision 1.3  2003/06/18 10:39:55  kw
++*   LogPrintf changed
++*
++*   Revision 1.2  2001/12/06 08:04:09  matl
++*   Don't make Debug/Trace-LogPrintf's: performance !
++*
++*   Revision 1.1  2001/10/22 14:32:40  mflasser
++*   copied from WA v1.6
++*
++*
++**********************************************************************/
+
+#ifndef WIN32
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#else
+#include <windows.h>
+#endif
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <time.h>
+#ifndef WIN32
+#include <netdb.h>
+#include <unistd.h>
+#endif
+#include <signal.h>
+#include <errno.h>
+#include <malloc.h>
+#include <logtool.h>
+
+#include "h1tcp.h"
+
+#define MAX_TELE_LEN	1024
+
+
+#undef __rcv__log__
+#undef __snd__log__
+#undef __trace__log__
+#undef __debug__log__
+
+#define __TCP_NODELAY__
+
+int tel_cnt;
+time_t	t1, t2;
+
+typedef struct _osi_head {
+	u_char	version;
+	u_char	res1;
+	u_char	tpkt_len[2];
+	u_char	head_len;
+} osi_head;
+
+typedef struct _osi_conn {
+	osi_head	oh;
+	u_char		code;
+	u_char		dst_ref[2];
+	u_char		src_ref[2];
+	u_char		tp_class;
+	/*
+	 * conn data
+	 */
+} osi_conn;
+
+typedef struct _osi_data {
+	osi_head	oh;
+	u_char		code;
+	u_char		last;
+	/*
+	 * data (rw_head, ...)
+	 */
+} osi_data;
+
+
+#define H1TCP_VERS	0x03
+#define SRC_REF		0xffff
+#define DST_REF		0x0000
+
+#define CODE_CR		0xe0		/* Connection Request */
+#define CODE_CC		0xd0		/* Connection Confirmation */
+#define CODE_DT		0xf0		/* Data Transfer */
+#define CODE_DR		0x80		/* Disconnect Request */
+
+#define PARA_TPDU	0xc0
+#define PARA_LTSAP	0xc1
+#define PARA_RTSAP	0xc2
+
+#define ISLAST		0x80
+#define NOTLAST		0x00
+
+#define POW_PDU		9
+#define MAX_PDU		512		/* MAX_PDU = 2 ^ POW_PDU */
+
+#define RW_HEAD_LEN	16
+#define OSI_HEAD_LEN sizeof(osi_head)
+#define BUFSZ		(MAX_TELE_LEN+RW_HEAD_LEN+OSI_HEAD_LEN+100)
+
+#define WRITE_QVZ	10		/* [s] */
+#define CONNECT_TO	10		/* [s] */
+#define RCV_BVZ		1000	/* [ms] */
+
+
+typedef struct _h1tcp_data {
+	int		s;
+	int		max_pdu;
+	time_t	snd_time;			/* fuer QVZ write */
+	u_char	frag_buf[BUFSZ];
+	int		frag_idx;
+	u_char	r_buf[BUFSZ];
+	int		r_idx;
+} h1tcp_data;
+
+static h1tcp_data	*p_h1tcp_data = NULL;
+static int			phd_idx;
+
+/* ------------------------------------------------------------
+ * Telegramme senden ...
+ */
+static int
+h1tcp_snd_sock(h1tcp_data *phd, u_char *buf, int len)
+{
+	int		rv;
+
+#ifdef __snd__log__
+	int		i;
+	char	*pc;
+	char	trc_buf[3*BUFSZ + 50];
+	
+	pc = trc_buf;
+	for(i=0; i<len; ++i) {
+		if (i % 25 == 0)
+			pc += sprintf(pc, "\n");
+		pc += sprintf(pc, " %02x", buf[i]);
+	}
+
+	LogPrintf("h1tcp", LT_TRACE, "send_trace: %s", trc_buf);
+#endif
+
+	rv = sendto(phd->s, buf, len, 0, NULL, 0);
+	if (rv != len) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_snd_sock: send: rv = %d, errno = %d, len = %d",
+			rv, errno, len);
+		rv = -1;
+	}
+	return rv;
+}
+
+
+int
+h1tcp_snd_send(int s, u_char *buf, int len)
+{
+	int			rv, slen, idx;
+	int			first;
+	u_char		*pc;
+	u_char		sbuf[BUFSZ];
+	osi_data	*pod;
+	h1tcp_data	*phd;
+
+#ifdef __debug__log__
+	LogPrintf("h1tcp", LT_DEBUG,
+		"h1tcp_snd_send:  s = %d, len = %d ... ", s, len);
+#endif
+
+	if (s < 0 || s >= phd_idx) {
+		LogPrintf("h1tcp",
+			LT_ALERT, "h1tcp_snd_send: s out of range (%d)", s);
+		return -1;
+	}
+	phd = &p_h1tcp_data[s];
+
+	/*
+	 * geradzahling Anzahl
+	 */
+	if (len % 2 != 0)
+		++len;
+	idx = 0;
+	for(first=1; first || idx<len; first=0) {
+		slen = len - idx;
+		if ((slen+(int)sizeof(osi_data)) > phd->max_pdu)
+			slen = phd->max_pdu - sizeof(osi_data);
+
+		memset(&sbuf, 0, sizeof(sbuf));
+		pod = (osi_data *)sbuf;
+		pod->oh.version = H1TCP_VERS;
+		pod->code = CODE_DT;
+		pod->last = (slen+idx)>=len ? ISLAST : NOTLAST;
+
+		pc = &pod->last + 1;
+		if (slen > 0)
+			memcpy(pc, &buf[idx], slen);
+		pc += slen;
+		idx += slen;
+		/*
+		 * Laengen
+		 */
+		slen = pc - sbuf;
+		pod->oh.tpkt_len[0] = slen / 0x100;
+		pod->oh.tpkt_len[1] = slen % 0x100;
+		pod->oh.head_len = 2;	/* code + last */
+
+		rv = h1tcp_snd_sock(phd, sbuf, slen);
+		if (rv < 0)
+			return rv;
+	}
+#ifdef __debug__log__
+	LogPrintf("h1tcp", LT_DEBUG, "h1tcp_snd_send OK");
+#endif
+	return 0;
+}
+	
+
+int
+h1tcp_snd_write(int s, u_char *buf, int len, int dbnr, int off)
+{
+	int			rv;
+	time_t		timer;
+	u_char		sbuf[BUFSZ];
+	u_char		*pc;
+	h1tcp_data	*phd;
+
+#ifdef __debug__log__
+	LogPrintf("h1tcp", LT_DEBUG,
+		"h1tcp_snd_write: s = %d, len = %d, dbnr = %d, off = %d ...",
+		s, len, dbnr, off);
+#endif
+
+	if (s < 0 || s >= phd_idx) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_snd_write: s out of range (%d)", s);
+		return -1;
+	}
+	phd = &p_h1tcp_data[s];
+
+	if (len < 0 || len > MAX_TELE_LEN) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_snd_write: telegramm len > max (%d > %d)",
+			len, MAX_TELE_LEN);
+		return -1;
+	}
+	time(&timer);
+
+	if (phd->snd_time != 0) {
+		/*
+		 * Keine Antwort auf letzten WRITE ?
+		 */
+		if (abs(timer - phd->snd_time) > WRITE_QVZ) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_snd_write: quitt timeout");
+			return -1;
+		}
+		
+		return 0;
+	}
+
+	memset(sbuf, 0, sizeof(sbuf));
+	/*
+	 * RW Header
+	 */
+	pc = &sbuf[0];
+	*(pc++) = 'S';		/* System Kennung */
+	*(pc++) = '5';
+	*(pc++) = 16;		/* Laenge RW Header */
+
+	*(pc++) = 1;		/* Kennung OP-Code */
+	*(pc++) = 3;		/* Laenge OP-Code */
+	*(pc++) = 3;		/* OP-Code: 'WRITE' */
+
+	*(pc++) = 3;		/* Kennung ORG-Block */
+	*(pc++) = 8;		/* Laenge ORG-Block */
+	*(pc++) = 1;		/* ORG-Kennung: 'DB' */
+	*(pc++) = dbnr;
+	*(pc++) = off / 0x100;
+	*(pc++) = off % 0x100;
+	*(pc++) = len / 0x100;
+	*(pc++) = len % 0x100;
+
+	*(pc++) = 0xff;		/* Kennung Leerblock */
+	*(pc++) = 2;		/* Laenge Leerblock */
+	pc = &sbuf[RW_HEAD_LEN];
+	if (len > 0)
+		memcpy(pc, buf, len);
+
+	rv = h1tcp_snd_send(s, sbuf, len+RW_HEAD_LEN);
+#ifdef __debug__log__
+	if (rv >= 0)
+		LogPrintf("h1tcp", LT_DEBUG, "h1tcp_snd_write OK");
+#endif
+	phd->snd_time = timer;
+	return rv;
+}
+
+
+/* ------------------------------------------------------------
+ * Telgramme empfangen
+ */
+#ifdef WIN32
+#define NFDBITS (sizeof(long) * 8)
+#define howmany(x, y)   (((x)+((y)-1))/(y))
+#endif
+
+#define NWORDS  howmany(FD_SETSIZE, NFDBITS)
+
+static int
+_h1tcp_rcv_sock(h1tcp_data *phd, u_char *buf, int max_len, int to)
+{
+	int				rv, s, i, len;
+	fd_set	read_fds;
+	struct timeval	tv;
+#ifdef __rcv__log__
+	char	*pc;
+	char	trc_buf[3*BUFSZ + 50];
+#endif
+
+	s = phd->s;
+#ifdef MIT_NWORDS_STIMMT_WOS_NET_FRAGEN
+	if (s < 0 || s > NWORDS)
+		return -1;
+#endif /* MIT_NWORDS_STIMMT_WOS_NET_FRAGEN */
+
+	if (s < 0)
+		return -1;
+
+	memset(&read_fds, 0, sizeof(read_fds));
+
+	FD_SET (s, &read_fds);
+
+#ifdef FD_SET_WIRD_VERWENDETTTTTT
+	read_fds.fds_bits[s / NFDBITS] = (1 << (s % NFDBITS));
+#endif /* FD_SET_WIRD_VERWENDETTTTTT */
+
+	tv.tv_usec = (to % 1000) * 1000;
+	tv.tv_sec = to / 1000;
+
+  	rv = select(FD_SETSIZE,
+#if !defined WIN32 && !defined AIX
+#else
+#endif
+    &read_fds,
+    NULL, NULL, &tv);
+
+	if (rv < 0)
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_sock: select: rv = %d, errno = %d", rv, errno);
+	if (rv <= 0)
+		return rv;
+
+	rv = recv(s, buf, max_len, 0);
+	if (rv < 0 && errno == EAGAIN) {
+		/* No Data */
+		rv = 0;
+	}
+	else if (rv == 0) {
+		/* Connectionproblem */
+		rv = -1;
+	} 
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_sock: recv: rv = %d, errno = %d", rv, errno);
+		return rv;
+	}
+	len = rv;
+
+#ifdef __rcv__log__
+	pc = trc_buf;
+	for(i=0; i<len; ++i) {
+		if (i % 25 == 0)
+			pc += sprintf(pc, "\n");
+		pc += sprintf(pc, " %02x", buf[i]);
+	}
+
+	LogPrintf("h1tcp", LT_TRACE, "rcv_trace: %s", trc_buf);
+#endif
+
+	return len;
+}
+
+
+static int
+h1tcp_rcv_sock(h1tcp_data *phd, u_char *buf, int max_len, int to)
+{
+	int				rv, len;
+	osi_data		*pod;
+
+	for(;;) {
+		if (phd->frag_idx > 0) {
+			pod = (osi_data *)phd->frag_buf;
+			if (pod->oh.version != H1TCP_VERS) {
+				LogPrintf("h1tcp", LT_ALERT,
+					"h1tcp_rcv_sock: H1TCP_VERS invalid (%d)",
+					pod->oh.version);
+				return -1;
+			}
+			len = pod->oh.tpkt_len[0] * 0x100 + pod->oh.tpkt_len[1];
+			if (len < sizeof(osi_data) || len > MAX_PDU) {
+				LogPrintf("h1tcp", LT_ALERT,
+					"h1tcp_rcv_sock: len invalid (%d)", len);
+				return -1;
+			}
+
+			if (phd->frag_idx >= len) {
+				/*
+				 * Block vollstaendig empfangen
+				 */
+				memcpy(buf, phd->frag_buf, len);
+				phd->frag_idx -= len;
+				if (phd->frag_idx > 0) {
+					/*
+					 * noch daten im frag_buf
+					 */
+					memcpy(&phd->frag_buf[0], &phd->frag_buf[len],
+						phd->frag_idx);
+				}
+				return len;
+			}
+		}
+
+		rv = _h1tcp_rcv_sock(phd, &phd->frag_buf[phd->frag_idx],
+			BUFSZ-phd->frag_idx, to);
+		if (rv < 0)
+			return rv;
+		/*
+		 * Timeout im Telegramm
+		 */
+		if (rv == 0) {
+			if (phd->frag_idx > 0) {
+				LogPrintf("h1tcp", LT_ALERT,
+					"h1tcp_rcv_sock: ZVZ timeout");
+				return -1;
+			}
+			else {
+				/* no data */
+				return 0;
+			}
+		}
+		phd->frag_idx += rv;
+	}
+	return -1;
+}
+
+int
+h1tcp_rcv_send(int s, u_char *buf, int max_len, int to)
+{
+	int			rv, idx;
+	int			len, offset;
+	u_char		rbuf[BUFSZ];
+	osi_data	*pod;
+	h1tcp_data	*phd;
+
+#ifdef __trace__log__
+	LogPrintf("h1tcp", LT_TRACE,
+		"h1tcp_rcv_send: s = %d, max_len = %d, to = %d ...", s, max_len, to);
+#endif /* __trace__log__ */
+
+	if (s < 0 || s >= phd_idx) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_send: s out of range (%d)", s);
+		return -1;
+	}
+	phd = &p_h1tcp_data[s];
+
+	idx = 0;
+	for(;;) {
+		/*********** !!!!!!!!!! BLOCKVZ !!!!!!!!!!!!!! **********/
+		rv = h1tcp_rcv_sock(phd, rbuf, BUFSZ, to);
+		if (rv < 0)
+			return rv;
+		if (rv == 0) {
+			if (idx > 0) {
+				LogPrintf("h1tcp", LT_ALERT,
+					"h1tcp_rcv_send: PDU timeout pdu_idx = %d", idx);
+				return -1;
+			}
+			else {
+#ifdef __trace__log__
+				LogPrintf("h1tcp", LT_TRACE, "h1tcp_rcv_send TIMEOUT");
+#endif /* __trace__log__ */
+				return 0;
+			}
+		}
+		len = rv;
+		/*
+		 * Ueberlauf ?
+		 */
+		if ((len + idx) > max_len) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_rcv_send: Buffer Overflow len = %d, max_len = %d",
+				len + idx, max_len);
+			return -1;
+		}
+
+		pod = (osi_data *)rbuf;
+		offset = sizeof(osi_head) + pod->oh.head_len;
+		if (offset > len) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_rcv_send: Data Error data_offset > tel_len (%d > %d)",
+				offset, len);
+			return -1;
+		}
+		if (len > offset) {
+			memcpy(&buf[idx], &rbuf[offset], len-offset);
+			idx += (len-offset);
+		}
+		if ((pod->last & ISLAST) != 0) {
+#ifdef __debug__log__
+			LogPrintf("h1tcp", LT_DEBUG, "h1tcp_rcv_send OK  len = %d", idx);
+#endif
+			return idx;
+		}
+	}
+	return -1;
+}
+
+
+int
+h1tcp_rcv_write(int s, u_char *buf, int max_len, int to)
+{
+	int			rv, len;
+	u_char		*pc;
+	u_char		rbuf[BUFSZ];
+	u_char		sbuf[BUFSZ];
+	h1tcp_data	*phd;
+
+#ifdef __debug__log__
+	LogPrintf("h1tcp", LT_DEBUG,
+		"h1tcp_rcv_write: s = %d, max_len = %d, to = %d ...", s, max_len, to);
+#endif
+	if (s < 0 || s >= phd_idx) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_send: s out of range (%d)", s);
+		return -1;
+	}
+	phd = &p_h1tcp_data[s];
+
+	if (phd->snd_time != 0 || phd->r_idx == 0) {
+		/*
+		 * offener SEND oder keine Daten im r_buf
+		 */
+		rv = h1tcp_rcv_send(s, rbuf, BUFSZ, to);
+		if (rv <= 0)
+			return rv;
+		len = rv;
+	}
+	else if (phd->r_idx != 0) {
+		len = phd->r_idx;
+		memcpy(rbuf, phd->r_buf, len);
+		phd->r_idx = 0;
+	}
+	
+	len -= RW_HEAD_LEN;
+	if (len < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_write: RW_telegramm to short len = %d, min_len = %d",
+			len, RW_HEAD_LEN);
+		return -1;
+	}
+	/*
+	 * Ueberlauf ?
+	 */
+	if (len > max_len) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_send: Buffer Overflow len = %d, max_len = %d",
+			len, max_len);
+		return -1;
+	}
+	
+	/*
+	 * Ueberprufen des Write Headers
+	 */
+	if (rbuf[0] != 'S' || rbuf[1] != '5') {
+		int		i;
+		char	*pc;
+		char	trc_buf[3*RW_HEAD_LEN+2];
+
+		pc = trc_buf;
+		for(i=0; i<RW_HEAD_LEN; ++i)
+			pc += sprintf(pc, " %02x", rbuf[i]);
+
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_write: RW_header invalid\nheader: %s",
+			trc_buf);
+		return -1;
+	}
+
+	if (rbuf[5] == 4) {
+		/*
+		 * WRITE Quittierungstelegramm
+		 */
+		if (rbuf[8] != 0) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_rcv_write: RW_quitt_header invalid: rbuf[8] != 0");
+			return -1;
+		}
+		phd->snd_time = 0;
+		return 0;
+	}
+	else {
+		if (phd->r_idx != 0) {
+			/*
+			 * Daten empfangen obwohl alte Daten noch nicht quittiert
+			 * --> Fehler
+			 */
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_rcv_write: Statemachine Error: New Data befor Quitt");
+			return -1;
+		}
+		if (phd->snd_time != 0) {
+			/*
+			 * es ist ein SND Unix->S5 offen
+			 * --> Daten merken, nicht quittieren
+			 */
+			memcpy(phd->r_buf, rbuf, len);
+			phd->r_idx = len;
+			LogPrintf("h1tcp", LT_DEBUG, "h1tcp_rcv_write NO_DATA");
+			return 0;
+		}
+		else {
+			/*
+			 * Write Anfroderungstelegramm
+			 *   --> Quittierungstelegramm erzeugen
+			 */
+			memset(sbuf, 0, sizeof(sbuf));
+			pc = &sbuf[0];
+			*(pc++) = 'S';		/* System Kennung */
+			*(pc++) = '5';
+			*(pc++) = 16;		/* Laenge RW Header */
+
+			*(pc++) = 1;		/* Kennung OP-Code */
+			*(pc++) = 3;		/* Laenge OP-Code */
+			*(pc++) = 4;		/* OP-Code: 'WRITE QUITT' */
+
+			*(pc++) = 0x0f;		/* Kennung Q-Block */
+			*(pc++) = 3;		/* Laenge Q-Block */
+			*(pc++) = 0;		/* Fehlernummer */
+
+			*(pc++) = 0xff;		/* Kennung Leerblock */
+			*(pc++) = 7;		/* Laenge Leerblock */
+
+			rv = h1tcp_snd_send(s, sbuf, RW_HEAD_LEN);
+			if (rv < 0)
+				return rv;
+			
+			memcpy(buf, &rbuf[RW_HEAD_LEN], len);
+#ifdef __debug__log__
+			LogPrintf("h1tcp", LT_DEBUG, "h1tcp_rcv_send OK  len = %d", len);
+#endif
+			return len;
+		}
+	}
+}
+
+/* ------------------------------------------------------------
+ * TCP connect & disconnect
+ */
+
+
+int
+h1tcp_shutdown(int s)
+{
+	int			rv;
+	u_char		buf[BUFSZ];
+	h1tcp_data	*phd;
+	osi_conn	*poc;
+
+	LogPrintf("h1tcp", LT_ALERT, "h1tcp_shutdown: s = %d ...", s);
+	if (s < 0 || s >= phd_idx) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_rcv_send: s out of range (%d)", s);
+	}
+
+	if (s >= 0 && s < phd_idx) {
+		rv = shutdown(s, 0);
+		if (rv < 0) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_snd_sock: shutdown: rv = %d, errno = %d",
+				rv, errno);
+		}
+
+		phd = &p_h1tcp_data[s];
+
+		memset(&buf, 0, sizeof(buf));
+		poc = (osi_conn *)buf;
+		poc->oh.version = H1TCP_VERS;
+		poc->oh.tpkt_len[0] = sizeof(osi_conn) / 0x100;
+		poc->oh.tpkt_len[1] = sizeof(osi_conn) % 0x100;
+		poc->oh.head_len = sizeof(osi_conn) - sizeof(osi_head);
+		poc->code = CODE_DR;
+		poc->dst_ref[0] = DST_REF / 0x100;
+		poc->dst_ref[1] = DST_REF % 0x100;
+		poc->src_ref[0] = SRC_REF / 0x100;
+		poc->src_ref[1] = SRC_REF % 0x100;
+		poc->tp_class = 128;		/* normal disconnect */
+
+		rv = h1tcp_snd_sock(phd, buf, sizeof(osi_conn));
+	}
+#ifndef WIN32
+	rv = close(s);
+#else 
+	rv =closesocket(s);
+#endif
+
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_snd_sock: close: rv = %d, errno = %d",
+			rv, errno);
+	}
+
+	LogPrintf("h1tcp", LT_DEBUG, "h1tcp_shutdown FINISH");
+	return 0;
+}
+
+
+static int
+_h1tcp_connect(h1tcp_data *phd, char *ltsap, char *rtsap)
+{
+	int			rv, len, i;
+	u_char		*pc;
+	u_char		buf[BUFSZ];
+	osi_conn	*poc;
+
+	memset(&buf, 0, sizeof(buf));
+	poc = (osi_conn *)buf;
+	poc->oh.version = H1TCP_VERS;
+	poc->code = CODE_CR;
+	poc->dst_ref[0] = DST_REF / 0x100;
+	poc->dst_ref[1] = DST_REF % 0x100;
+	poc->src_ref[0] = SRC_REF / 0x100;
+	poc->src_ref[1] = SRC_REF % 0x100;
+	poc->tp_class = 0;
+	pc = &poc->tp_class + 1;		/* offset connect data */
+
+	*(pc++) = PARA_TPDU;
+	*(pc++) = 1;				/* len */
+	*(pc++) = POW_PDU;			/* 512 Bytes */
+
+	*(pc++) = PARA_LTSAP;
+	*(pc++) = strlen(ltsap);
+	strcpy((char*)pc, ltsap);
+	pc += strlen(ltsap);
+
+	*(pc++) = PARA_RTSAP;
+	*(pc++) = strlen(rtsap);
+	strcpy((char*)pc, rtsap);
+	pc += strlen(rtsap);
+
+	/*
+	 * Laengen
+	 */
+	len = pc - buf;
+	poc->oh.tpkt_len[0] = len / 0x100;
+	poc->oh.tpkt_len[1] = len % 0x100;
+	poc->oh.head_len = len - sizeof(osi_head);
+
+	rv = h1tcp_snd_sock(phd, buf, len);
+	if (rv < 0)
+		return rv;
+	
+	memset(&buf, 0, sizeof(buf));
+	rv = h1tcp_rcv_sock(phd, buf, sizeof(buf), CONNECT_TO*1000);
+	if (rv < 0)
+		return rv;
+	if (rv == 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"_h1tcp_connect: Connection Confirm Timeout");
+		return -1;
+	}
+	if (poc->code != CODE_CC) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"_h1tcp_connect: CODE != CODE_CC (%d != %d)",
+			poc->code, CODE_CC);
+		return -1;
+	}
+	len = poc->oh.tpkt_len[0] * 0x100 + poc->oh.tpkt_len[1];
+	if (len < sizeof(osi_conn)) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"_h1tcp_connect: Conection Confirm Telegamm to short (%d < %d)",
+			len, sizeof(osi_conn));
+		return -1;
+	}
+	for(i=offsetof(osi_conn, tp_class)+1; i<len; ) {
+		switch (buf[i]) {
+		case PARA_LTSAP:
+		case PARA_RTSAP:
+			break;
+		case PARA_TPDU:
+			/*
+			 * pdu zwischen 16 und 65536
+			 */
+			if (buf[i+2] < 4 || buf[i+2] > 16) {
+				LogPrintf("h1tcp", LT_ALERT,
+					"_h1tcp_connect: MAX_PDU invalid (%d)", (1 << buf[i+2]));
+				return -1;
+			}
+			phd->max_pdu = (1 << buf[i+2]);
+			LogPrintf("h1tcp", LT_DEBUG,
+				"_h1tcp_connect: MAX_PDU: %d", phd->max_pdu);
+			break;
+		default:
+			return -1;
+		}
+		i += (buf[i+1] + 2);
+	}
+	if (phd->max_pdu == 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"_h1tcp_connect: Error: no MAX_PDU in Connection Confirm");
+		return -1;
+	}
+	return 0;
+}
+
+int
+h1tcp_connect(char *host, char *ltsap, char *rtsap)
+{
+	int					rv, s;
+	int					val;
+	struct hostent		*hp;		/* pointer to host info for remote host */
+	struct servent		*sp;		/* pointer to service information */
+	struct sockaddr_in	peeraddr_in;/* for peer socket address */
+	h1tcp_data			*phd;
+
+	LogPrintf("h1tcp", LT_ALERT,
+		"h1tcp_connect:\nhost = '%s', ltsap = '%s', rtsap = '%s' ...",
+		host, ltsap, rtsap);
+	/*
+	 * clear out address structures
+	 */
+	memset ((char *)&peeraddr_in, 0, sizeof(struct sockaddr_in));
+
+	/*
+	 * Set up the peer address to which we will connect.
+	 */
+	peeraddr_in.sin_family = AF_INET;
+	/*
+	 * Get the host information for the hostname that the
+	 * user passed in.
+	 */
+	hp = gethostbyname (host);
+	if (hp == NULL) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: %s not found in /etc/hosts", host);
+		return -1;
+	}
+	peeraddr_in.sin_addr.s_addr = ((struct in_addr *)(void*)(hp->h_addr))->s_addr;
+		/* Find the information for the "example" server
+		 * in order to get the needed port number.
+		 */
+	sp = getservbyname ("iso-tsap", "tcp");
+	if (sp == NULL) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: iso_tsap not found in /etc/services");
+		return -1;
+	}
+
+	peeraddr_in.sin_port = sp->s_port;
+
+	/*
+	 * Create the socket.
+	 */
+	s = socket (AF_INET, SOCK_STREAM, 0);
+	if (s < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: socket: rv = %d, errno = %d",
+			s, errno);
+		return s;
+	}
+
+	if (s >= phd_idx) {
+		phd = realloc(p_h1tcp_data, ((s+1) * sizeof(h1tcp_data)));
+		if (phd == NULL) {
+			LogPrintf("h1tcp", LT_ALERT,
+				"h1tcp_connect: realloc: size = %d, rv = %d, errno = %d",
+				((s+1) * sizeof(h1tcp_data)), phd, errno);
+			return -1;
+		}
+		p_h1tcp_data = phd;
+		phd_idx = s + 1;
+	}
+	phd = &p_h1tcp_data[s];
+	memset(phd, 0, sizeof(h1tcp_data));
+	phd->s = s;
+
+	val = BUFSZ * 10;
+	rv = setsockopt(s, SOL_SOCKET, SO_SNDBUF, (void*)&val, sizeof(val));
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: setsockop O_SNDBUF: rv = %d, errno = %d",
+			rv, errno);
+#ifndef WIN32
+		close(s);
+#else 
+		closesocket(s);
+#endif
+		return -1;
+	}
+
+#ifdef __TCP_NODELAY__
+	val = 1;
+	rv = setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (void*)&val, sizeof(val));
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: setsockop TCP_NODELAY: rv = %d, errno = %d",
+			rv, errno);
+#ifndef WIN32
+		close(s);
+#else 
+		closesocket(s);
+#endif
+		return -1;
+	}
+#endif
+	/*
+	 * Try to connect to the remote server at the address
+	 * which was just built into peeraddr.
+	 */
+	rv = connect(s, (struct sockaddr *)&peeraddr_in, sizeof(struct sockaddr_in));
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: connect: rv = %d, errno = %d",
+			rv, errno);
+#ifndef WIN32
+		close(s);
+#else 
+		closesocket(s);
+#endif
+		return -1;
+	}
+
+#ifndef WIN32
+	rv = fcntl(s, F_SETFL, O_NONBLOCK);
+	if (rv < 0) {
+		LogPrintf("h1tcp", LT_ALERT,
+			"h1tcp_connect: fcntl O_NONBLOCK: rv = %d, errno = %d",
+			rv, errno);
+#ifndef WIN32
+		close(s);
+#else 
+		closesocket(s);
+#endif
+		return -1;
+	}
+#endif
+
+	rv = _h1tcp_connect(phd, ltsap, rtsap);
+	if (rv < 0) {
+		h1tcp_shutdown(s);
+		return -1;
+	}
+	LogPrintf("h1tcp", LT_ALERT, "h1tcp_connect OK  socket = %d", s);
+	return s;
+}
+

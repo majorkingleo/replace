@@ -115,6 +115,17 @@ std::string  RemoveVersidPdl::remove_versid( const std::string & file )
 	std::string result = cut_revision_history( file );
 	result = cut_VERSID( result );
 	result = cut_versid_function( result );
+	result = add_eof( result );
 
 	return result;
+}
+
+
+std::string RemoveVersidPdl::add_eof( const std::string & file ) const
+{
+	if( file.find(';') != std::string::npos ) {
+		return file;
+	}
+
+	return file + "\n1;";
 }

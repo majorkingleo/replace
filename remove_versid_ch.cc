@@ -3,6 +3,7 @@
 #include "getline.h"
 #include "find_first_of.h"
 #include "utils.h"
+#include <debug.h>
 
 using namespace Tools;
 
@@ -145,7 +146,8 @@ std::string RemoveVersidCh::cut_static_versid( const std::string & file ) const
 {
 	std::string::size_type pos = find_first_of( file, 0,
 												"VERSID_H",
-												"VERSID_C" );
+												"VERSID_C",
+												"VERSID");
 
 	if( pos == std::string::npos )
 		return file;
@@ -155,11 +157,15 @@ std::string RemoveVersidCh::cut_static_versid( const std::string & file ) const
 
 	std::string line = get_whole_line( file, pos );
 
-	if( line.find( "static" ) == std::string::npos )
+	if( line.find( "static" ) == std::string::npos ) {
+		DEBUG("no static found");
 		return file;
+	}
 
-	if( line.find( "char" ) == std::string::npos )
-			return file;
+	if( line.find( "char" ) == std::string::npos ) {
+		DEBUG("no char found");
+		return file;
+	}
 
 	std::string::size_type start = file.rfind('\n',pos);
 
@@ -167,23 +173,32 @@ std::string RemoveVersidCh::cut_static_versid( const std::string & file ) const
 
 	line = get_line( file, pos );
 
-	if( line.find("#if defined(__GNUC__)") == std::string::npos )
+	if( line.find("defined") == std::string::npos ||
+	    line.find("__GNUC__") == std::string::npos ) {
+		DEBUG("defined(__GNUC__) not found");
 		return file;
+	}
 
 	pos += line.size() + 1;
 
 	line = get_line( file, pos );
 
-	if( line.find("__attribute__ ((unused))") == std::string::npos )
+	if( line.find("__attribute__ ((unused))") == std::string::npos ) {
+		DEBUG( "__attribute__ ((unused)) not found");
 		return file;
+	}
 
 	pos = file.find(';', pos);
 
-	if( pos == std::string::npos )
+	if( pos == std::string::npos ) {
+		DEBUG( "; not found");
 		return file;
+	}
 
 	std::string result = file.substr(0,start);
 	result += file.substr(pos+1);
+
+	DEBUG( format("cutting: >>%s<<",  file.substr(start,pos-start)) );
 
 	return result;
 }
@@ -251,7 +266,7 @@ std::string RemoveVersidCh::remove_versid( const std::string & file_)
 		break;
 	}
 
-	if( pos == 0 ) // nichts hat sich geändert
+	if( pos == 0 ) // nichts hat sich geï¿½ndert
 	{
 		return cut_the_easy_stuff(file);
 	}

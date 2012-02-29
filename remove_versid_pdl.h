@@ -14,6 +14,7 @@ protected:
 	std::string cut_revision_history( const std::string & file ) const;
 	std::string cut_VERSID( const std::string & file ) const;
 	std::string cut_versid_function( const std::string & file ) const;
+	std::string add_eof( const std::string & file ) const;
 };
 
 #endif

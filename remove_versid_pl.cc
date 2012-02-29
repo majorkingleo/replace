@@ -64,3 +64,4 @@ std::string RemoveVersidPl::remove_versid( const std::string & file )
 
 	return result;
 }
+
