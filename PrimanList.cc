@@ -46,25 +46,37 @@ std::string PrimanList::toString( const SEL_CALLBACK & type )
 
 std::string PrimanList::include_primanlist( const std::string & file )
 {
-	std::string::size_type pos = file.find( "#include" );
+	std::string::size_type pos = 0;
 
-	if( pos == std::string::npos )
-		return file;
+	while (pos != std::string::npos) {
+		pos = file.find( "#include", pos );
 
-	if( is_in_string( file, pos ) )
-		return file;
+		if( pos == std::string::npos )
+			return file;
 
-	std::string::size_type begin_of_line = file.rfind('\n',pos);
+		if( is_in_string( file, pos ) )
+			return file;
 
-	if( begin_of_line == std::string::npos )
-		begin_of_line = 0;
+		std::string::size_type begin_of_line = file.rfind('\n',pos);
 
-	std::string result = file.substr( 0, begin_of_line +1);
-	result += "#include <primanlist.h>";
-	result += file.substr(begin_of_line);
+		if( get_whole_line(file,begin_of_line).find("#ifdef") != std::string::npos )
+		{
+			DEBUG(format("#ifdef found at line %d",get_linenum(file,pos-1)));
+			pos = file.find("#endif", pos+1);
+			continue;
+		}
 
+		if( begin_of_line == std::string::npos )
+			begin_of_line = 0;
 
-	return result;
+		std::string result = file.substr( 0, begin_of_line +1);
+		result += "#include <primanlist.h>";
+		result += file.substr(begin_of_line);
+
+		return result;
+	}
+
+	return file;
 }
 
 PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
@@ -135,7 +147,7 @@ std::string PrimanList::get_varname( const std::string & var )
 {
 	for(int pos = var.length() - 1; pos >= 0; pos-- )
 	{
-		if( !isalpha(var[pos]) )
+		if( !isalnum(var[pos]) && var[pos] != '_' )
 			return var.substr(pos+1);
 	}
 
@@ -174,7 +186,7 @@ std::string PrimanList::add_selcallback_to_reasons( const std::string & file, st
 	std::string line = get_whole_line( file, pos);
 
 	// das machen wird dazu damit wir wissen
-	// wieviel wir einrücken sollen
+	// wieviel wir einrï¿½cken sollen
 	// damits auch besser aussieht
 	std::string::size_type start_of_case = find_first_of( line, 0, "case", "default" );
 	std::string indent = line.substr(0,start_of_case);
@@ -238,9 +250,9 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 			continue;
 		}
 
-		// in der nächsten Zeile
+		// in der nï¿½chsten Zeile
 		// pListAction->sel_callback = PrimanListSelCallbackLocal
-		// hinzufügen
+		// hinzufï¿½gen
 
 		std::string::size_type next_line = file.find('\n', pos);
 
