@@ -59,10 +59,12 @@ std::string PrimanList::include_primanlist( const std::string & file )
 
 		std::string::size_type begin_of_line = file.rfind('\n',pos);
 
-		if( get_whole_line(file,begin_of_line).find("#ifdef") != std::string::npos )
+		DEBUG( get_whole_line(file,begin_of_line-1) );
+
+		if( get_whole_line(file,begin_of_line-1).find("#ifdef") != std::string::npos )
 		{
 			DEBUG(format("#ifdef found at line %d",get_linenum(file,pos-1)));
-			pos = file.find("#endif", pos+1);
+			pos = file.find("#endif", pos+1)+6;
 			continue;
 		}
 

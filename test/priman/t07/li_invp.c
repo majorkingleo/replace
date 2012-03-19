@@ -1,0 +1,286 @@
+/**
+* @file
+* @todo describe file content
+* @author Copyright (c) 2012 Salomon Automation GmbH
+*/
+#ifdef WIN32
+#include <windows.h>
+#endif
+#include <mumalloc.h>
+#include <sqllist.h>
+#include <owrcloader.h>
+#include <stime.h>
+
+#include <t_util.h>
+#include <li_util.h>
+#include <ml.h>
+#include <sqltable.h>
+
+/* ------- Local-Headers -------------------------------------------------- */
+
+#include "wamas.h"
+
+#define _LI_INVP_C
+#include "li_invp.h"
+#undef _LI_INVP_C
+
+#include "menufct.h"
+
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+
+/* ------- Namen sind definiert fuer die listenteile -----------------------*/
+
+#define  PN_INVK    	"LIINVKP"
+#define  TN_INVK     	"INVKP"
+#define  PN_INVP     	"LIINVPP"
+#define  TN_INVP     	"INVPP"
+
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+/* ------- Structures ----------------------------------------------------- */
+
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* 
+-* Destroy-Calllback fuer die Freigabe von alloc,malloc ...
+-*
+-*--------------------------------------------------------------------------*/
+
+static void destroyCallbackInvp (ListTdialog *hListDialog)
+
+{
+	if (hListDialog) {
+		free(hListDialog);
+	}
+
+	return;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Eigentliche Listenfunktion
+-* RETURNS
+-*      0   bzw.
+-*     -1   im Fehlerfall
+-*--------------------------------------------------------------------------*/
+static int localLiInvp (OWidget hParent, char *pcMtitle,
+							Value hUd, MskDialog *hMaskRl)
+{
+	extern elTlistPart elp_INVK[];
+	static elTitem LIINVK_ITEM[] = {
+		{TN_INVK,   {0, NULL},   {0, (char *)elp_INVK, 0, EL_SUB},},
+		{NULL}
+    };
+	extern elTlistPart elp_INVP[];
+	static elTitem LIINVP_ITEM[] = {
+		{TN_INVP,   {1, NULL},   {0, (char *)elp_INVP, 0, EL_SUB},},
+		{NULL}
+    };
+
+	static elTlistPart tElp_LIINV[] = {
+		{FILTER_NAME,   sizeof(ListTfilter),    FilterItem},
+		{PN_INVK, 		0, 						LIINVK_ITEM},
+		{PN_INVP, 		0, 						LIINVP_ITEM},
+		{FOOT_NAME,     sizeof(FOOT4LISTS),     FOOT_ITEM},
+		{NULL}
+	};
+
+	/*
+ 	 *  DB-Statement
+	 */
+	static elTlist tElInvp = {
+		"invp",
+		tElp_LIINV,
+		0,
+		"SELECT %INVKP, %INVPP FROM "
+		"INVKP, INVPP WHERE "
+		"INVPP.ProtNr = INVKP.ProtNr",
+	};
+
+	extern listSubSel SE_INVK;
+	extern listSubSel SE_INVP;
+
+	/* 
+	 *  Filter und Sortierkriterien
+	 */
+	static listSelItem Selector[] = {
+		{"INV-Protokoll", TN_INVK, &SE_INVK,
+			{&tElInvp},
+				{NULL},
+				{NULL},
+			{NULL},
+			LSI_TYPE_RC
+		},
+		{"INV-Protokoll", TN_INVP, &SE_INVP,
+			{&tElInvp},
+				{NULL},
+				{NULL},
+			{NULL},
+			LSI_TYPE_RC
+		},
+		{ NULL, }
+	};
+
+	ListTdialog		*pListDialog;
+	ListTXdialog	*pListXDialog;
+	ListTaction		*pListAction;
+	listSelItem		*pSelector;
+	MskDialog		hMskRl;
+	char			*ptLiInvp;
+    static time_t   todayMorning;
+    static time_t   todayEvening;
+    listSelItem     *pSel;
+	int             iObjSize;
+
+    iObjSize = getStructSize(TN_INVK);
+    iObjSize += getStructSize(TN_INVP);
+
+    tElp_LIINV[1].elpObjSize = iObjSize;
+    LIINVK_ITEM[0].elBody.elaOffset = 0;
+    tElp_LIINV[2].elpObjSize = iObjSize;
+    LIINVP_ITEM[0].elBody.elaOffset = getStructSize(TN_INVK);
+
+
+	if ( VaMultipleMalloc (	(int)sizeof(ListTdialog),	(void**)&pListDialog,
+							(int)sizeof(ListTXdialog),	(void**)&pListXDialog,
+							(int)sizeof(ListTaction),	(void**)&pListAction,
+							(int)sizeof(Selector),		(void**)&pSelector,
+							(int)iObjSize,				(void**)&ptLiInvp,
+							(int)(-1)) == (void*)NULL )
+		return -1;
+
+    if ((pSel = GetSelByName (&Selector[0], "INVK_ProtZeit_t")) != NULL) {
+        todayMorning = today_morning ();
+        todayEvening = today_evening ();
+        pSel->lsiFilter.lfLQinitVon = (void *)&todayMorning;
+        pSel->lsiFilter.lfLQinitBis = (void *)&todayEvening;
+    }
+    /* Untersortierung festlegen
+     */
+    if ((pSel = GetSelByName (&Selector[0], "INVK_InvNr_t")) != NULL) {
+        pSel->lsiSort.lsOrderByColName = "INVK.InvNr,INVK.ProtZeit,INVP.MId_AId_Mand,INVP.MId_AId_ArtNr,INVP.MId_AId_Var";
+    }
+    if ((pSel = GetSelByName (&Selector[0], "INVP_MId_AId_Mand_t")) != NULL) {
+        pSel->lsiSort.lsOrderByColName = "INVP.MId_AId_Mand,INVP.MId_AId_ArtNr,INVP.MId_AId_Var,INVK.ProtZeit";
+    }
+    if ((pSel= GetSelByName (&Selector[0], "INVP_MId_AId_ArtNr_t")) != NULL) {
+        pSel->lsiSort.lsSort = 0;
+        pSel->lsiSort.lsActiveColNames = NULL;
+        pSel->lsiSort.lsOrderByColName = NULL;
+    }
+    if ((pSel= GetSelByName (&Selector[0], "INVP_MId_AId_Var_t")) != NULL) {
+        pSel->lsiSort.lsSort = 0;
+        pSel->lsiSort.lsActiveColNames = NULL;
+        pSel->lsiSort.lsOrderByColName = NULL;
+    }
+    if ((pSel = GetSelByName (&Selector[0], "INVP_MId_Charge_t")) != NULL) {
+        pSel->lsiSort.lsOrderByColName = "INVP.AId_Charge,INVP.MId_AId_Mand,INVP.MId_AId_Var,INVK.InvNr,INVK.ProtZeit";
+    }
+	memset(pListDialog, 0, sizeof(ListTdialog));
+
+	/*
+	 * Selector und Listenbeschreibung 
+	 */
+	pListDialog->ldSelector			= pSelector;
+	pListDialog->ldHsl				= HSL_NI;
+	pListDialog->ldAction			= pListAction;
+	pListDialog->ldGenCallback		= FilterGenSqlList;
+	pListDialog->ldTitle			= pcMtitle;
+	pListDialog->ldGenCalldata		= pListXDialog;
+	pListDialog->ldDestroyCallback	= destroyCallbackInvp;
+	pListDialog->ldPMaskRl			= hMaskRl;
+	pListDialog->ldSelectPrinter	= tTermCtx.fctGetPrn;
+	pListDialog->ldSelMask			= "SE_INVP";
+	pListDialog->ldPrintButResValTable = mgPrnButResValTable;
+
+	memcpy(pSelector, Selector, sizeof(Selector));
+
+	memset(pListXDialog, 0, sizeof(ListTXdialog));
+	pListXDialog->list				= pListDialog;
+	pListXDialog->cb_genSqlList		= cb_makeListFoot;
+	pListXDialog->bd 				= NULL;
+
+	memset(pListAction, 0, sizeof(ListTaction));
+	pListAction->sel_callback		= NULL;
+	pListAction->sel_calldata		= ptLiInvp;
+    pListAction->sel_nookbutton     = 1;
+
+	hMskRl = listSelMaskOpen (pListDialog, NULL);
+	if (hMskRl == (MskDialog )NULL) {
+		if (hMaskRl) {
+			*hMaskRl = (MskDialog )NULL;
+		}
+		free (pListDialog);
+		return 0 ;
+	}
+
+	pListXDialog->mask_rl = hMskRl;	
+
+	return listSelMask(pListDialog, hParent);
+}
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Funktion zum Aufruf der Liste, laedt ausserdem die Maskenbeschreibung
+-*      aus dem RC-File.
+-*      Uebergabeparameter: OWidget parent
+-*                          Value   tUd       Userdata
+-*      Aufruf aus der li_invp Funktion
+-* RETURNS
+-*      Rueckgabewert der local_li_invp - Funktion
+-*--------------------------------------------------------------------------*/
+
+int _li_invp (OWidget hParent, Value hUd) 
+{
+	static MskDialog	hMaskRl = (MskDialog )NULL;
+
+	if (hMaskRl  &&  SHELL_OF(hMaskRl)) {
+        WdgGuiSet (GuiNactiveShell, (Value)SHELL_OF(hMaskRl));
+        return RETURN_ACCEPTED;
+    }
+
+	OwrcLoadObject(ApNconfigFile, "inv.rc");
+	OwrcLoadObject(ApNconfigFile, "invp.rc");
+    OwrcLoadObject(ApNconfigFile, "se_invp.rc");
+
+    return localLiInvp (hParent, MlM("Protokoll Inventur"), hUd, &hMaskRl);
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Aufruf der Listenaufruffunktion
+-*      Uebergabeparameter: standart OWIL
+-*      Aufruf aus Menuebaum(Hauptmenue)
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+MENUFCT li_invp(MskDialog hMask, MskStatic hEf, MskElement hEl,
+                int iReason, void *hCbc)
+{
+
+    switch (iReason) {
+    case FCB_XF:
+
+        _li_invp(GetRootShell(), (Value)NULL);
+
+        break;
+
+    default:
+        break;
+    }
+
+    return;
+}
+
