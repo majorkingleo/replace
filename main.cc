@@ -273,6 +273,8 @@ int main( int argc, char **argv )
 		  continue;
 		}
 
+	  DEBUG( format( "working on file %s", files[i].second ) );
+
 	  std::string file_erg;
 
 	  switch( file_type )

@@ -1,0 +1,391 @@
+#include <primanlist.h>
+#include <versid.h>
+VERSIDC(li_lieffaehig, "$Header: /cvsrootb/SPAR-AT/WAMAS-M/wmllr/src/term/li_lieffaehig.c,v 1.2 2003/10/23 09:47:16 wamas Exp $$Locker:  $")
+/*****************************************************************************
++* PROJECT:   WAMAS-M 
++* PACKAGE:   M 
++* FILE:      li_lieffaehig.c
++* CONTENTS:  overview description, list of functions, ...
++* COPYRIGHT NOTICE:
++*         (c) Copyright 2000 by
++*                 Salomon Automationstechnik Ges.m.b.H
++*                 Friesachstrasse 15
++*                 A-8114 Friesach bei Graz
++*                 Tel.: ++43 3127 200-0
++*                 Fax.: ++43 3127 200-22
++*
++* REVISION HISTORY:
++*
++*   $Log: li_lieffaehig.c,v $
++*   Revision 1.2  2003/10/23 09:47:16  wamas
++*   Set default value to filter field <Mandant> and <Variant>.
++*
++*   Revision 1.1.1.1  2003/02/07 12:02:05  mmovia
++*   New Version for SPAR AUSTRIA
++*
++*   Revision 1.2  2002/06/06 15:16:38  rpuswald
++*   totally changed.
++*
++*   Revision 1.1  2002/06/06 10:52:18  rpuswald
++*   first version.
++*
++****************************************************************************/
+
+/* ===========================================================================
+ * INCLUDES
+ * =========================================================================*/
+
+/* ------- System-Headers ------------------------------------------------- */
+
+/* ------- Owil-Headers --------------------------------------------------- */
+
+/* ------- Tools-Headers -------------------------------------------------- */
+
+#include <stime.h>
+#include <mumalloc.h>
+#include <owrcloader.h>
+#include <sqllist.h>
+#include <sqltable.h>
+#include <ml.h>
+
+/* ------- Local-Headers -------------------------------------------------- */
+
+#include "t_util.h"
+#include "li_util.h"
+
+#include "aus.h"
+#include "art.h"
+
+#define _LI_LIEFFAEHIG_C
+#include "li_lieffaehig.h"
+#undef _LI_LIEFFAEHIG_C
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+
+#define PN_AUSKP 	"AUSKP"
+#define PN_ARTAUSPP "ARTAUSPP"
+
+#define DBLALIGN(s) ((s)+((s)%8))
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+ /* ------- Enums --------------------------------------------------------- */
+
+ /* ------- Structures ---------------------------------------------------- */
+
+/* ===========================================================================
+ * LOCAL (STATIC) Variables and Function-Prototypes
+ * =========================================================================*/
+
+ /* ------- Variables ----------------------------------------------------- */
+
+ /* ------- Function-Prototypes ------------------------------------------- */
+
+static void destroy_cb_lieffaehig (ListTdialog*);
+
+/* ===========================================================================
+ * GLOBAL VARIABLES
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL (STATIC) Functions
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Zerstoert den Listendialog(Destroy-Callback)
+-* RETURNS
+-*      void Funktion->kein Return
+-*--------------------------------------------------------------------------*/
+
+static void destroy_cb_lieffaehig (ListTdialog *ptListDialog)
+{
+    if (ptListDialog != NULL) {
+        free (ptListDialog);
+	}
+
+    return;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Eigentliche Listenfunktion
+-* RETURNS
+-*      0   bzw.
+-*     -1   im Fehlerfall
+-*--------------------------------------------------------------------------*/
+
+static int local_li_lieffaehig (OWidget hParent, char *pcMtitle,
+                          				Value ptUd, MskDialog *hPmaskRl)
+{
+	extern elTlistPart elp_AUSK[];
+	extern elTlistPart elp_AUSP[];
+	extern elTlistPart elp_ART[];
+
+	static elTitem AUSKP_ITEM[] = {
+        {TN_AUSKP,       {0, NULL}, {0, (char *)elp_AUSK, 0, EL_SUB},},
+        {NULL}
+    };
+
+	static elTitem ARTAUSPP_ITEM[] = {
+        {TN_AUSPP,       {0, NULL}, {0, (char *)elp_AUSP, 0, EL_SUB},},
+        {TN_ART,         {0, NULL}, {0, (char *)elp_ART,   0, EL_SUB},},
+        {NULL}
+    };
+
+	static elTlistPart shElp_LILIEFFAEHIG[] = {
+        {FILTER_NAME,   sizeof (ListTfilter),   FilterItem},
+        {PN_AUSKP,    	sizeof (AUSK),  		AUSKP_ITEM},
+        {PN_ARTAUSPP,   0, 						ARTAUSPP_ITEM},
+        {FOOT_NAME,     sizeof (FOOT4LISTS),    FOOT_ITEM},
+        {NULL}
+    };
+
+	
+    /*  DB-Statement
+    */
+    static elTlist shEl_lieffaehig = {
+        "lieffaehig",
+        shElp_LILIEFFAEHIG,
+        0,
+		"SELECT "
+			"%AUSKP, %AUSPP, %ART "
+		"FROM "
+			"AUSKP, AUSPP, ART "
+		"WHERE "
+			"AUSKP.ProtNr = AUSPP.ProtNr AND "
+			"AUSKP.AusId_Mand = AUSPP.AusId_Mand AND "
+			"AUSKP.AusId_AusNr = AUSPP.AusId_AusNr AND "
+			"AUSKP.AusId_AusKz = AUSPP.AusId_AusKz AND "
+			"AUSKP.AusId_TlNr = AUSPP.AusId_TlNr AND "
+			"AUSPP.MId_AId_Mand = ART.AId_Mand AND "
+			"AUSPP.MId_AId_ArtNr = ART.AId_ArtNr AND "
+			"AUSPP.MId_AId_Var = ART.AId_Var AND "
+			"AUSPP.LiMngsHost_Mng < AUSPP.UrBestMng"
+	};
+
+
+	extern listSubSel SE_AUSK;
+	extern listSubSel SE_AUSP;
+	extern listSubSel SE_ART;
+
+    /*  Filter und Sortierkriterien
+    */
+    static listSelItem shSelector[] = {
+	 	{"AUSKP", TN_AUSKP, &SE_AUSK,
+            {&shEl_lieffaehig},
+                {NULL},
+                {NULL},
+            {NULL},
+            LSI_TYPE_RC
+        },
+        {"AUSPP", TN_AUSPP, &SE_AUSP,
+            {&shEl_lieffaehig},
+                {NULL},
+                {NULL},
+            {NULL},
+            LSI_TYPE_RC
+        },
+        {"ART", TN_ART, &SE_ART,
+            {&shEl_lieffaehig},
+                {NULL},
+                {NULL},
+            {NULL},
+            LSI_TYPE_RC
+        },
+		{NULL}
+	};
+
+	ListTdialog     *phListDialog	= NULL;
+    ListTXdialog    *phListXDialog	= NULL;
+    ListTaction     *phListAction	= NULL;
+    listSelItem     *phSelector		= NULL;
+	listSelItem     *pSel         	= NULL;
+	char            *pLiOpm			= NULL;	
+    MskDialog       hMaskRl;
+	int				iObjSize = 0;
+
+	static time_t   todayMorning;
+    static time_t   todayEvening;
+
+
+	iObjSize  = DBLALIGN (getStructSize (TN_AUSKP));
+	iObjSize += DBLALIGN (getStructSize (TN_AUSPP));
+	iObjSize += DBLALIGN (getStructSize (TN_ART));
+
+	shElp_LILIEFFAEHIG[1].elpObjSize = iObjSize;
+	shElp_LILIEFFAEHIG[2].elpObjSize = iObjSize;
+	shElp_LILIEFFAEHIG[3].elpObjSize = iObjSize;
+
+
+	ARTAUSPP_ITEM[0].elBody.elaOffset = 
+								DBLALIGN (getStructSize (TN_AUSPP));
+	ARTAUSPP_ITEM[1].elBody.elaOffset = 
+								DBLALIGN (getStructSize (TN_AUSPP)) +
+                                DBLALIGN (getStructSize (TN_ART));
+
+
+    if (VaMultipleMalloc ((int)sizeof (ListTdialog),   (void**)&phListDialog,
+                          (int)sizeof (ListTXdialog),  (void**)&phListXDialog,
+                          (int)sizeof (ListTaction),   (void**)&phListAction,
+                          (int)sizeof (shSelector),    (void**)&phSelector,
+						  (int)iObjSize,			   (void**)&pLiOpm,
+                          (int)(-1)) == (void*)NULL) {
+        return (-1);
+    }
+
+	/* --- Set default value to filter field <Mandant> --- */
+	if (tTermCtx.iSingleClient == 1) {
+		if ((pSel= GetSelByName (&shSelector[0], "ART_AId_Mand_t")) != NULL) {
+			pSel->lsiFilter.lfLQinitVon = (void *)tTermCtx.acDefClient;
+		}
+		if ((pSel= GetSelByName (&shSelector[0], 
+								 "AUSK_AusId_Mand_t")) != NULL) {
+			pSel->lsiFilter.lfLQinitVon = (void *)tTermCtx.acDefClient;
+		}
+	}
+
+	/* --- Set default value to filter field <Variant> --- */
+	if (tTermCtx.iSingleVariant == 1) {
+	    if ((pSel= GetSelByName(&shSelector[0], 
+								"ART_AId_Var_t")) != NULL) {
+	         pSel->lsiFilter.lfLQinitVon = (void *)tTermCtx.acDefVariant;
+	    }
+	}
+
+
+
+	if ((pSel= GetSelByName (&shSelector[0], "AUSK_ProtZeit_t")) != NULL) {
+        todayMorning = today_morning ();
+        todayEvening = today_evening ();
+        pSel->lsiFilter.lfLQinitVon = (void *)&todayMorning;
+        pSel->lsiFilter.lfLQinitBis = (void *)&todayEvening;
+    }
+
+	memset (phListDialog, 0, sizeof(ListTdialog));
+
+    phListDialog->ldSelector        = phSelector;
+    phListDialog->ldHsl             = HSL_NI;
+    phListDialog->ldAction          = phListAction;
+    phListDialog->ldGenCallback     = FilterGenSqlList;
+    phListDialog->ldTitle           = pcMtitle;
+    phListDialog->ldGenCalldata     = phListXDialog;
+    phListDialog->ldDestroyCallback = destroy_cb_lieffaehig;
+    phListDialog->ldPMaskRl        	= hPmaskRl;
+    phListDialog->ldSelectPrinter  	= tTermCtx.fctGetPrn;
+    phListDialog->ldSelMask        	= "SE_LIEFFAEHIG";
+    phListDialog->ldPrintButResValTable = mgPrnButResValTable;
+
+ 	memcpy(phSelector, shSelector, sizeof(shSelector));
+
+    memset(phListXDialog, 0, sizeof(ListTXdialog));
+    phListXDialog->list             = phListDialog;
+    phListXDialog->cb_genSqlList    = cb_makeListFoot;
+    phListXDialog->bd               = NULL;
+
+    memset(phListAction, 0, sizeof(ListTaction));
+    phListAction->sel_callback      = PrimanListSelCallbackLocal;
+    phListAction->sel_calldata      = pLiOpm;
+    phListAction->sel_nookbutton    = 1;
+
+    hMaskRl = listSelMaskOpen (phListDialog, NULL);
+
+    if (hMaskRl == (MskDialog )NULL) {
+        if (hPmaskRl) {
+            *hPmaskRl = (MskDialog )NULL;
+        }
+        free (phListDialog);
+        return (0) ;
+    }
+
+	/*--- Activate mask element <Mandant> ---*/
+	if (tTermCtx.iSingleClient == 1) {
+       phListDialog->ldQuery.liqSort.lsLQmask = 1L<<0 |
+												1L<<1 |
+												1L<<4; 
+	}
+    /*--- Activate mask element <Variante> ---*/
+	if (tTermCtx.iSingleVariant == 1) {
+		phListDialog->ldQuery.liqSort.lsLQmask = 1L<<0 |
+												 1L<<1 | 
+												 1L<<3 | 
+                                                 1L<<4;
+   }
+
+
+
+    phListXDialog->mask_rl = hMaskRl;
+
+    return listSelMask (phListDialog, hParent);
+}
+
+/* ===========================================================================
+ * GLOBAL (PUBLIC) Functions
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Funktion zum Aufruf der Liste, laedt ausserdem die Maskenbeschreibung
+-*      aus dem RC-File.
+-* RETURNS
+-*      Rueckgabewert der local_li_lieffaehig - Funktion
+-*--------------------------------------------------------------------------*/
+
+int _li_lieffaehig (OWidget hParent, Value ptUd)
+{
+    static MskDialog    hMaskRl = (MskDialog )NULL;
+
+    if (hMaskRl && SHELL_OF(hMaskRl)) {
+        WdgGuiSet (GuiNactiveShell, (Value) SHELL_OF(hMaskRl));
+        return (RETURN_ACCEPTED);
+    }
+
+    OwrcLoadObject(ApNconfigFile, "art.rc");
+    OwrcLoadObject(ApNconfigFile, "aus.rc");
+    OwrcLoadObject(ApNconfigFile, "se_lieffaehig.rc");
+
+    return local_li_lieffaehig (hParent,
+				MlM("Liste Lieferfähigkeit"), ptUd, &hMaskRl);
+
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Aufruf aus Menuebaum(Hauptmenue)
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+
+MENUFCT li_lieffaehig (MskDialog hMaskRl, MskStatic hEf, MskElement hEl,
+                int iReason, void *pvCbc)
+{
+    switch (iReason) {
+    case FCB_XF:
+        _li_lieffaehig (GetRootShell(), (Value)NULL);
+        break;
+
+    default:
+        break;
+    }
+	
+	return;
+}
+
+#ifdef __cplusplus
+}
+#endif

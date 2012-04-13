@@ -59,6 +59,9 @@ std::string PrimanList::include_primanlist( const std::string & file )
 
 		std::string::size_type begin_of_line = file.rfind('\n',pos);
 
+		if( pos == 0 )
+			begin_of_line =  0;
+
 		DEBUG( get_whole_line(file,begin_of_line-1) );
 
 		if( get_whole_line(file,begin_of_line-1).find("#ifdef") != std::string::npos )
@@ -71,8 +74,18 @@ std::string PrimanList::include_primanlist( const std::string & file )
 		if( begin_of_line == std::string::npos )
 			begin_of_line = 0;
 
-		std::string result = file.substr( 0, begin_of_line +1);
-		result += "#include <primanlist.h>";
+		std::string::size_type cut_pos;
+		std::string extra;
+
+		if( begin_of_line > 0 ) {
+			cut_pos = begin_of_line+1;
+		} else {
+			cut_pos = 0;
+			extra = "\n";
+		}
+
+		std::string result = file.substr( 0, cut_pos);
+		result += "#include <primanlist.h>" + extra;
 		result += file.substr(begin_of_line);
 
 		return result;
