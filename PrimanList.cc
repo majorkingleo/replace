@@ -28,6 +28,8 @@ namespace {
 PrimanList::PrimanList()
 {
 	keywords.push_back( "ListTXdialog" );
+	// test
+	// test 2
 }
 
 std::string PrimanList::toString( const SEL_CALLBACK & type )
