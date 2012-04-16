@@ -17,6 +17,7 @@ RemoveVersidCh::RemoveVersidCh( bool noheader_ )
     keywords.push_back("$Log:");
 
     header_template = make_header_template();
+	// test
 }
 
 std::string RemoveVersidCh::make_header_template() const
