@@ -1,0 +1,416 @@
+##############################################################################
+## PROJECT:  projectname
+## PACKAGE:  package name
+## FILE:     me_anmeld.rc
+## CONTENTS: overview description, list of functions, ...
+## NOTES:      
+## COPYRIGHT NOTICE:
+##          (c) Copyright 2000 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Friesach bei Graz
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## 
+##############################################################################
+
+# ****************************************************************************
+# *          SPREAD - SHEET - Layout   -   D E F I N I T I O N               *
+# ****************************************************************************
+
+OWSSCDTABLE ME_ANMELD_Layout [
+  
+# Personalnummer
+  OWSSCDCOL ZOVW_PersNr [
+    Label="PersNr"
+    Width=7
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long|ODT_FLAG_NUM
+      VOffset=offs_anmeld_PersNr
+    ]
+  ]
+  
+# Arbeitsbereich SOLL - Von KP
+  OWSSCDCOL ZOVW_ABer_SOLL_VKp [
+    Label="VKP SOLL"
+    Width=10
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_ABer_S_VKp
+      Transformer = CbX_lo2str_anmeld_KpIdx
+    ]
+  ]
+  
+# Arbeitsbereich SOLL - Nach KP
+  OWSSCDCOL ZOVW_ABer_SOLL_NKp [
+    Label="BKP SOLL"
+    Width=10
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_ABer_S_NKp
+      Transformer = CbX_lo2str_anmeld_KpIdx
+    ]
+  ]
+  
+# Arbeitsbereich IST - Von KP
+  OWSSCDCOL ZOVW_ABer_IST_VKp [
+    Label="VKP IST"
+    Width=9
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_ABer_I_VKp
+      Transformer = CbX_lo2str_anmeld_KpIdx
+    ]
+  ]
+  
+# Arbeitsbereich IST - Nach KP
+  OWSSCDCOL ZOVW_ABer_IST_NKp [
+    Label="BKP IST"
+    Width=9
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_ABer_I_NKp
+      Transformer = CbX_lo2str_anmeld_KpIdx
+    ]
+  ]
+  
+# Scanner-Id
+  OWSSCDCOL ZOVW_ScannerId [
+    Label="SId"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_SId_Name
+    ]
+  ]
+  
+# Betriebszustand SOLL
+  OWSSCDCOL ZOVW_Kpd_Bz_SOLL [
+    Label="BZ-SOLL"
+    Width=10
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_Bz_Soll
+      Transformer = CbX_lo2str_anmeld_Bz
+    ]
+  ]
+  
+# Betriebszustand IST
+  OWSSCDCOL ZOVW_Kpd_Bz_IST [
+    Label="BZ-IST"
+    Width=10
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=offs_anmeld_Bz_Ist
+      Transformer = CbX_lo2str_anmeld_Bz
+    ]
+  ]
+  
+# Anzahl der Positionen
+  OWSSCDCOL ANMELD_AnzPos [
+    Label="Pos"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long|ODT_FLAG_NUM
+      VOffset=offs_anmeld_AnzPos
+    ]
+  ]
+  
+# Datum / Zeit
+  OWSSCDCOL ZOVW_Bz_Ae_Zeit [
+    Label="Datum/Zeit"
+    Width=18
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long|ODT_FLAG_NUM
+      VOffset=offs_anmeld_BzAeZeit
+      Transformer = CbX_time2str_anmeld_BzAeZeit
+    ]
+  ]
+]
+
+
+# ****************************************************************************
+# *          S P R E A D - S H E E T   -   D E F I N I T I O N               *
+# ****************************************************************************
+
+MSKCANVAS ME_ANMELD_SpreadSheet [
+  HScroll=AP_SCROLLBAR_RIGHT
+  VScroll=AP_SCROLLBAR_BOTTOM
+  Callback=OwSsCanvas
+  ReasonMask=MSK_CANVAS_SS
+  MSKATOM [
+    OwCallback=OwSsCanvasLb
+    OwCallbackLayout=CbDbLayout
+    OwSsLayout=ME_ANMELD_Layout
+    LB_ElementSize=me_anmeld_sizeofLbEntry
+    LB_Policy=POLICY_SINGLESELECT
+    LB_Display=8
+    LB_Width=70
+    ##LB_SelectColor=Inverse
+    LB_ActionCallback=LbActionCb_Anmeld
+  ]
+]
+
+
+# ****************************************************************************
+# *                  F R A M E   -   D E F I N I T I O N                     *
+# ****************************************************************************
+
+MSKFRAME GrpFrame_Anmeld_Filter [
+  Label = "Filterteil"
+]
+
+MSKFRAME GrpFrame_Anmeld_Action [
+  Label = "Aktionsteil"
+]
+
+MSKFRAME GrpFrame_Anmeld_Data [
+  Label = "Datenteil"
+]
+
+
+# ****************************************************************************
+# *                 B U T T O N S   -   D E F I N I T I O N                  *
+# ****************************************************************************
+
+MSKLABEL DummyLabel_ANMELD [
+  Label = " "
+]
+
+MSKBUTTONLABEL ANMELD_Adopt_F [
+  Label = "Übernehmen"
+]
+
+MSKBUTTONLABEL ANMELD_Scanner_F [
+  Label = "Scanner-Kfg"
+]
+
+MSKBUTTONLABEL ANMELD_PBLEC_F [
+  Label = "Fehlercodes"
+]
+
+MSKBUTTONLABEL ANMELD_SC2VPLI_F [
+  Label = "Scanner akt."
+]
+
+MSKBUTTONLABEL Info_F [
+  Label = "  Info  "
+]
+
+# ****************************************************************************
+# *         M A S K   -   G R O U P    D E F I N I T I O N                   *
+# ****************************************************************************
+
+MSKROWCOL GrpRow1Column2 [
+  Rows=1
+  Columns=2
+  HSize=AP_SHRINK
+  VSize=AP_SHRINK
+]
+
+MSKROWCOL GrpRow3Column1 [
+  Rows=3
+  Columns=1
+  HSize=AP_SHRINK
+  VSize=AP_SHRINK
+]
+
+MSKGROUP GrpHorizBottomRight [
+  Align=GEOM_H_ALIGN
+  HJoin=GEOM_H_RJOINED
+  VJoin=GEOM_V_BJOINED
+  HSize=AP_EXPAND
+  VSize=AP_EXPAND
+]
+
+MSKGROUP GrpVertBottom_AnMeld [
+  Align=GEOM_V_ALIGN
+  HJoin=GEOM_H_LJOINED
+  VJoin=GEOM_V_BJOINED
+]
+
+# ****************************************************************************
+# *         M A S K   										   	             *
+# ****************************************************************************
+# START Mask ME_ANMELD
+
+MSKDIALOG ME_ANMELD [
+  Unique 		= 1
+  ShellRealize 	= 1
+  KeepPos 		= 0
+  KeepSize 		= 0
+  SuOnly 		= 0
+  NoTopPlate 	= 1
+  Title			= "Anmeldedialog"
+  
+  MSKATOM [
+    Version = "%W% %G% %U%"
+  ]
+  
+  MSKDESCR Filler []
+  
+  MSKDESCR GrpHoriz [
+    
+    MSKDESCR GrpVert [
+      
+### Filterteil ###
+      MSKDESCR GrpFrame_Anmeld_Filter [
+        MSKDESCR Filler []
+        MSKDESCR GrpHoriz [
+          MSKDESCR ZOVW_PersNr_t [
+            Key = 0
+            CMatch = "-ANMELD_INP-"
+            Label   = "PersNr"
+            MSKATOM [
+              OpmEfDbName   = "ZOVW.PersNr"
+              OpmPorderBy1  = "ZOVW.PersNr"
+              OpmTable      = "ZOVW"
+              OwCallback1   = CbSqlOm
+            ]
+          ]
+          MSKDESCR GrpHorizBottomRight [
+            MSKDESCR Read_F [
+              CMatch = "-ANMELD_INP-"
+              IsDefault= True
+            ]
+          ] 
+        ]
+      ]
+      
+### Datenteil ###
+      MSKDESCR GrpFrame_Anmeld_Data [
+        MSKDESCR Filler []
+        MSKDESCR GrpHoriz [
+          MSKDESCR ME_ANMELD_SpreadSheet [
+            CMatch = "-ANMELD_INP-"
+          ]
+          MSKDESCR Filler []
+          MSKDESCR GrpHorizBottomRight [
+            MSKDESCR Info_F [
+              CMatch = "-ANMELD_INP-"
+            ]
+          ] 
+        ] 
+      ]
+      
+### Aktionsteil ###
+      MSKDESCR GrpFrame_Anmeld_Action [
+        MSKDESCR Filler []
+        MSKDESCR GrpVert [
+          MSKDESCR GrpHoriz [
+            MSKDESCR Marker-1 []
+            MSKDESCR GrpVert [
+              MSKDESCR ZOVW_PersNr_t [
+                Key = 1
+                CMatch = "-ANMELD_INP-ANMELD_ZOVW-"
+                Label   = "PersNr"
+              ]
+              MSKDESCR ZOVW_ABer_SOLL_VKp_t [
+                CMatch = "-ANMELD_INP-ANMELD_ZOVW-"
+                Label   = "Von Kp"
+                MSKATOM [
+                  OwCallback2 = CbGeneral_KpIdx
+                  OwCallback3 = CbGeneral_KpIdx
+                ]
+              ]
+              MSKDESCR ZOVW_SId_Name_t [
+                CMatch = "-ANMELD_INP-ANMELD_ZOVW-ANMELD_LS-"
+                Label   = "Scanner-Id"
+                 MSKATOM [
+#                  OpmEfDbName   = "SCR.Id_Name"
+#                  OpmPorderBy1  = "SCR.Id_Name"
+#                  OpmTable      = "SCR"
+#                  OwCallback1   = CbSqlOm
+                   OwCallback1   = CbGeneral_SId_Name
+                 ]
+              ]
+            ]
+            MSKDESCR Marker-2 []
+            MSKDESCR GrpVert [
+              MSKDESCR DummyLabel_ANMELD []
+              MSKDESCR ZOVW_ABer_SOLL_NKp_t [
+                CMatch = "-ANMELD_INP-ANMELD_ZOVW-"
+                Label   = "Bis Kp"
+                MSKATOM [
+                  OwCallback2 = CbGeneral_KpIdx
+                ]
+              ]
+              MSKDESCR ZOVW_Kpd_Bz_SOLL_t [
+                CMatch = "-ANMELD_INP-ANMELD_ZOVW-ANMELD_LS-"
+                Label   = "Betriebszustand"
+              ]
+            ]
+          ]
+          MSKDESCR ZOVW_InfoTxt1_t [
+            CMatch = "-ANMELD_INP-ANMELD_ZOVW-"
+          ]
+          MSKDESCR SepHoriz []
+          MSKDESCR GrpHoriz [
+            MSKDESCR GrpRow [
+              MSKDESCR ANMELD_Scanner_F [
+                CMatch = "-ANMELD_INP-"
+              ]
+              MSKDESCR ANMELD_SC2VPLI_F [
+                CMatch = "-ANMELD_INP-"
+              ]
+            ]
+            MSKDESCR GrpHorizBottomRight [
+              MSKDESCR GrpRow1Column2 [
+                MSKDESCR Delete_F [
+                  CMatch = "-ANMELD_INP-"
+                ]
+                MSKDESCR ANMELD_Adopt_F [
+                  CMatch = "-ANMELD_INP-"
+                ]
+              ]
+            ]
+          ]
+          
+        ]
+      ]
+      
+    ]
+    
+### Buttons rechts ###
+    MSKDESCR GrpVert [
+      MSKDESCR GrpColumn [
+        MSKDESCR Ok_F [
+          CMatch = "-ANMELD_INP-"
+        ]
+        MSKDESCR ClrFld_F [
+          CMatch = "-ANMELD_INP-"
+        ]
+        MSKDESCR Cancel_F [
+          Callback = OwClose
+          IsCancel = True
+        ]
+        
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        MSKDESCR Filler []
+        
+        MSKDESCR ANMELD_PBLEC_F [
+          CMatch = "-ANMELD_INP-"
+        ]
+      ]
+    ]
+    
+  ]
+]
+# END Mask ME_ANMELD

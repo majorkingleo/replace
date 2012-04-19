@@ -19,6 +19,7 @@
 #include "PrimanList.h"
 
 #include "OutDebug.h"
+#include "OwCallback1.h"
 
 using namespace Tools;
 
@@ -188,6 +189,18 @@ int main( int argc, char **argv )
    o_primanlist.setRequired(true);
    oc_primanlist.addOptionR(&o_primanlist);
 
+
+   Arg::OptionChain oc_owcallback;
+   arg.addChainR(&oc_owcallback);
+   oc_owcallback.setMinMatch(1);
+   oc_owcallback.setContinueOnFail(true);
+   oc_owcallback.setContinueOnMatch(true);
+
+    Arg::FlagOption o_owcallback("owcallback");
+    o_owcallback.setDescription("correct missing OwCallback1");
+    o_owcallback.setRequired(true);
+    oc_owcallback.addOptionR(&o_owcallback);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -219,7 +232,8 @@ int main( int argc, char **argv )
 
   if( !o_replace.isSet() &&
 	  !o_versid_remove.isSet() &&
-	  !o_primanlist.isSet() )
+	  !o_primanlist.isSet() &&
+	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
@@ -250,6 +264,7 @@ int main( int argc, char **argv )
   Ref<RemoveVersid> remove_version_id_pl;
 
   Ref<PrimanList> priman_list;
+  Ref<OwCallback1> owcallback1;
 
   if( o_versid_remove.getState() ) {
 	  remove_version_id_pdl = new RemoveVersidPdl();
@@ -260,6 +275,10 @@ int main( int argc, char **argv )
 
   if( o_primanlist.getState() ) {
 	  priman_list = new PrimanList();
+  }
+
+  if( o_owcallback.getState() ) {
+	  owcallback1 = new OwCallback1();
   }
 
   for( unsigned i = 0; i < files.size(); i++ )
@@ -285,6 +304,10 @@ int main( int argc, char **argv )
 
 		  if( o_versid_remove.getState() )
 			  file_erg = remove_version_id_rc->remove_versid(file);
+
+		  if( o_owcallback.isSet() ) {
+			  file_erg = owcallback1->patch_file(file);
+		  }
 
 		  break;
 
