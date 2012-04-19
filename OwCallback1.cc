@@ -13,6 +13,14 @@ using namespace Tools;
 OwCallback1::OwCallback1()
 {
 	keywords.push_back( "OwCallback2" );
+	keywords.push_back( "OwCallback3" );
+	keywords.push_back( "OwCallback4" );
+	keywords.push_back( "OwCallback5" );
+	keywords.push_back( "OwCallback6" );
+	keywords.push_back( "OwCallback7" );
+	keywords.push_back( "OwCallback8" );
+	keywords.push_back( "OwCallback9" );
+
 }
 
 void OwCallback1::fix_owcallbackx( std::string & s, int num )
