@@ -66,14 +66,16 @@ std::string OwCallback1::patch_file( const std::string & file )
 
 	std::string result( file );
 
-	fix_owcallbackx( result, 1 );
-	fix_owcallbackx( result, 2 );
-	fix_owcallbackx( result, 3 );
-	fix_owcallbackx( result, 4 );
-	fix_owcallbackx( result, 5 );
-	fix_owcallbackx( result, 6 );
-	fix_owcallbackx( result, 7 );
-	fix_owcallbackx( result, 8 );
+	for( int i = 0; i < 8; i++ ) {
+		fix_owcallbackx( result, 1 );
+		fix_owcallbackx( result, 2 );
+		fix_owcallbackx( result, 3 );
+		fix_owcallbackx( result, 4 );
+		fix_owcallbackx( result, 5 );
+		fix_owcallbackx( result, 6 );
+		fix_owcallbackx( result, 7 );
+		fix_owcallbackx( result, 8 );
+	}
 
 	return result;
 }
