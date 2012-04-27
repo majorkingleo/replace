@@ -205,8 +205,6 @@ int main( int argc, char **argv )
 
   if( !arg.parse() || argc <= 1 )
     {
-	  std::cout << "compilation failed\n";
-
       if( o_version.getState() )
       {
     	  std::cout << format("%s version %s\n", argv[0], VERSION);
