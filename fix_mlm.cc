@@ -32,6 +32,14 @@ std::string FixMlM::patch_file( const std::string & file )
 
 		// DEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
 
+
+		std::string line_before = get_whole_line( res, pos );
+		if( line_before.find( "LsMessage") != std::string::npos ) {
+			//  LsMessage(MlM("Seite %ld von %ld")) is allowed
+			pos += 3;
+			continue;
+		}
+
 		Function func;
 		std::string::size_type start, end;
 
@@ -53,9 +61,6 @@ std::string FixMlM::patch_file( const std::string & file )
 						// allow %%
 						if( arg[pos_fmt+1] != '%' ) {
 
-
-							std::string before = get_whole_line( res, pos );
-
 							// make MlMsg out of it
 							res.insert(pos+3,"sg");
 							pos+=2;
@@ -64,7 +69,7 @@ std::string FixMlM::patch_file( const std::string & file )
 
 							DEBUG( format( "line %d\n- %s\n+ %s",
 									get_linenum(res,pos),
-									before, after) );
+									line_before, after) );
 						}
 					}
 				} // if
