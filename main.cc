@@ -20,6 +20,7 @@
 
 #include "OutDebug.h"
 #include "OwCallback1.h"
+#include "fix_mlm.h"
 
 using namespace Tools;
 
@@ -201,6 +202,17 @@ int main( int argc, char **argv )
     o_owcallback.setRequired(true);
     oc_owcallback.addOptionR(&o_owcallback);
 
+    Arg::OptionChain oc_mlm;
+    arg.addChainR(&oc_mlm);
+    oc_mlm.setMinMatch(1);
+    oc_mlm.setContinueOnFail(true);
+    oc_mlm.setContinueOnMatch(true);
+
+     Arg::FlagOption o_mlm("mlm");
+     o_mlm.setDescription("correct MlM(%d) calls to MlMsg(%d)");
+     o_mlm.setRequired(true);
+     oc_mlm.addOptionR(&o_mlm);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -231,6 +243,7 @@ int main( int argc, char **argv )
   if( !o_replace.isSet() &&
 	  !o_versid_remove.isSet() &&
 	  !o_primanlist.isSet() &&
+	  !o_mlm.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -279,6 +292,11 @@ int main( int argc, char **argv )
 	  owcallback1 = new OwCallback1();
   }
 
+  Ref<FixMlM> fix_mlm;
+
+  if( o_mlm.getState() )
+	  fix_mlm = new FixMlM();
+
   for( unsigned i = 0; i < files.size(); i++ )
 	{
 	  std::string file;
@@ -320,6 +338,9 @@ int main( int argc, char **argv )
 
 		  if( o_primanlist.getState() )
 			  file_erg = priman_list->patch_file(file);
+
+		  if( o_mlm.getState() )
+			  file_erg = fix_mlm->patch_file(file);
 
 		  break;
 
