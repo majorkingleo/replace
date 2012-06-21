@@ -79,3 +79,14 @@ std::string OwCallback1::patch_file( const std::string & file )
 
 	return result;
 }
+
+bool OwCallback1::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::RC_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}

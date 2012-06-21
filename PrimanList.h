@@ -24,7 +24,9 @@ public:
 public:
 	PrimanList();
 
-	std::string patch_file( const std::string & file );
+	virtual std::string patch_file( const std::string & file );
+
+	virtual bool want_file( const FILE_TYPE & file_type );
 
 public:
 	static std::string toString( const SEL_CALLBACK & callback );

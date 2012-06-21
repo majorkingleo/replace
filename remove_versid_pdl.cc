@@ -129,3 +129,16 @@ std::string RemoveVersidPdl::add_eof( const std::string & file ) const
 
 	return file + "\n1;";
 }
+
+
+bool RemoveVersidPdl::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::PDL_FILE:
+	  case FILE_TYPE::PDS_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}

@@ -13,6 +13,13 @@ public:
 
 	std::string remove_versid(  const std::string & file );
 
+	virtual bool want_file( const FILE_TYPE & file_type );
+
+	virtual std::string patch_file( const std::string & file )
+	{
+		return remove_versid( file );
+	}
+
 protected:
 
 	std::string make_header_template() const;

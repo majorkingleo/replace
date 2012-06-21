@@ -84,4 +84,15 @@ std::string FixMlM::patch_file( const std::string & file )
 }
 
 
+bool FixMlM::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::C_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}
+
 

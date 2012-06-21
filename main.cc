@@ -17,6 +17,7 @@
 #include "remove_versid_rc.h"
 #include "remove_versid_pl.h"
 #include "PrimanList.h"
+#include "RestoreShell.h"
 
 #include "OutDebug.h"
 #include "OwCallback1.h"
@@ -190,6 +191,16 @@ int main( int argc, char **argv )
    o_primanlist.setRequired(true);
    oc_primanlist.addOptionR(&o_primanlist);
 
+   Arg::OptionChain oc_restoreshell;
+   arg.addChainR(&oc_restoreshell);
+   oc_restoreshell.setMinMatch(1);
+   oc_restoreshell.setContinueOnFail(true);
+   oc_restoreshell.setContinueOnMatch(true);
+
+   Arg::FlagOption o_restoreshell("restoreshell");
+   o_restoreshell.setDescription("add restore GuiNrestoreShell shell and GuiNmakeActiveShell to lists");
+   o_restoreshell.setRequired(true);
+   oc_restoreshell.addOptionR(&o_restoreshell);
 
    Arg::OptionChain oc_owcallback;
    arg.addChainR(&oc_owcallback);
@@ -244,6 +255,7 @@ int main( int argc, char **argv )
 	  !o_versid_remove.isSet() &&
 	  !o_primanlist.isSet() &&
 	  !o_mlm.isSet() &&
+	  !o_restoreshell.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -269,33 +281,31 @@ int main( int argc, char **argv )
 	  return 0;
   }
   
-  Ref<RemoveVersid> remove_version_id_pdl;
-  Ref<RemoveVersid> remove_version_id_rc;
-  Ref<RemoveVersid> remove_version_id_ch;
-  Ref<RemoveVersid> remove_version_id_pl;
-
-  Ref<PrimanList> priman_list;
-  Ref<OwCallback1> owcallback1;
+  std::vector<Ref<HandleFile> > handlers;
 
   if( o_versid_remove.getState() ) {
-	  remove_version_id_pdl = new RemoveVersidPdl();
-	  remove_version_id_rc = new RemoveVersidRc();
-	  remove_version_id_ch = new RemoveVersidCh(o_noheader.getState());
-	  remove_version_id_pl = new RemoveVersidPl();
+
+	  handlers.push_back( new RemoveVersidPdl() );
+	  handlers.push_back( new RemoveVersidRc() );
+	  handlers.push_back( new RemoveVersidCh(o_noheader.getState()) );
+      handlers.push_back( new RemoveVersidPl() );
+
   }
 
   if( o_primanlist.getState() ) {
-	  priman_list = new PrimanList();
+	  handlers.push_back( new PrimanList() );
   }
 
   if( o_owcallback.getState() ) {
-	  owcallback1 = new OwCallback1();
+	  handlers.push_back( new OwCallback1() );
   }
 
-  Ref<FixMlM> fix_mlm;
+  if( o_restoreshell.getState() ) {
+	  handlers.push_back( new RestoreShell() );
+  }
 
   if( o_mlm.getState() )
-	  fix_mlm = new FixMlM();
+	  handlers.push_back( new FixMlM() );
 
   for( unsigned i = 0; i < files.size(); i++ )
 	{
@@ -310,20 +320,13 @@ int main( int argc, char **argv )
 
 	  DEBUG( format( "working on file %s", files[i].second ) );
 
-	  std::string file_erg;
+	  std::string file_erg = file;
 
 	  switch( file_type )
 	  {
 	  case FILE_TYPE::RC_FILE:
 		  if( o_replace.isSet() )
-		  	  file_erg = patch_file( file, search , replace );
-
-		  if( o_versid_remove.getState() )
-			  file_erg = remove_version_id_rc->remove_versid(file);
-
-		  if( o_owcallback.isSet() ) {
-			  file_erg = owcallback1->patch_file(file);
-		  }
+		  	  file_erg = patch_file( file_erg, search , replace );
 
 		  break;
 
@@ -331,41 +334,20 @@ int main( int argc, char **argv )
 	  case FILE_TYPE::C_FILE:
 
 		  if( o_replace.isSet() )
-			  file_erg = patch_file( file, search , replace );
-
-		  if( o_versid_remove.getState() )
-		  		  file_erg = remove_version_id_ch->remove_versid(file);
-
-		  if( o_primanlist.getState() )
-			  file_erg = priman_list->patch_file(file);
-
-		  if( o_mlm.getState() )
-			  file_erg = fix_mlm->patch_file(file);
+			  file_erg = patch_file( file_erg, search , replace );
 
 		  break;
 
-	  case FILE_TYPE::PL_FILE:
-		  if( o_versid_remove.getState() )
-		  	  file_erg = remove_version_id_pl->remove_versid(file);
+	  default:
 		  break;
-
-
-	  case FILE_TYPE::PDL_FILE:
-	  case FILE_TYPE::PDS_FILE:
-		  if( o_versid_remove.getState() )
-		  	  file_erg = remove_version_id_pdl->remove_versid(file);
-		  break;
-
-	  case FILE_TYPE::FIRST__:
-	  case FILE_TYPE::LAST__:
-	  case FILE_TYPE::UNKNOWN:
-		  continue;
-
 	  }
 
-
-	  if( file_erg.empty() )
-		  continue;
+	  for( unsigned j = 0; j < handlers.size(); j++ )
+	  {
+		  if( handlers[j]->want_file( file_type ) ) {
+			  file_erg = handlers[j]->patch_file( file_erg );
+		  }
+	  }
 
 	  if( file_erg != file )
 	    {

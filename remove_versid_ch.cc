@@ -287,3 +287,16 @@ std::string RemoveVersidCh::remove_versid( const std::string & file_)
 
 	return result;
 }
+
+
+bool RemoveVersidCh::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::HEADER:
+	  case FILE_TYPE::C_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}

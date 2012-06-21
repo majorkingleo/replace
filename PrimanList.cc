@@ -323,3 +323,14 @@ std::string PrimanList::patch_file( const std::string & file )
 
 	return result;
 }
+
+bool PrimanList::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::C_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}

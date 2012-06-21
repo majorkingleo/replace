@@ -65,3 +65,14 @@ std::string RemoveVersidPl::remove_versid( const std::string & file )
 	return result;
 }
 
+bool RemoveVersidPl::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::PL_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}
+

@@ -53,3 +53,15 @@ std::string RemoveVersidRc::remove_versid( const std::string & file )
 
 	return result;
 }
+
+
+bool RemoveVersidRc::want_file( const FILE_TYPE & file_type )
+{
+	switch( file_type )
+	{
+	  case FILE_TYPE::RC_FILE:
+		  return true;
+	  default:
+		  return false;
+	}
+}

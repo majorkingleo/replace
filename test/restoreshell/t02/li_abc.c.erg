@@ -1,0 +1,319 @@
+/*****************************************************************************
++* PROJECT:   WK33 
++* PACKAGE:   WH 
++* FILE:      li_abc.c 
++* CONTENTS:  ABC Setup
++* COPYRIGHT NOTICE:
++*         (c) Copyright 2004 by
++*                 Salomon Automationstechnik Ges.m.b.H
++*                 Friesachstrasse 15
++*                 A-8114 Friesach bei Graz
++*                 Tel.: ++43 3127 200-0
++*                 Fax.: ++43 3127 200-22
++*
++****************************************************************************/
+
+/* ===========================================================================
+ * INCLUDES
+ * =========================================================================*/
+
+/* ------- System-Headers ------------------------------------------------- */
+
+/* ------- Owil-Headers --------------------------------------------------- */
+#include <owil.h>
+
+/* ------- Tools-Headers -------------------------------------------------- */
+#include <sqllist.h>
+#include <mumalloc.h>
+#include <owrcloader.h>
+
+#include <t_util.h>
+#include <ml.h>
+
+/* ------- Local-Headers -------------------------------------------------- */
+#include "menufct.h"
+#include "ast.h"
+#include "te_ast.h"
+
+#define _LI_ABC_C
+#include "li_abc.h"
+#undef _LI_ABC_C
+#include "primanlist.h"
+#include "me_abc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+ /* ------- Enums --------------------------------------------------------- */
+
+ /* ------- Structures ---------------------------------------------------- */
+typedef struct _LIAST {
+	AbcSetup	tAst;
+} LIAST;
+
+
+/* ===========================================================================
+ * LOCAL (STATIC) Variables and Function-Prototypes
+ * =========================================================================*/
+ /* ------- Function-Prototypes ------------------------------------------- */
+
+ /* ------- Variables ----------------------------------------------------- */
+
+/* ===========================================================================
+ * GLOBAL VARIABLES
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCALE (STATIC) FUNKTIONEN
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Destroys the Listdialog(Destroy-Callback)
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+static void destroy_callback_abc (ListTdialog *ptListDialog)
+{
+	if (ptListDialog != NULL) {
+		free (ptListDialog);
+		ptListDialog = NULL;
+	}
+	return;
+}
+
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*		Listbuffer Callback
+-* RETURNS
+-*      SEL_RETURN_NOACT
+-*--------------------------------------------------------------------------*/
+static int sel_callback_abc (elThandle *hEh, int iSel_reason, OWidget hW, 
+								selTdata *ptSelData, void *pvCalldata)
+{
+	LM2_DESC	*ptLd;
+	CbViewRec	*ptCbv;
+	long		lLine,lRecnum, lRecoffset, lType, lLiType;
+	LIAST		tRecord;
+
+	switch (iSel_reason) {
+	case SEL_REASON_SEL:
+
+		ptLd = hEh->ehLM2_DESC;
+		ptCbv = &ptSelData->selView;
+		lLine = ptCbv->u.input.line;
+
+		if (lm2_lin2rec (ptLd, lLine, &lRecnum, &lRecoffset) < 0) {
+			break;
+		}
+		if (lm2_seek (ptLd, lRecnum, 0) < 0) {
+			break;
+		}
+
+		memset (&tRecord, 0, sizeof (LIAST));
+
+		if (lm2_read (ptLd, &lType, &tRecord) < 0) {
+			break;
+		}
+
+		lLiType = elPart2LM2_TYPE (hEh->ehList, elNbody, TN_AST);
+		if (lType == lLiType) {
+			entry_abc (GetRootShell (), &tRecord.tAst);
+		}
+
+		break;
+
+	case SEL_REASON_PROCESS:
+		break;
+
+	case SEL_REASON_END:
+		break;
+
+	case SEL_REASON_PRINT:
+		return PrimanListSelCallbackLocal(hEh, iSel_reason, hW, ptSelData, pvCalldata);
+			
+	default:
+		break;
+	}
+
+	return (SEL_RETURN_NOACT);
+}
+
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      realy listfunction 
+-* RETURNS
+-*      0   
+-*     -1   error 
+-*--------------------------------------------------------------------------*/
+static int local_li_abc (OWidget hParent, char *pcMtitle,
+							Value ptUd, MskDialog *hPmaskRl)
+{
+	static elTitem hLITABLE_ITEM[] = {
+		{TN_AST, {0, NULL}, {0, (char *)elp_AbcSetup, 0, EL_SUB},},
+		{NULL}
+	};
+
+	static elTlistPart hElp_LITABLE[] = {
+		{FILTER_NAME, 	sizeof (ListTfilter), 	FilterItem},
+		{TN_AST, 		sizeof (AbcSetup), 			hLITABLE_ITEM},
+		{FOOT_NAME, 	sizeof (FOOT4LISTS),	FOOT_ITEM},
+		{NULL}
+	};
+
+	/*
+ 	 *  DB-Statement
+	 */
+	static elTlist hEl_table = {
+		"AST",
+		hElp_LITABLE,
+		0,
+		"SELECT %AST FROM AST ",
+	};
+
+	/* 
+	 *  Filter and sort-creteria 
+	 */
+	static listSelItem hSelector[] = {
+		{"ABC Setup", "AST", &SE_AbcSetup,
+			{&hEl_table},
+				{NULL},
+				{NULL},
+			{NULL},
+			LSI_TYPE_RC
+		},
+		{ NULL, }
+	};
+
+	ListTdialog		*phListDialog;
+	ListTXdialog	*phListXDialog;
+	ListTaction		*phListAction;
+	listSelItem		*phSelector;
+	MskDialog		 hMaskRl;
+	LIAST			*ptLiTable;
+
+	if (VaMultipleMalloc (	(int)sizeof (ListTdialog),	(void**)&phListDialog,
+							(int)sizeof (ListTXdialog),	(void**)&phListXDialog,
+							(int)sizeof (ListTaction),	(void**)&phListAction,
+							(int)sizeof (hSelector),	(void**)&phSelector,
+							(int)sizeof (LIAST),		(void**)&ptLiTable,
+							(int)(-1)) == (void*)NULL )
+		return (-1);
+
+	memset (phListDialog, 0, sizeof (ListTdialog));
+	phListDialog->ldSelector		= phSelector;
+	phListDialog->ldHsl				= HSL_NI;
+	phListDialog->ldAction			= phListAction;
+	phListDialog->ldGenCallback		= lgGenSqlList;
+	phListDialog->ldTitle			= pcMtitle;
+	phListDialog->ldGenCalldata		= phListXDialog;
+	phListDialog->ldDestroyCallback	= destroy_callback_abc;
+	phListDialog->ldPMaskRl			= hPmaskRl;
+	phListDialog->ldSelectPrinter 	= tTermCtx.fctGetPrn;
+	phListDialog->ldSelMask			= "SE_ABC";
+	phListDialog->ldPrintButResValTable = mgPrnButResValTable;
+
+	memcpy (phSelector, hSelector, sizeof (hSelector));
+
+
+	memset (phListXDialog, 0, sizeof (ListTXdialog));
+	phListXDialog->list				= phListDialog;
+	phListXDialog->cb_genSqlList	= cb_makeListFoot;
+
+	memset (phListAction, 0, sizeof (ListTaction));
+	phListAction->sel_callback		= sel_callback_abc;
+	phListAction->sel_calldata		= ptLiTable;
+	phListAction->sel_nookbutton    = 1;
+
+	hMaskRl = listSelMaskOpen (phListDialog, NULL);
+	if (hMaskRl == (MskDialog)NULL) {
+		if (hPmaskRl != NULL) {
+			*hPmaskRl = (MskDialog)NULL;
+		}
+		free (phListDialog);
+		return (0);
+	}
+
+	phListXDialog->mask_rl = hMaskRl;	
+
+	return (listSelMask (phListDialog, hParent));
+}
+
+
+/* ===========================================================================
+ * GLOBAL (PUBLIC) Functions 
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Function to call the list
+-* RETURNS
+-*      Returnvalue of the local_li_abc - Function
+-*--------------------------------------------------------------------------*/
+int _li_abc (OWidget hParent, Value ptUd) 
+{
+	static MskDialog	hMaskRl = (MskDialog )NULL;
+
+	if (hMaskRl  &&  SHELL_OF (hMaskRl)) {
+		WdgGuiSet (GuiNrestoreShell, (Value)SHELL_OF (hMaskRl));
+		WdgGuiSet (GuiNmakeActiveShell, (Value)SHELL_OF (hMaskRl));
+		return (RETURN_ACCEPTED);
+	}
+	
+	OwrcLoadObject (ApNconfigFile, "abc.rc");
+	OwrcLoadObject (ApNconfigFile, "se_abc.rc");
+
+    return (local_li_abc (hParent, MlM ("GD019 Liste ABC Setup"), ptUd, &hMaskRl));
+}
+
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Call from Menutree(Mainmenue)
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+void li_abc (MskDialog hMaskRl, MskStatic hEf, MskElement hEl,
+				int iReason, void *pvCbc)
+{
+	switch (iReason) {
+	case FCB_XF:
+		_li_abc (GetRootShell (), (Value)NULL);
+		break;
+
+	default:
+		break;
+	}
+
+	return;
+}
+
+#ifdef __cplusplus
+}
+#endif

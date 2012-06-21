@@ -13,7 +13,7 @@ HandleFile::~HandleFile()
 
 bool HandleFile::should_skip_file( const std::string & file ) const
 {
-  // Schlüsselworte anhand denen wir versuchen zu erkennen, ob diese Datei verändert
+  // SchlÃ¼sselworte anhand denen wir versuchen zu erkennen, ob diese Datei verÃ¤ndert
   // werde soll..
 
   for( unsigned int i = 0; i < keywords.size(); i++ )
