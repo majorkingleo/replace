@@ -7,6 +7,7 @@
 #include "string_utils.h"
 #include "cppdir.h"
 #include "xml.h"
+#include "debug.h"
 
 using namespace Tools;
 
@@ -67,6 +68,8 @@ std::string::size_type find_function( const std::string & function,
 		if( pos + function.size() >= s.size() )
 			return std::string::npos;
 
+		DEBUG( format( "found %s at line %d => %s", function, get_linenum(s,pos), get_whole_line(s, pos) ));
+
 		if( isalpha( s[pos-1] ) || isalpha( s[pos+function.size()] ) || 
 			s[pos-1] == '_' || s[pos-1] == '$' )
 		{ 
@@ -110,8 +113,11 @@ std::string::size_type find_function( const std::string & function,
 				return pos;
 			  }
 
-			if( !is_in( s[i], " \t\n" ) )
-				return std::string::npos;
+			if( !is_in( s[i], " \t\n" ) ) {
+				start = pos + function.size();
+				continue;
+				// return std::string::npos;
+			}
 		}
     }
 

@@ -30,7 +30,7 @@ std::string FixMlM::patch_file( const std::string & file )
 		if( pos == std::string::npos )
 			return res;
 
-		// DEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
+		DEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
 
 
 		std::string line_before = get_whole_line( res, pos );
