@@ -139,7 +139,29 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 		std::string callback_name = strip(*sl.rbegin(),";\t ");
 
 		DEBUG(format("try to find function: %s",callback_name));
-		pos = find_function(callback_name,file,0);
+
+		std::string::size_type pos2 = 0;
+
+		while( pos2 != std::string::npos )
+		{
+			pos2 = find_function(callback_name,file,pos2);
+
+			if( pos2 != std::string::npos )
+			{
+				std::string func_line = get_whole_line(file,pos2);
+
+				if( func_line.find("-*") == 0 ) {
+					// comment line
+					pos2 += callback_name.size();
+					continue;
+				} else {
+					break;
+				}
+			}
+		}
+
+		if( pos2 != std::string::npos )
+			pos = pos2;
 
 		if( pos != std::string::npos )
 			return SEL_CALLBACK::AT_POS;
@@ -184,10 +206,14 @@ std::string PrimanList::add_selcallback_to_reasons( const std::string & file, st
 	Function func;
 	std::string::size_type start, end;
 
+	DEBUG( format("line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
+
 	if( !get_function(file,pos,start,end,&func) ) {
 		DEBUG("unable to load callback function");
 		return file;
 	}
+
+	DEBUG( format("function args: %s", func.args.size() ) );
 
 	strip_argtypes(func);
 
