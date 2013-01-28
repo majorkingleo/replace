@@ -6,6 +6,7 @@
 #include <format.h>
 #include <debug.h>
 #include <ctype.h>
+#include <cpp_util.h>
 
 using namespace Tools;
 
@@ -114,9 +115,16 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 			return SEL_CALLBACK::NOT_FOUND;
 		}
 
+		if( is_in_comment( file, pos ) ) {
+			DEBUG( "sel_callback is in comment");
+			start = pos + function.size();
+			continue;
+		}
+
 		if( is_in_string( file, pos ) ) {
 			DEBUG( "sel_callback is in string");
-			return SEL_CALLBACK::NOT_FOUND;
+			start = pos + function.size();
+			continue;
 		}
 
 		if( isalpha( file[pos-1] ) ||
@@ -136,7 +144,7 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 
 		std::vector<std::string> sl = split_simple( line, "=");
 
-		std::string callback_name = strip(*sl.rbegin(),";\t ");
+		std::string callback_name = strip(*sl.rbegin(),";\t\r ");
 
 		DEBUG(format("try to find function: %s",callback_name));
 
@@ -150,21 +158,23 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 			{
 				std::string func_line = get_whole_line(file,pos2);
 
-				if( func_line.find("-*") == 0 ) {
+				if( is_in_comment( file, pos2 ) ) {
+					DEBUG( format("line: >%s< is a comment", func_line));
 					// comment line
 					pos2 += callback_name.size();
-					continue;
 				} else {
+					DEBUG( format("found %s call at line %d", func_line, get_linenum(file,pos2)));
 					break;
 				}
 			}
 		}
 
-		if( pos2 != std::string::npos )
-			pos = pos2;
+		pos = pos2;
 
-		if( pos != std::string::npos )
+		if( pos2 != std::string::npos )
+		{
 			return SEL_CALLBACK::AT_POS;
+		}
 	}
 
 	return SEL_CALLBACK::NOT_FOUND;
@@ -208,12 +218,17 @@ std::string PrimanList::add_selcallback_to_reasons( const std::string & file, st
 
 	DEBUG( format("line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
 
+
 	if( !get_function(file,pos,start,end,&func) ) {
 		DEBUG("unable to load callback function");
 		return file;
 	}
 
 	DEBUG( format("function args: %s", func.args.size() ) );
+
+	if( func.args.size() != 5 ) {
+		throw REPORT_EXCEPTION( format("cannot find the correct number of arguments for function %s", func.name ) );
+	}
 
 	strip_argtypes(func);
 
@@ -229,7 +244,7 @@ std::string PrimanList::add_selcallback_to_reasons( const std::string & file, st
 	std::string line = get_whole_line( file, pos);
 
 	// das machen wird dazu damit wir wissen
-	// wieviel wir einr�cken sollen
+	// wieviel wir einrücken sollen
 	// damits auch besser aussieht
 	std::string::size_type start_of_case = find_first_of( line, 0, "case", "default" );
 	std::string indent = line.substr(0,start_of_case);
@@ -293,9 +308,9 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 			continue;
 		}
 
-		// in der n�chsten Zeile
+		// in der nächsten Zeile
 		// pListAction->sel_callback = PrimanListSelCallbackLocal
-		// hinzuf�gen
+		// hinzufügen
 
 		std::string::size_type next_line = file.find('\n', pos);
 
@@ -332,7 +347,7 @@ std::string PrimanList::patch_file( const std::string & file )
 
 	std::string result = include_primanlist( file );
 
-	std::string::size_type pos;
+	std::string::size_type pos = 0;
 
 	SEL_CALLBACK sc_type = detect_sel_callback(file,pos);
 
@@ -359,4 +374,15 @@ bool PrimanList::want_file( const FILE_TYPE & file_type )
 	  default:
 		  return false;
 	}
+}
+
+bool PrimanList::is_in_comment( const std::string & file, std::string::size_type pos )
+{
+	std::string func_line = get_whole_line(file,pos);
+
+	if( func_line.find("-*") == 0 ) {
+		return true;
+	}
+
+	return false;
 }

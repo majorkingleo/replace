@@ -58,6 +58,8 @@ std::string::size_type find_function( const std::string & function,
 {
     bool found = false;
 
+    DEBUG( format("try finding function '%s'", function));
+
     while( !found )
     {   
 		std::string::size_type pos = s.find( function, start );

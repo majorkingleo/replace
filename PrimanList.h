@@ -47,6 +47,8 @@ protected:
 	static std::string get_varname( const std::string & var );
 
 	static std::string insert_selcallback( const std::string & file );
+
+	static bool is_in_comment( const std::string & file, std::string::size_type pos );
 };
 
 #endif /* PRIMANLIST_H_ */

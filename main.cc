@@ -342,25 +342,30 @@ int main( int argc, char **argv )
 		  break;
 	  }
 
-	  for( unsigned j = 0; j < handlers.size(); j++ )
-	  {
-		  if( handlers[j]->want_file( file_type ) ) {
-			  file_erg = handlers[j]->patch_file( file_erg );
+	  try {
+		  for( unsigned j = 0; j < handlers.size(); j++ )
+		  {
+			  if( handlers[j]->want_file( file_type ) ) {
+				  file_erg = handlers[j]->patch_file( file_erg );
+			  }
 		  }
+
+		  if( file_erg != file )
+		  {
+			  std::cout << "patching file " << files[i].second << std::endl;
+
+			  if( show_diff ) {
+				  std::cout << diff_lines( file, file_erg ) << std::endl;
+			  }
+		  }
+		  else
+		  {
+			  continue;
+		  }
+	  } catch( ReportException & err ) {
+		  std::cerr << "error: " << err.what() << std::endl;
+		  continue;
 	  }
-
-	  if( file_erg != file )
-	    {
-	      std::cout << "patching file " << files[i].second << std::endl;
-
-	      if( show_diff ) {
-	    	  std::cout << diff_lines( file, file_erg ) << std::endl;
-	      }
-	    }
-	  else
-	    {
-	      continue;
-	    }
 
 	  if( doit )
 		{
