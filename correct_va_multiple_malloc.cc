@@ -83,7 +83,7 @@ std::string CorrectVaMultipleMalloc::patch_file( const std::string & file )
 
 		if( changed_something )
 		{
-			std::string first_part_of_file = res.substr(0,start);
+			std::string first_part_of_file = res.substr(0,pos);
 
 			std::stringstream str;
 
@@ -97,7 +97,7 @@ std::string CorrectVaMultipleMalloc::patch_file( const std::string & file )
 				str << func.args[i];
 			}
 
-			str << ")";
+			DEBUG( str.str() );
 
 			std::string second_part_of_file = res.substr(end);
 

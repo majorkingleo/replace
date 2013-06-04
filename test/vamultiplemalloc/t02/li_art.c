@@ -1,0 +1,409 @@
+#if !defined(__lint) && !defined(__LINT__) && !defined(lint)
+/*****************************************************************************
++*/ static char VERSID [] 
+#if defined(__GNUC__)
+__attribute__ ((unused))
+#endif
+= "$Header: /cvsrootb/GUSSKOMPONENTEN/llr/src/prewmp/src/menus/li_art.c,v 1.1.1.1 2002/04/25 12:56:33 creitba Exp $$Locker:  $";
+#endif 
+/*
++* PROJECT:   GUSSKOMPONENTEN
++* PACKAGE:   MEART
++* FILE:      li_art.c
++* CONTENTS:  Liste Artikelstamm 
++* COPYRIGHT NOTICE:
++*         (c) Copyright 2001 by 
++*                 Salomon Automationstechnik Ges.m.b.H
++*                 Friesachstrasse 15
++*                 A-8114 Stuebing
++*                 Tel.: ++43 3127 200-0
++*                 Fax.: ++43 3127 200-22
++* REVISION HISTORY:
++*   $Log: li_art.c,v $
++*   Revision 1.1.1.1  2002/04/25 12:56:33  creitba
++*   COPIED FROM WAMAS-K/src WK31_LVSWA_007
++*
++****************************************************************************/
+
+/* ===========================================================================
+ * INCLUDES
+ * =========================================================================*/
+/* ------- System-Headers ------------------------------------------------- */
+
+/* ------- Owil-Headers --------------------------------------------------- */
+
+/* ------- Tools-Headers -------------------------------------------------- */
+
+#include <mumalloc.h>
+#include <sqllist.h>
+#include <owrcloader.h>
+
+#include <t_util.h>
+#include <li_util.h>
+#include <ml.h>
+#include <sqltable.h>
+
+/* ------- Local-Headers -------------------------------------------------- */
+
+#include "wamas.h"
+
+#define _LI_ART_C
+#include "li_art.h"
+#undef _LI_ART_C
+
+#include "me_art.h"
+#include "callback.h"
+
+#include "menufct.h"
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+
+/* ------- Allg. Defines ------------------------------------------------- */
+
+#define PN_ART	"LIART"
+#define TN_ART	"ART"
+#define TN_COLLI	"COLLI_LIST"
+#define ID_ART	"LI_ART"
+#define TITLE	"Liste Artikelstamm"
+#define DBLALIGN(s) ((s)+((s)%8))
+
+#ifdef DBEAN13
+#define PN_EAN13  "LIEAN13"
+#define TN_EAN13  "EAN13"
+#endif /* DBEAN13 */
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+ /* ------- Enums --------------------------------------------------------- */
+
+ /* ------- Structures ---------------------------------------------------- */
+
+/* ===========================================================================
+ * LOCAL (STATIC) Variables and Function-Prototypes
+ * =========================================================================*/
+
+ /* ------- Variables ----------------------------------------------------- */
+
+ /* ------- Function-Prototypes ------------------------------------------- */
+
+/* ===========================================================================
+ * GLOBAL VARIABLES
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL (STATIC) Funktions 
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Zerstoert den Listendialog(Destroy-Callback)
+-*      Uebergabeparameter: ListTdialog *pListDialog    -Pointer auf den
+-*                                                       Listendialog
+-*      Aufruf aus:         sel_callback_art
+-* RETURNS
+-*      void Funktion->kein Return
+-*--------------------------------------------------------------------------*/
+static void destroy_callback_art (ListTdialog *ptListDialog)
+{
+	if (ptListDialog)
+		free(ptListDialog);
+	return;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Wird in der Liste ein Datensatz ausgwaehlt, so wird automatisch das
+-*      das dazugehoerige Wartungsmenue geoeffnet(existiert es schon so wird
+-*      es in den Vordergrund gegeben.
+-*      Uebergabeparameter:     diverse Daten aus der Liste
+-*      Aufruf aus        :     Anbindung erfolgt in local_li_art, Funktion
+-*                              wird als Callback bei einer Auswahl eines
+-*                              Datensatzart in der Liste aufgerufen.
+-* RETURNS
+-*      0   bzw.
+-*      SEL_RETURN_NOACT
+-*--------------------------------------------------------------------------*/
+static int sel_callback_art (elThandle *hEh, int iSel_reason, OWidget hW, 
+								selTdata *ptSelData, void *pvCalldata)
+{
+	LM2_DESC	*ptLd;
+	CbViewRec	*ptCbv;
+	long		lLine, lRecnum, lRecoffset, lType, lLiType;
+	char		*tRecord;
+	int         iObjSize;
+
+	switch (iSel_reason) {
+	case SEL_REASON_SEL:
+
+		iObjSize = DBLALIGN(getStructSize(TN_ART));
+#ifdef DBEAN13
+			iObjSize += DBLALIGN(getStructSize(TN_EAN13));
+#endif /* DBEAN13 */
+
+		ptLd = hEh->ehLM2_DESC;
+		ptCbv = &ptSelData->selView;
+		lLine = ptCbv->u.input.line;
+
+		if (lm2_lin2rec(ptLd, lLine, &lRecnum, &lRecoffset) < 0)
+			return 0;
+		if (lm2_seek(ptLd, lRecnum, 0) < 0)
+			return 0;
+
+		tRecord = (char *)malloc (iObjSize);
+        if (tRecord == NULL)
+            break;
+        memset (tRecord, 0, iObjSize);
+
+        if (lm2_read(ptLd, &lType, tRecord) < 0) {
+            free (tRecord);
+            return 0;
+        }
+
+		lLiType = elPart2LM2_TYPE(hEh->ehList, elNbody, PN_ART);
+		if (lType == lLiType)
+		{
+			entry_art(GetRootShell (), &tRecord[0]);
+			free (tRecord);
+			return SEL_RETURN_NOACT;
+		}
+
+		free (tRecord);
+
+		return SEL_RETURN_NOACT;
+
+	case SEL_REASON_PROCESS:
+		return 0;
+
+	case SEL_REASON_END:
+		return 0;
+
+	default:
+		return 0;
+	}
+	return 0;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Eigentliche Listenfunktion
+-* RETURNS
+-*      0   bzw.
+-*     -1   im Fehlerfall
+-*--------------------------------------------------------------------------*/
+static int local_li_art (OWidget hParent, char *pcMtitle,
+							Value ptUd, MskDialog *hPmaskRl)
+{
+	extern elTlistPart elp_ART[];
+
+    static elTitem it_Colli[] = {
+        {"Colli", {0}, {9, "%s", 0, lcb_Colli},},
+        {"Rest",  {0}, {13, "%s", 0, lcb_Rest},},
+        {NULL },
+    };
+
+	static elTlistPart elp_COLLI_LIST[] = {
+		{TN_COLLI, 9, it_Colli},
+		{NULL}
+	};
+
+	static elTitem shLIART_ITEM[] = {
+		{TN_ART,     {0, NULL},   {0, (char *)elp_ART, 0, EL_SUB},},
+ 		{TN_COLLI, {0, NULL},   {0, (char *)elp_COLLI_LIST, 0, EL_SUB},},
+		{NULL}
+	};
+
+#ifdef DBEAN13
+	extern elTlistPart elp_EAN13[];
+	static elTitem shLIEAN13_ITEM[] = {
+		{TN_EAN13,   {1, NULL},   {0, (char *)elp_EAN13, 0, EL_SUB},},
+		{TN_ART,     {0, NULL},   {0, (char *)elp_ART, 0, EL_SUB},},
+		{NULL}
+	};
+#endif /* DBEAN13 */
+
+
+	static elTlistPart shElp_LIART[] = {
+		{FILTER_NAME, 	sizeof(ListTfilter), 	FilterItem},
+		{PN_ART, 		0, 						shLIART_ITEM},
+#ifdef DBEAN13
+		{PN_EAN13, 		0, 						shLIEAN13_ITEM},
+#endif /* DBEAN13 */
+		{FOOT_NAME, 	sizeof(FOOT4LISTS),		FOOT_ITEM},
+		{NULL}
+	};
+
+	/*
+ 	 *  DB-Statement
+	 */
+	static elTlist shEl_art = {
+		"art",
+		shElp_LIART,
+		0,
+#ifdef DBEAN13
+		"SELECT %ART,%EAN13 FROM ART,EAN13 "
+		"WHERE EAN13.AId_Mand(+) = ART.AId_Mand "
+		  "AND EAN13.AId_ArtNr(+) = ART.AId_ArtNr "
+		  "AND EAN13.AId_Var(+) = ART.AId_Var",
+#else
+		"SELECT %ART FROM ART ",
+#endif /* DBEAN13 */
+	};
+
+	extern listSubSel SE_ART;
+	extern listSubSel SE_EAN13;
+
+	/* 
+	 *  Filter und Sortierkriterien
+	 */
+	static listSelItem shSelector[] = {
+		{"Artikelstamm", TN_ART, &SE_ART,
+			{&shEl_art},
+				{NULL},
+				{NULL},
+			{NULL},
+			LSI_TYPE_RC
+		},
+#ifdef DBEAN13
+		{"EAN-13", TN_EAN13, &SE_EAN13,
+			{&shEl_art},
+				{NULL},
+				{NULL},
+			{NULL},
+			LSI_TYPE_RC
+		},
+#endif /* DBEAN13 */
+		{ NULL, }
+	};
+
+	ListTdialog     *phListDialog;
+    ListTXdialog    *phListXDialog;
+    ListTaction     *phListAction;
+    listSelItem     *phSelector;
+    MskDialog       hMaskRl;
+    char            *phLiArt;
+	int             iObjSize;
+
+    iObjSize = DBLALIGN(getStructSize(TN_ART));
+#ifdef DBEAN13
+    iObjSize += DBLALIGN(getStructSize(TN_EAN13));
+#endif /* DBEAN13 */
+    shElp_LIART[1].elpObjSize = iObjSize;
+#ifdef DBEAN13
+    shElp_LIART[2].elpObjSize = iObjSize;
+	shLIEAN13_ITEM[0].elBody.elaOffset = DBLALIGN(getStructSize(TN_ART));
+	shLIEAN13_ITEM[1].elBody.elaOffset = 0;
+#endif /* DBEAN13 */
+	it_Colli[0].elBody.elaOffset = getFieldOffset (NULL,TN_ART, "Mngs");
+	it_Colli[1].elBody.elaOffset = getFieldOffset (NULL,TN_ART, "Mngs");
+
+	if ( VaMultipleMalloc ( (int)sizeof(ListTdialog),   (void**)&phListDialog,
+                            (int)sizeof(ListTXdialog),  (void**)&phListXDialog,
+                            (int)sizeof(ListTaction),   (void**)&phListAction,
+                            (int)sizeof(shSelector),    (void**)&phSelector,
+                            (int)iObjSize,              (void**)&phLiArt,
+                            (int)(-1)) == (void*)NULL )
+		return -1;
+
+	memset(phListDialog, 0, sizeof(ListTdialog));
+	phListDialog->ldSelector		= phSelector;
+	phListDialog->ldHsl				= HSL_NI;
+	phListDialog->ldAction			= phListAction;
+	phListDialog->ldGenCallback		= FilterGenSqlList;
+	phListDialog->ldTitle			= pcMtitle;
+	phListDialog->ldGenCalldata		= phListXDialog;
+	phListDialog->ldDestroyCallback	= destroy_callback_art;
+	phListDialog->ldPMaskRl			= hPmaskRl;
+	phListDialog->ldSelectPrinter    = tTermCtx.fctGetPrn;
+	phListDialog->ldSelMask			= "SE_ART";
+	phListDialog->ldPrintButResValTable = mgPrnButResValTable;
+
+	memcpy(phSelector, shSelector, sizeof(shSelector));
+
+	memset(phListXDialog, 0, sizeof(ListTXdialog));
+	phListXDialog->list				= phListDialog;
+	phListXDialog->cb_genSqlList	= cb_makeListFoot;
+	phListXDialog->bd 				= NULL;
+
+	memset(phListAction, 0, sizeof(ListTaction));
+	phListAction->sel_callback		= sel_callback_art;
+	phListAction->sel_calldata		= phLiArt;
+	phListAction->sel_nookbutton    = 1;
+
+	hMaskRl = listSelMaskOpen (phListDialog, NULL);
+	if (hMaskRl == (MskDialog )NULL) {
+		if (hPmaskRl) {
+			*hPmaskRl = (MskDialog )NULL;
+		}
+		free (phListDialog);
+		return 0 ;
+	}
+
+	phListXDialog->mask_rl = hMaskRl;	
+
+	return listSelMask(phListDialog, hParent);
+}
+
+/* ===========================================================================
+ * LOCAL (STATIC) Funktions 
+ * =========================================================================*/
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Funktion zum Aufruf der Liste, laedt ausserdem die Maskenbeschreibung
+-*      aus dem RC-File.
+-*      Uebergabeparameter: OWidget parent
+-*                          Value 	tUd       Userdata
+-*      Aufruf aus der li_art Funktion, oder aus dem Unimenue fuer ART
+-* RETURNS
+-*      Rueckgabewert der local_li_art - Funktion
+-*--------------------------------------------------------------------------*/
+int _li_art (OWidget hParent, Value ptUd) 
+{
+	static MskDialog	hMaskRl = (MskDialog )NULL;
+
+	if (hMaskRl  &&  SHELL_OF(hMaskRl)) {
+		WdgGuiSet (GuiNactiveShell, (Value)SHELL_OF(hMaskRl));
+		return RETURN_ACCEPTED;
+	}
+
+	OwrcLoadObject(ApNconfigFile, "art.rc");
+#ifdef DBEAN13
+    OwrcLoadObject(ApNconfigFile, "ean13.rc");
+#endif /* DBEAN13 */
+	OwrcLoadObject(ApNconfigFile, "se_art.rc");
+
+    return local_li_art (hParent,MlM(TITLE), ptUd, &hMaskRl);
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Aufruf der Listenaufruffunktion
+-*      Uebergabeparameter: standart OWIL
+-*      Aufruf aus Menuebaum(Hauptmenue)
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+MENUFCT li_art (MskDialog hMaskRl, MskStatic hEf, MskElement hEl,
+				int iReason, void *pvCbc)
+{
+	switch (iReason) {
+	case FCB_XF:
+		_li_art (GetRootShell(), (Value)NULL);
+		break;
+
+	default:
+		break;
+	}
+}
+

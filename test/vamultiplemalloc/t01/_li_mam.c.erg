@@ -144,10 +144,10 @@ static int local_li_mam (OWidget parent, int id, char *mtitle, Value ud,
                         &orderByStrg[4][0];
 
 
-	if ( VaMultipleMalloc VaMultipleMalloc(	(int)sizeof(ListTdialog), 	(void**)&pListDialog, 
+	if ( VaMultipleMalloc(	(int)sizeof(ListTdialog), 	(void**)&pListDialog, 
 							(int)sizeof(ListTXdialog), 	&pListXDialog, 
 							(int)sizeof(ListTaction), 	&pListAction, 
-							(int)(-1))) == (void*)NULL )
+							(int)(-1)) == (void*)NULL )
 		return -1;
 
 
