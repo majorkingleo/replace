@@ -538,7 +538,7 @@ bool overlap( const std::vector<std::string> &list1, const std::vector<std::stri
 bool get_function( const std::string &s,
                    std::string::size_type pos,
                    std::string::size_type &start,
-                   std::string::size_type &end, Function *func )
+                   std::string::size_type &end, Function *func, bool strip_args )
 {
     int count = 1;
     start = s.find( '(', pos );
@@ -590,8 +590,12 @@ bool get_function( const std::string &s,
 
                  std::string ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
 
-                 if( !ss.empty() )
-                     func->args.push_back( ss );
+                 if( !ss.empty() ) {
+                	 if( strip_args )
+                		 func->args.push_back( ss );
+                	 else
+                		 func->args.push_back( s.substr( last_arg_end, pos - last_arg_end ) );
+                 }
 
                  last_arg_end = pos + 1;
              }
@@ -604,8 +608,12 @@ bool get_function( const std::string &s,
     {
         std::string ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
 
-        if( !ss.empty() )
-            func->args.push_back( ss );
+        if( !ss.empty() ) {
+        	if( strip_args )
+        		func->args.push_back( ss );
+        	else
+        		func->args.push_back( s.substr( last_arg_end, pos - last_arg_end ) );
+        }
 
         std::string::size_type send = end;
 

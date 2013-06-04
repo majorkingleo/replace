@@ -172,6 +172,6 @@ std::ostream & operator<<(std::ostream & out, const std::vector<std::string> & l
 bool get_function( const std::string &s,
                    std::string::size_type pos,
                    std::string::size_type &start,
-                   std::string::size_type &end, Function *func );
+                   std::string::size_type &end, Function *func,  bool strip_args = true );
 
 #endif

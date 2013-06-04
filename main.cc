@@ -22,6 +22,7 @@
 #include "OutDebug.h"
 #include "OwCallback1.h"
 #include "fix_mlm.h"
+#include "correct_va_multiple_malloc.h"
 
 using namespace Tools;
 
@@ -224,6 +225,17 @@ int main( int argc, char **argv )
      o_mlm.setRequired(true);
      oc_mlm.addOptionR(&o_mlm);
 
+     Arg::OptionChain oc_correct_va_multiple_malloc;
+     arg.addChainR(&oc_correct_va_multiple_malloc);
+     oc_correct_va_multiple_malloc.setMinMatch(1);
+     oc_correct_va_multiple_malloc.setContinueOnFail(true);
+     oc_correct_va_multiple_malloc.setContinueOnMatch(true);
+
+     Arg::FlagOption o_correct_va_multiple_malloc("vamulmalloc");
+     o_correct_va_multiple_malloc.setDescription("correct (void**) casts in VaMultipleMalloc to reduce warnings");
+     o_correct_va_multiple_malloc.setRequired(true);
+     oc_correct_va_multiple_malloc.addOptionR(&o_correct_va_multiple_malloc);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -256,6 +268,7 @@ int main( int argc, char **argv )
 	  !o_primanlist.isSet() &&
 	  !o_mlm.isSet() &&
 	  !o_restoreshell.isSet() &&
+	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -306,6 +319,10 @@ int main( int argc, char **argv )
 
   if( o_mlm.getState() )
 	  handlers.push_back( new FixMlM() );
+
+  if( o_correct_va_multiple_malloc.getState() ) {
+	  handlers.push_back( new CorrectVaMultipleMalloc() );
+  }
 
   for( unsigned i = 0; i < files.size(); i++ )
 	{
