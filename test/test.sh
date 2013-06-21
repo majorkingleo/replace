@@ -6,4 +6,5 @@
 ./test_mlm.sh
 ./test_restoreshell.sh
 ./test_vamultiplemalloc.sh
+./test_genericpointer.sh
 

@@ -23,6 +23,7 @@
 #include "OwCallback1.h"
 #include "fix_mlm.h"
 #include "correct_va_multiple_malloc.h"
+#include "remove_generic_cast.h"
 
 using namespace Tools;
 
@@ -236,6 +237,17 @@ int main( int argc, char **argv )
      o_correct_va_multiple_malloc.setRequired(true);
      oc_correct_va_multiple_malloc.addOptionR(&o_correct_va_multiple_malloc);
 
+     Arg::OptionChain oc_remove_generic_cast;
+     arg.addChainR(&oc_remove_generic_cast);
+     oc_remove_generic_cast.setMinMatch(1);
+     oc_remove_generic_cast.setContinueOnFail(true);
+     oc_remove_generic_cast.setContinueOnMatch(true);
+
+     Arg::FlagOption o_remove_generic_cast("genericcast");
+     o_remove_generic_cast.setDescription("correct (MskTgeneric *) casts in MskVaAssign to reduce warnings");
+     o_remove_generic_cast.setRequired(true);
+     oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -269,6 +281,7 @@ int main( int argc, char **argv )
 	  !o_mlm.isSet() &&
 	  !o_restoreshell.isSet() &&
 	  !o_correct_va_multiple_malloc.isSet() &&
+	  !o_remove_generic_cast.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -322,6 +335,13 @@ int main( int argc, char **argv )
 
   if( o_correct_va_multiple_malloc.getState() ) {
 	  handlers.push_back( new CorrectVaMultipleMalloc() );
+  }
+
+  if( o_remove_generic_cast.getState() ) {
+	  handlers.push_back( new RemoveGenericCast() );
+	  handlers.push_back( new RemoveGenericCast("MskUpdateVar") );
+	  handlers.push_back( new RemoveGenericCast("MskQueryRl") );
+	  handlers.push_back( new RemoveGenericCast("LmskGetVar") );
   }
 
   for( unsigned i = 0; i < files.size(); i++ )

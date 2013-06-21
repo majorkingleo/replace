@@ -1,0 +1,1317 @@
+/**********************************************************************
++*
++*  PACKAGE:	FESTO
++*
++*  FILE:		me_zob.c
++*
++*  CONTENTS:	Menue: Zugang ohne Bestellung
++*
++*  NOTES:
++*
++*  Rev  Date       Comment                                         By
++*  ---  ---------  ----------------------------------------------  ---
++*	  0  23-Oct-95	created											ali
++**********************************************************************/
+
+#include <stddef.h>
+#include <stime.h>
+#include "menu.h"
+#include "status.h"
+#include "einlagerung.h"
+#include "bestand.h"
+#include "lst_util.h"
+#include "me_we.h"
+#include "mt_ela_waage.h"
+/* XX-XX-XX-XX */
+#include "msk_util.h"
+#include "cb.h"
+#include "ef.h"
+#include "ef_sap.h"
+#include "conv.h"
+#include "disperr.h"
+#include "sapr3.h"
+#include "local_disperr.h"
+#include "term_util.h"
+#include "kst_util.h"
+
+
+
+
+#define DEFAULT_GESCHVOR	GESCHVOR_ZOB
+#define DATE_STR_LEN		8
+
+typedef struct {
+	int 	recGeschVor;				/* Geschaeftsvorfall */
+	char	recBelegNr [BELEGNRLEN+1];	/* Belegnummer */
+	int		recLagNr;					/* Lagernummer */
+	int		recWaageIdx;					/* Waage */
+
+	char	recObjBez[SAP_OBJBEZ_LEN+1];
+
+	char	recBewTyp [BEWTYPELEN+1];  	/* Bewegungstyp */
+	char	recTcode [SAP_TCODE_LEN+1];	/* Transaktion */
+	char	recObject [SAP_OBJEKT_LEN+1];/* Objekt */
+
+	char    recTeilNr[5][TEILNRLEN_8+1];/* Zum Anzeigen der letzten Eingaben */
+	int     recTeilMng[5];
+	int     recMaxMng[5];
+	int		recMngEinh[5];
+	time_t	recFirstEla;
+	char	recFirstElaStr[5][DATE_STR_LEN+1];
+	int		recMlzt[5];
+	int		recMaxMlzt[5];
+	int     recGebSize[5];
+
+	TST		tst;
+	int		recStkGew;
+
+	KOERBE	koe[MAX_KOERBE];			/* Korb-Records fuer wev */
+} ZOB_REC;
+
+/*
+ * Accelerator Waage
+ */
+static int _CbAccWaage(OWidget shell, OWidget w, KeyInfo ki, void *calldata);
+static	KeyInfoRec 		WKAccWaage = { OW_ACC_KEYPRESS, WK_F7, 0,0,0};
+
+static MskTtext ef_MngEinh2 = {
+    {EK_EF_TEXT, NULL, },
+    EFT_STRG,
+    "",
+    MNGEHLEN,
+    MNGEHLEN,
+    0,
+    DSP_DEZ,
+	0,
+	0,
+    cbt_MngEinh,
+};
+
+static MskTtext ef_DateStr = {
+    {EK_EF_TEXT, NULL, },
+    EFT_STRG,
+    "",
+    DATE_STR_LEN,
+    DATE_STR_LEN,
+};
+
+static MskTtext ef_ObjBez = {
+    {EK_EF_TEXT},
+    EFT_STRG,
+    "",
+    SAP_OBJBEZ_LEN,
+    SAP_OBJBEZ_LEN,
+};
+
+static MskTbuttonLabel _ef_Waage = {
+    {EK_EF_BUTTONLABEL, "Text",},
+    " F7 Wiegen ",
+    AP_KEY_SPECIAL
+};
+
+
+static time_t getDefFirstEla()
+{
+	time_t		timer;
+	struct tm	*ptm, tm;
+
+	time(&timer);
+	ptm = localtime(&timer);
+	if (ptm == NULL)
+		return 0;
+	tm = *ptm;
+	tm.tm_year -= ALTER_LIFO;
+	tm.tm_isdst = -1;
+	timer = mktime(&tm);
+	if (timer == (time_t)-1)
+		return 0;
+	return timer;
+}
+
+
+static int _WaitForOnline (OWidget hWdg, Value pvData, Value pvCalldata)
+{
+    int         iRv;
+	SAPR3_OL	*ptSol = (SAPR3_OL*) pvCalldata;
+
+	iRv = 0;
+#ifndef xx__SALOMON_HOME__
+	iRv = SapR3_Online (ptSol);
+#else
+	if (ptSol->solptTst != NULL)
+		iRv = ExecSql("SELECT %TST FROM teilestamm WHERE tstTeilNr=:a",
+			SELSTRUCT("TST", *ptSol->solptTst),
+			SQLSTRING(ptSol->solptTst->tstTeilNr), NULL);
+#endif
+    return iRv;
+}
+
+static int _SapR3_OnlineAnfrage (OWidget 	hWdg, 
+								 ZOB_REC 	*ptRec,
+								 TST		*ptTst,
+								 char		*pcBoxText)
+{
+	SAPR3_OL		tSol;
+	int				iRv;
+
+	memset (&tSol, 0, sizeof (tSol));
+
+	sprintf (tSol.solObject, ptRec->recObject);
+	sprintf (tSol.solBewType, ptRec->recBewTyp);
+	sprintf (tSol.solTcode,	ptRec->recTcode);
+	sprintf (tSol.solBelegNr, ptRec->recBelegNr);
+	if (ptTst != NULL && IsEmptyStrg (ptTst->tstTeilNr) == 0)
+		tSol.solptTst = ptTst;
+
+	iRv = ApBoxInform (hWdg, pcBoxText, _WaitForOnline, (Value)&tSol);
+	if (iRv < 0)
+	{
+		MenuBoxAlert (hWdg, HSL_NI,
+			"SAP Onlineanfrage fehlgeschlagen !\n\n%s",
+			VtrRfcGetLastErrTxt());
+
+			return iRv;
+	}
+
+	/* -------------------
+	 * Check Prod Lagerort ungleich VTR (Hack sns)
+	 */
+	if ( (ptRec->recGeschVor == GESCHVOR_RLO || 
+		  ptRec->recGeschVor == GESCHVOR_ELO || 
+		  ptRec->recGeschVor == GESCHVOR_RLO_S) &&
+				strcmp(ptRec->recBelegNr, "0001") == 0 ) { 
+		MenuBoxAlert (hWdg, HSL_NI,
+			"SAP Onlineanfrage:\n\n"
+			"Lagerort: %s nicht erlaubt",
+			ptRec->recBelegNr);
+
+			return -1;
+	}
+
+	/* -------------------
+	 * Check Menge auf Prod Lagerort
+	 */
+	if (tSol.solptTst != NULL &&
+		(ptRec->recGeschVor == GESCHVOR_RLO || ptRec->recGeschVor == GESCHVOR_ELO) ) {
+		ptRec->recMaxMng[0] = tSol.solMaxMng;
+
+		if (ptRec->recMaxMng[0] <= 0) {
+			MenuBoxAlert (hWdg, HSL_NI,
+				"SAP Onlineanfrage:\n\n"
+				"Keine verfuegbare Menge des Materials: %s auf Lagerort: %s",
+				ptTst->tstTeilNr, ptRec->recBelegNr);
+
+			return -1;
+		}
+	}
+	else {
+		ptRec->recMaxMng[0] = -1;
+	}
+
+	/* -------------------
+	 * Obj Bez uebernehmen
+	 */
+	memset(ptRec->recObjBez, 0, sizeof(ptRec->recObjBez));
+	strncpy(ptRec->recObjBez, tSol.solObjBez, sizeof(ptRec->recObjBez)-1);
+
+	return (0);
+}
+
+static void cb_TeilNrZob(MskTmaskRl *my_mask, MskTgeneric *ef,
+                MskTgenericRl *ef_rl_, int reason, void *cbc)
+{
+	int				iRv;
+	MskTcbcLf       *cbc_lf;
+	ZOB_REC			*rec;
+	MskTtextRl *ef_rl = (MskTtextRl *)ef_rl_;
+
+	if (ef_rl->attr & EF_ATTR_INVISIBLE)
+		return;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(my_mask,MskNmaskCalldata);	
+
+    switch( reason ) {
+	case FCB_LF:
+		cbc_lf = (MskTcbcLf *)cbc;
+		if (strlen(cbc_lf->var.p_char) == 0) {
+			cbc_lf->result = 0;
+			break;
+		}
+
+		/*
+		 * neue TNR ?
+		 */
+		if (strcmp(rec->tst.tstTeilNr, cbc_lf->var.p_char) == 0)
+			break;
+		/*
+		 * Teilestamm mit SAP synchronisieren
+		 */
+		strcpy (rec->tst.tstTeilNr, cbc_lf->var.p_char);
+
+		iRv = _SapR3_OnlineAnfrage (SHELL_OF (my_mask),
+			rec, &rec->tst, "Teilestamm wird mit SAP synchronisiert ...");
+		if (iRv < 0) {
+			strcpy (rec->tst.tstTeilNr, "");
+			cbc_lf->result = 0;
+			break;
+		}
+
+		/* -------------------
+		 * Update Teilestamm
+		 */
+		iRv = SapR3_CheckTeilestamm (SHELL_OF (my_mask), &rec->tst);
+		if (iRv < 0) {
+			strcpy (rec->tst.tstTeilNr, "");
+			cbc_lf->result = 0;
+			break;
+		}
+		rec->recMlzt[0] = getMlzt(&rec->tst, 1);
+		rec->recMaxMlzt[0] = getMlzt(&rec->tst, 0);
+		MskUpdateVar(my_mask,  &ef_StrDrei,  KEY_DEF);
+		MskUpdateVar(my_mask,  &ef_StrDrei,  KEY_10);
+
+		rec->recMngEinh[0] = rec->tst.tstMngEinh;
+		MskUpdateVar(my_mask,  &ef_MngEinh2,  KEY_DEF);
+
+		rec->recStkGew = -1;
+
+		if (rec->recWaageIdx != WAAGE_UNDEF) {
+			WdgAddAccelerator(my_mask->shell,
+				(WdgTcbAccelerator)_CbAccWaage,
+				&WKAccWaage, (Value)my_mask);
+			MskVaAssign(my_mask,  &_ef_Waage, 
+				MskNkey,        	(Value) KEY_DEF, 
+				MskNattrClr, 	(Value) EF_ATTR_INACTIVE, 
+				MskNupdate, 		(Value) 1, 
+				NULL);
+		}
+
+		break;
+    }
+}
+
+static void cb_TeilMngZob(MskTmaskRl *my_mask, MskTgeneric *ef,
+                MskTgenericRl *ef_rl_, int reason, void *cbc)
+{
+  int				TeilMng;
+  MskTcbcLf       *cbc_lf;
+  ZOB_REC			*rec;
+  MskTtextRl *ef_rl = (MskTtextRl *)ef_rl_;
+
+	if (ef_rl->attr & EF_ATTR_INVISIBLE)
+		return;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(my_mask,MskNmaskCalldata);
+
+    switch( reason ) {
+	case FCB_LF:
+		cbc_lf = (MskTcbcLf *)cbc;
+		TeilMng = *cbc_lf->var.p_num;
+		if (TeilMng <= 0) {
+			GrBell();
+			cbc_lf->result = 0;
+			break;
+		}
+		if (rec->recGeschVor != GESCHVOR_RLO && rec->recGeschVor != GESCHVOR_ELO)
+			break;
+		
+		if (TeilMng > rec->recMaxMng[0]) {
+			MenuBoxAlert(SHELL_OF(my_mask),HSL_Not_Intended,
+				"Maximale Menge: %d %s",
+					rec->recMaxMng[0],
+					MngEinh2Str(&rec->tst.tstMngEinh, NULL));
+			cbc_lf->result = 0;
+			break;
+		}
+		break;
+    }
+	return;
+}
+
+static void cb_MlztZob(MskTmaskRl *my_mask, MskTgeneric *ef,
+                MskTgenericRl *ef_rl_, int reason, void *cbc)
+{
+  int				Mlzt;
+  MskTcbcLf       *cbc_lf;
+  ZOB_REC			*rec;
+  MskTtextRl *ef_rl = (MskTtextRl *)ef_rl_;
+
+	if (ef_rl->attr & EF_ATTR_INVISIBLE)
+		return;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(my_mask,MskNmaskCalldata);
+
+    switch( reason ) {
+	case FCB_LF:
+		cbc_lf = (MskTcbcLf *)cbc;
+		Mlzt = *cbc_lf->var.p_num;
+
+		if (rec->recMaxMlzt[0] >= 0 && Mlzt > rec->recMaxMlzt[0]) {
+			GrBell();
+			cbc_lf->result = 0;
+			break;
+		}
+		break;
+    }
+	return;
+}
+
+
+static void
+cb_BelegNr(MskTmaskRl *my_mask, MskTgeneric *ef,
+                MskTgenericRl *ef_rl_, int reason, void *cbc)
+{
+	ZOB_REC			*rec;
+	int				flen;
+	MskTtextRl *ef_rl = (MskTtextRl *)ef_rl_;
+
+	if (ef_rl->attr & EF_ATTR_INVISIBLE)
+		return;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(my_mask,MskNmaskCalldata);	
+
+	switch (rec->recGeschVor) {
+		default:
+		case GESCHVOR_ZOB:
+		case GESCHVOR_RUE:
+		case GESCHVOR_INV:
+		case GESCHVOR_ZOB_P:
+			flen = SAP_KOSTL_LEN;
+			break;
+		case GESCHVOR_RLB:
+			flen = SAP_LIFNR_LEN;
+			break;
+		case GESCHVOR_RFA:
+			flen = SAP_AUFNR_LEN;
+			break;
+		case GESCHVOR_RLO:
+		case GESCHVOR_ELO:
+			flen = SAP_LGORT_LEN;
+			break;
+	}
+	cb_BelegNr_MaxLen(my_mask, (MskTgeneric*)ef, (MskTgenericRl*)ef_rl, reason, cbc, flen);
+}
+
+
+static void cb_geschvor(MskTmaskRl *my_mask, MskTgeneric *ef,
+                MskTgenericRl *ef_rl_, int reason, void *cbc)
+{
+	MskTcbcLf       *cbc_lf;
+	ZOB_REC			*rec;
+	MskTtextRl *ef_rl = (MskTtextRl *)ef_rl_;
+
+	if (ef_rl->attr & EF_ATTR_INVISIBLE)
+		return;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(my_mask,MskNmaskCalldata);	
+
+    switch( reason ) {
+
+	case FCB_LF:
+
+		cbc_lf = (MskTcbcLf *)cbc;
+
+		rec->recGeschVor = *cbc_lf->var.p_num;
+		switch (rec->recGeschVor)
+		{
+			case GESCHVOR_ZOB:
+			case GESCHVOR_ZOB_P:
+				if (strcmp(rec->recObject, OOBJ_KS) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Kostenstelle", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_KS);	/* online vorgang */
+				sprintf (rec->recBewTyp,	"501");
+				sprintf (rec->recTcode,		"MB1C");
+				break;
+
+			case GESCHVOR_RUE:
+				if (strcmp(rec->recObject, OOBJ_KS) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Kostenstelle", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_KS);	/* online vorgang */
+				sprintf (rec->recBewTyp,	"202");
+				sprintf (rec->recTcode,		"MB1A");
+				break;
+
+			case GESCHVOR_RLB:
+				if (strcmp(rec->recObject, OOBJ_LI) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Lieferant", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_LI);	/* online vorgang */
+				sprintf (rec->recBewTyp,	"542");
+				sprintf (rec->recTcode,		"MB1B");
+				break;
+
+			case GESCHVOR_RFA:
+				if (strcmp(rec->recObject, OOBJ_FA) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Fertigungsauftrag", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_FA);	/* online vorgang */
+				sprintf (rec->recBewTyp,	"262");
+				sprintf (rec->recTcode,		"MB1A");
+				break;
+
+			case GESCHVOR_RLO:
+			case GESCHVOR_RLO_S:
+			case GESCHVOR_ELO:
+				if (strcmp(rec->recObject, OOBJ_LO) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Lagerort", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_LO);
+				sprintf (rec->recBewTyp,	"312");
+				sprintf (rec->recTcode,		"MB11");
+				break;
+
+/* eigentlich keine Beleg-Nr einzugeben, keine RFC-SAP-Plausi */
+			case GESCHVOR_INV:
+				if (strcmp(rec->recObject, OOBJ_KS) != 0) {
+					rec->recBelegNr[0] = '\0';
+					MskUpdateVar (my_mask, &ef_BelegNr, KEY_DEF);
+					MskVaAssign(my_mask,&ef_BelegNr,
+						MskNkey,   (Value)KEY_DEF,
+						MskNlabel, (Value)"Kostenstelle", NULL);
+				}
+				sprintf (rec->recObject,	OOBJ_MA);
+				sprintf (rec->recBewTyp,	"712");
+				sprintf (rec->recTcode,		"MB11");
+				break;
+
+			default:
+				sprintf (rec->recBewTyp,	"???");		/* online vorgang */
+				sprintf (rec->recTcode,		"????");
+				sprintf (rec->recObject,	"????");
+				cbc_lf->result = 0;
+				break;
+		}
+
+		MskUpdateMaskDup(my_mask);
+		break;
+    }
+}
+
+/******************************************************************************/
+/************************* Maskenbeschreibung *********************************/
+/******************************************************************************/
+
+static void call_ewd(MskTmaskRlPtr hMaskRl, ZOB_REC *rec)
+{
+	int					iRv;
+	MskTgenericRl		*rl;
+	ELA_WAAGE_DATA		ewd;
+
+	memset(&ewd, 0, sizeof(ewd));
+	if (rec->tst.tstTeilNr[0] == '\0')
+		return;
+	
+	ewd.LagNr = rec->recLagNr;
+	ewd.WaageIdx = rec->recWaageIdx;
+	ewd.tTst = rec->tst;
+	ewd.RvMng = -1;
+	ewd.RvStkGew = -1;
+	iRv = _mt_ela_waage(SHELL_OF(hMaskRl), "Einlagerung wiegen", &ewd);
+
+	if (ewd.RvStkGew > 0)
+		rec->recStkGew = ewd.RvStkGew;
+
+	if (iRv >= 0) {
+		if (ewd.RvMng > 0) {
+			rec->recTeilMng[0] = ewd.RvMng;
+			MskUpdateVar(hMaskRl,  &ef_TeilMng,  KEY_DEF);
+		}
+		/*
+		 * NextTab Group auf Menge (wie bei Eingabe)
+		 */
+		rl = MskQueryRl(hMaskRl,  &ef_TeilMng,  KEY_DEF);
+		if (rl != NULL)
+			MskNextTabGroup((MskTgenericRl *)rl);
+	}
+}
+
+static int _CbAccWaage(OWidget shell, OWidget w, KeyInfo ki, void *calldata)
+{
+	MskTmaskRlPtr  	hMaskRl = (MskTmaskRl *)calldata;
+	ZOB_REC			*rec;
+
+	rec = (ZOB_REC*)MskRlMaskGet(hMaskRl, MskNmaskCalldata);
+	call_ewd(hMaskRl, rec);
+
+	return RETURN_ABORT; /* Zeichen wird gefressen */
+}
+
+static void _CbWaage (MskTmaskRlPtr	hMaskRl,
+					  MskTgeneric	*hEf,
+					  MskTgenericRl	*hEfRl,
+					  int			iReason,
+					  void			*pvCbc)
+{
+	ZOB_REC			*rec;
+
+	switch (iReason)
+	{
+	case FCB_RF:
+		if (hEfRl->ec_rl.w)
+        {
+            WdgVaSet (hEfRl->ec_rl.w,
+                      WdgNtraversal,        (Value)0,
+                      WdgNcbAlways,         (Value)1,
+                      NULL);
+        }
+		break;
+
+	case FCB_XF:
+		rec  = (ZOB_REC*)MskRlMaskGet(hMaskRl, MskNmaskCalldata);	
+		call_ewd(hMaskRl, rec);
+		break;
+
+	default:
+		break;
+	}
+
+	return;
+}
+
+static MskTdecLabel lab_Teil = { {EK_DEC_LABEL}, {" TeilNr"}, };
+static MskTdecLabel lab_Mng =  { {EK_DEC_LABEL}, {"    Menge"}, };
+static MskTdecLabel lab_ErstEla = { {EK_DEC_LABEL}, {" Erst-Einl."}, };
+static MskTdecLabel lab_Mhd = { {EK_DEC_LABEL}, {" MLZT"}, };
+static MskTdecLabel lab_MaxMhd = { {EK_DEC_LABEL}, {" Max"}, };
+static MskTdecLabel lab_Geb =  { {EK_DEC_LABEL}, {" Geb"}, };
+// static MskTdecLabel lab_Nix =  { {EK_DEC_LABEL}, {" "}, };
+
+#define o(x) ((void*)offsetof(ZOB_REC,x))
+
+static MskTmaskDescr mask[] = {
+	{&dec_grp_vert_down},
+		{&dec_grp_vert_up},
+			{&dec_filler_v0},
+			{&dec_marker_1},
+			{&ef_GeschVor,cb_geschvor,KEY_DEF,o(recGeschVor),VK_OFFSET,
+					"-D1-D2-"},
+			{&ef_LagNr,NULL,KEY_DEF,o(recLagNr),VK_OFFSET,"-D1-D2-"},
+			{&dec_grp_horiz},
+				{&dec_marker_1},
+				{&ef_BelegNr,cb_BelegNr,KEY_DEF,o(recBelegNr),VK_OFFSET,
+						"-ELB_Kostenstelle ....-D1-D2-"},
+				{&dec_nix_1},
+				{&ef_ObjBez,NULL,KEY_DEF,o(recObjBez),VK_OFFSET,
+						"-I0-D-"},
+			{&dec_grp_end},
+		{&dec_grp_end},
+		{&dec_filler_v0},
+		{&dec_grp_vert_up},
+			{&dec_grp_horiz},
+				{&dec_nix},
+				{&dec_grp_vert},
+					{&lab_Teil,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_TeilNr,cb_TeilNrZob,KEY_DEF,o(recTeilNr[0]),
+								VK_OFFSET,"-ELB_-I0-"},
+					{&dec_filler_v0},
+					{&ef_TeilNr,NULL,KEY_1,o(recTeilNr[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_TeilNr,NULL,KEY_2,o(recTeilNr[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_TeilNr,NULL,KEY_3,o(recTeilNr[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_TeilNr,NULL,KEY_4,o(recTeilNr[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_filler_12},
+				{&dec_grp_vert},
+					{&lab_Mng,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_TeilMng,cb_TeilMngZob,KEY_DEF,o(recTeilMng[0]),
+								VK_OFFSET,"-ELB_-I0-"},
+					{&dec_filler_v0},
+					{&ef_StrAcht,NULL,KEY_1,o(recTeilMng[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrAcht,NULL,KEY_2,o(recTeilMng[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrAcht,NULL,KEY_3,o(recTeilMng[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrAcht,NULL,KEY_4,o(recTeilMng[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_grp_vert},
+					{&dec_nix_1},
+					{&ef_MngEinh2,NULL,KEY_DEF,o(recMngEinh[0]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&dec_filler_v0},
+					{&ef_MngEinh2,NULL,KEY_1,o(recMngEinh[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_MngEinh2,NULL,KEY_2,o(recMngEinh[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_MngEinh2,NULL,KEY_3,o(recMngEinh[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_MngEinh2,NULL,KEY_4,o(recMngEinh[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_filler_12},
+				{&dec_grp_vert},
+					{&lab_Geb,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_GebSize_str,NULL,KEY_DEF,o(recGebSize[0]),
+								VK_OFFSET,"-ELB_-I0-"},
+					{&dec_filler_v0},
+					{&ef_GebSize_str,NULL,KEY_1,o(recGebSize[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_GebSize_str,NULL,KEY_2,o(recGebSize[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_GebSize_str,NULL,KEY_3,o(recGebSize[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_GebSize_str,NULL,KEY_4,o(recGebSize[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_filler_12},
+				{&dec_grp_vert},
+					{&lab_MaxMhd,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_StrDrei,NULL,KEY_10,o(recMaxMlzt[0]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&dec_filler_v0},
+					{&ef_StrDrei,NULL,KEY_11,o(recMaxMlzt[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_12,o(recMaxMlzt[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_13,o(recMaxMlzt[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_14,o(recMaxMlzt[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_nix_1}, {&dec_nix_1},
+				{&dec_grp_vert},
+					{&lab_Mhd,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_StrDrei,cb_MlztZob,KEY_DEF,o(recMlzt[0]),
+								VK_OFFSET,"-ELB_-I0-"},
+					{&dec_filler_v0},
+					{&ef_StrDrei,NULL,KEY_1,o(recMlzt[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_2,o(recMlzt[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_3,o(recMlzt[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_StrDrei,NULL,KEY_4,o(recMlzt[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+				{&dec_filler_12},
+				{&dec_grp_vert},
+					{&lab_ErstEla,NULL,KEY_DEF,NULL,0,"-I0-"},
+					{&ef_dt_def,NULL,KEY_DEF,o(recFirstEla),
+								VK_OFFSET,"-ELB_-I0-"},
+					{&dec_filler_v0},
+					{&ef_DateStr,NULL,KEY_1,o(recFirstElaStr[1]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_DateStr,NULL,KEY_2,o(recFirstElaStr[2]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_DateStr,NULL,KEY_3,o(recFirstElaStr[3]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+					{&ef_DateStr,NULL,KEY_4,o(recFirstElaStr[4]),
+								VK_OFFSET,"-ELB_-I0-D-"},
+				{&dec_grp_end},		 
+			{&dec_grp_end},		 
+		{&dec_grp_end},		 
+		{&dec_filler_v0},
+		{&dec_grp_vert_up},
+			{&dec_grp_horiz_right},
+				{&_ef_Waage, _CbWaage, KEY_DEF, NULL, VK_ADDR, "-I0-I1-D-"},
+			{&dec_grp_end},		 
+		{&dec_grp_end},		 
+	{&dec_grp_end},		 
+	{NULL}
+};
+
+
+/*----------------------------------------------------------------------------
+-*	Funktion belegt ELA-Struktur mit den entsprechenden Werten und ruft
+-*	rcvElaAnm() entsprechend oft auf.
+-*/
+static int make_elas(OWidget w, Value data, Value calldata)
+{
+	ELA			ela;
+	ZOB_REC		*rec=(ZOB_REC*)calldata;
+	int			rv, i, j;
+	int			KorbMng;
+	int			KanbanMng;
+
+	/* Fuer jeden Korb eine ELA
+	-* generieren
+	-*/
+	for( rv=i=0; i<MAX_KOERBE; i++ ) {
+		if (rec->koe[i].KorbMng <= 0)
+			continue;
+
+		if (rec->koe[i].Kanban <= 0) {
+			j = 0;
+			KorbMng = rec->koe[i].KorbMng;
+			KanbanMng = 0;
+		}
+		else {
+			/*
+			 * Kanban
+			 * --> eine ela fuer alle Gebinde
+			 */
+			j = rec->koe[i].AnzKoe - 1;
+			KorbMng = rec->koe[i].KorbMng * rec->koe[i].AnzKoe;
+			KanbanMng = rec->koe[i].KorbMng;
+		}
+
+		for( ; j<rec->koe[i].AnzKoe; j++ ) {
+			memset( &ela, 0, sizeof(ela) );
+			strcpy (ela.elaBarcode, (char*)getFreeElaBarCode());
+
+			if( !ela.elaBarcode[0] ) {
+				DB_disperr (w,
+					"Im Moment keine freie\nBarcodenummer mehr","");
+				return -1;
+			}
+
+			/* Objekt festlegen
+			-*/
+
+			switch (rec->recGeschVor)
+			{
+			case GESCHVOR_ZOB:
+				strcpy(ela.elaObject, OBJ_WEKS); ela.elaFifoKz = 1; break;
+			case GESCHVOR_RUE:
+				strcpy(ela.elaObject, OBJ_WEUE); ela.elaFifoKz = 1; break;
+			case GESCHVOR_RLB:
+				strcpy(ela.elaObject, OBJ_WELB); ela.elaFifoKz = 1; break;
+			case GESCHVOR_RFA:
+				strcpy(ela.elaObject, OBJ_WERF); ela.elaFifoKz = 1; break;
+			case GESCHVOR_RLO:
+				strcpy(ela.elaObject, OBJ_WELO); ela.elaFifoKz = 1;	break;
+			case GESCHVOR_RLO_S:
+				strcpy(ela.elaObject, OBJ_WELS); ela.elaFifoKz = 1; break;
+			case GESCHVOR_INV:
+				strcpy(ela.elaObject, OBJ_WEIV); ela.elaFifoKz = 1; break;
+			case GESCHVOR_ZOB_P:
+				strcpy(ela.elaObject, OBJ_WEKP); ela.elaFifoKz = 1; break;
+			case GESCHVOR_ELO:
+				strcpy(ela.elaObject, OBJ_WELF); ela.elaFifoKz = 0; break;
+			default:
+				strcpy(ela.elaObject, "????");	 ela.elaFifoKz = 1; break;
+			}
+
+			strcpy(ela.elaBewType, rec->recBewTyp);
+			strcpy(ela.elaTcode, rec->recTcode);
+			ela.elaBcIdx = 0;
+			strcpy( ela.elaTeilNr, rec->tst.tstTeilNr );
+			strcpy( ela.elaBelegNr, rec->recBelegNr);
+			ela.elaBelegPos = 0;
+			ela.elaTeilMng = KorbMng;
+			ela.elaKanbanMng = KanbanMng;
+			ela.elaMngEinh = rec->tst.tstMngEinh;
+			ela.elaGebSize = rec->koe[i].GebSize;
+			ela.elaStkGew = 0;
+			ela.elaFehltKz = rec->tst.tstFehltKz;
+			ela.elaPos.LagNr=rec->recLagNr;
+			ela.elaEinlagSS = 0;
+			ela.elaEinlKz = EKZ_ZOB;
+			ela.elaFirstEin = rec->recFirstEla;
+			if (rec->recMlzt[0] > 0) {
+				ela.elaMhd = rec->recMlzt[0];
+				ela.elaMhdDat = mkMhdDat(0, ela.elaMhd);
+				if (ela.elaFifoKz != 0)
+					ela.elaMhdIdx = 1;
+				else
+					ela.elaMhdIdx = 0;
+			}
+			if (rec->recStkGew > 0)
+				ela.elaStkGew = rec->recStkGew;
+
+			rv = rcvElaAnmeld( &ela, 1, &rec->tst, NULL );
+			if( rv < 0 ) {
+				SqlRollback();
+				if (strlen(ela.elaInfoTxt) > 0)
+					MenuBoxAlert(w, HSL_Not_Intended,
+						ela.elaInfoTxt);
+				else
+					MenuBoxAlert(w, HSL_Not_Intended,
+						"Fehler bei Einlageranmeldung");
+				return -1;
+			}
+		}
+	}
+	return 1;
+}
+
+static int IsNotKommiLagNr(int LagNr, char* TeilNr  )
+{
+  TBS		tTBS;
+  long		lrv;
+
+  lrv = ExecSql("SELECT %TBS FROM TEILEBESTAND "
+				"WHERE "
+				"tbsteilnr = :a AND "
+				"tbsLagNr = :b AND "
+				"tbsNsMng > 0",
+				SELSTRUCT("TBS", tTBS),
+				SQLSTRING(TeilNr),
+				SQLINT(LagNr),
+				NULL);
+  if (lrv == 1) 
+	return 0;				
+  else
+	return 1;
+}
+
+/******************************************************************************/
+/************************* Masken-Callback  ***********************************/
+/******************************************************************************/
+static int cb_mask(MskTmaskRl *mask_rl, int reason)
+{
+  MskTgenericRl	*rl;
+  int				rv=1, iRv;
+  // int i;
+  // int j;
+  ZOB_REC			*rec;
+  LST				*lst;
+  // char            tele[MAXTELELEN+1];
+  // char			Object[SAP_OBJEKT_LEN+1];
+  // char			buf[64];
+  struct tm		*ptm;
+
+	rec  = (ZOB_REC*)MskRlMaskGet(mask_rl,MskNmaskCalldata);	
+
+	switch (reason) {
+	case MSK_CM:
+		rec->recGebSize[0] = rec->recGebSize[1] = rec->recGebSize[2] =
+		rec->recGebSize[3] = rec->recGebSize[4] = GEB_UNDEF;
+
+		rec->recTeilMng[1] = rec->recTeilMng[2] =
+		rec->recTeilMng[3] = rec->recTeilMng[4] = -1;
+
+		rec->recMaxMng[0] = rec->recMaxMng[1] = rec->recMaxMng[2] =
+		rec->recMaxMng[3] = rec->recMaxMng[4] = -1;
+
+		rec->recFirstEla = getDefFirstEla();
+		rec->recFirstElaStr[1][0] = rec->recFirstElaStr[2][0] =
+		rec->recFirstElaStr[3][0] = rec->recFirstElaStr[4][0] = '\0';
+
+		rec->recMlzt[0] = rec->recMlzt[1] = rec->recMlzt[2] =
+		rec->recMlzt[3] = rec->recMlzt[4] = -1;
+
+		rec->recMaxMlzt[0] = rec->recMaxMlzt[1] = rec->recMaxMlzt[2] =
+		rec->recMaxMlzt[3] = rec->recMaxMlzt[4] = -1;
+
+		rec->recGeschVor = DEFAULT_GESCHVOR;
+		rec->recLagNr = getLagNrByEnvironment();
+		rec->recWaageIdx = getWaageIdxByEnvironment();
+		MskVaAssignMatch(mask_rl,"*",
+			MskNvariableStruct,  (Value)rec,
+			NULL);
+		LoadEfState(mask_rl, -1, 0);
+		SetMaskState(mask_rl, EF_ATTR_NONE, Step_0);
+		break;
+
+	case MSK_OK:
+		switch (mask_rl->status) {
+		case Step_0:
+			if (MskCheckLm(mask_rl) == 0)
+				break;
+			MskTransferMaskDup(mask_rl);
+			if (rec->recLagNr == 0) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Bitte Lagernummer eingeben !");
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+			if( !GetLstByNr(rec->recLagNr) ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Lager unbekannt !");
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+#ifndef __SALOMON_HOME__
+			if ( getElaTyp(rec->recLagNr) < 0 ) {
+				MenuBoxAlert(SHELL_OF(mask_rl), HSL_Not_Intended,
+				  "Eine Einlagerung in Lager %d ist auf "
+				  "diesem Schirm nicht erlaubt !",
+				  rec->recLagNr);
+			  	rv=MSK_OK_UPDATEVAR;
+			  	break;
+		  	}
+#endif
+
+			if (rec->recGeschVor != GESCHVOR_INV) {
+			/*
+			 * Plausibilitaetspruefung auf SAP
+			 */
+				iRv = _SapR3_OnlineAnfrage (SHELL_OF (mask_rl),
+										rec,
+										NULL,
+										"Plausibilitaetspruefung auf SAP "
+										"laeuft ...");
+				if (iRv < 0)
+				{
+					rv=MSK_OK_UPDATEVAR;
+					break;
+				}
+			}
+			if (rec->recWaageIdx == WAAGE_UNDEF)
+				SetMaskState(mask_rl,EF_ATTR_NONE,Step_1);
+			else
+				SetMaskState(mask_rl,EF_ATTR_NONE,Step_2);
+
+			rv=MSK_OK_UPDATEVAR;
+			break;
+
+
+		case Step_1:
+		case Step_2:
+			MskTransferMaskDup(mask_rl);
+
+			if( !rec->recTeilNr[0][0] ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Jo,jo....\n..und die Teilenummer ?" );
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+			/* Lagerstamm holen
+            -*/
+            if( !(lst=GetLstByNr(rec->recLagNr)) ) {
+                MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+                    "Lagerstamm nicht gefunden...");
+                rv=MSK_OK_UPDATEVAR;
+                break;
+            }
+
+			/* Korbtyp<->Lager pruefen 
+			-*/
+			if( (lst->lstKorbKz==1)
+					&& !KstCompTyp(rec->recLagNr,rec->recGebSize[0]) 
+					&& rec->recGebSize[0] != GEB_UNDEF ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Korbtyp %d ist im Lager %d nicht erlaubt", 
+					rec->recGebSize[0],rec->recLagNr);
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+			if( rec->recTeilMng[0] <= 0 ) {
+				GrBell();
+				/*
+				 * auf Mengenfeld setzen
+				 */
+				rl = MskQueryRl(mask_rl,  
+					&ef_TeilNr,  KEY_DEF);
+				if (rl != NULL)
+					MskNextTabGroup((MskTgenericRl *)rl);
+
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+			if( rec->recFirstEla <= 0 ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Bitte Erst Einlagerdatum eingeben !");
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+			if( rec->tst.tstMhd > 0 && rec->recMlzt[0] <= 0 ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"Bitte MLZT eingeben !");
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+			if( rec->recMlzt[0] > rec->recMaxMlzt[0] ) {
+				MenuBoxAlert(SHELL_OF(mask_rl),HSL_Not_Intended,
+					"MLZT ungueltig !");
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+			/*
+			 * Ueberprufen ob am Schirm andere Einlagerungen als
+			 * Prim & Alt Lager erlaubt sind
+			 */
+			if (getElaEFixKz() != 0 && rec->recLagNr != rec->tst.tstPLagNr) {
+				MenuBoxAlert(SHELL_OF(mask_rl), HSL_Not_Intended,
+					"Einlagerungen fuer dieses Teil sind an diesem Schirm\n"
+					"nur in das Primaerlager: %d erlaubt !",
+					rec->tst.tstPLagNr);
+
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+
+#ifdef __ROHRBACH__
+			/*
+			 * Bei ZOB in RB nur ins Primaerlager einlagern
+			 */
+			if (rec->tst.tstPLagNr == 0 ) {
+				MenuBoxAlert(SHELL_OF(mask_rl), HSL_Not_Intended,
+					"ZOB-Einlagerung ist ohne Primaerlager nicht moeglich.\n"
+					"Bitte zuerst Materialstamm pflegen!");
+
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+			if (IsAksLagNr(rec->tst.tstPLagNr) &&
+				rec->recLagNr != rec->tst.tstPLagNr &&
+				IsNotKommiLagNr(rec->recLagNr, rec->tst.tstTeilNr) )
+			{
+				MenuBoxAlert(SHELL_OF(mask_rl), HSL_Not_Intended,
+					"ZOB-Einlagerung fuer dieses Teil ist\n"
+					"nur in das Primaerlager: %d erlaubt !",
+					rec->tst.tstPLagNr);
+
+				rv=MSK_OK_UPDATEVAR;
+				break;
+			}
+#endif /*__ROHRBACH__*/
+
+			/*
+			 * WE-Kontrolle ?
+			 */
+			if (rec->tst.tstWeKontr > 0) {
+				MenuBoxAlert(SHELL_OF(mask_rl), HSL_Not_Intended,
+				"Fuer dieses Teil muss eine\n"
+				"100-PROZENT-KONTROLLE\n"
+				"durchgefuehrt werden !");
+			}
+
+			/*
+			 * Gebinde aufteilung
+			 */
+			memset( rec->koe, 0, sizeof(rec->koe) );
+
+			if( lst->lstKorbKz != 0 ) {
+#ifdef __OHNE_WE_GEB__
+				if (rec->recGebSize[0] != GEB_UNDEF)
+#else
+				if (0)
+#endif
+				{
+					if( MenuBoxCommit(SHELL_OF(mask_rl),HSL_Not_Intended,
+						"TeileNr:\t%s\n"
+						"Bez:    \t%s\n"
+						"Gebinde:\t%d\n"
+						"Menge:  \t%d %s\n"
+						" \t\t\t\tanmelden ?",
+						rec->tst.tstTeilNr,
+						rec->tst.tstTeilBez,
+						rec->recGebSize[0],
+						rec->recTeilMng[0],
+						MngEinh2Str(&rec->tst.tstMngEinh,NULL) ) != IS_Ok )
+					{
+						rv=MSK_OK_UPDATEVAR;
+						break;
+					}
+
+					rec->koe[0].KorbMng=rec->recTeilMng[0];
+					rec->koe[0].AnzKoe=1;
+					rec->koe[0].GebSize=rec->recGebSize[0];
+				}
+				else {
+					/*
+					 * Gebindeaufteilung
+					 */
+					WEGEB_DATA	Wgd;
+
+					memset(&Wgd, 0, sizeof(Wgd));
+					Wgd.LagNr = rec->recLagNr;
+					Wgd.pTst = &rec->tst;
+					Wgd.AnmMng = rec->recTeilMng[0];
+					Wgd.DiffAllowed = 0;
+					Wgd.ElaKbAllowed = 1;
+					Wgd.GebSize = rec->recGebSize[0];
+					Wgd.WaageIdx = rec->recWaageIdx;
+					Wgd.RvAnmMng = 0;
+					Wgd.RvStkGew = rec->recStkGew;
+
+					rv = _we_geb2(SHELL_OF(mask_rl),rec->koe, &Wgd);
+
+					if (Wgd.RvStkGew > 0)
+						rec->recStkGew = Wgd.RvStkGew;
+
+					if( rv != IS_Ok ) {
+						rv=MSK_OK_UPDATEVAR;
+						break;
+					}
+				}
+			}
+			else {
+				/*
+				 * Bei sum-Laegern: gleich anmelden
+				 */
+				if( MenuBoxCommit(SHELL_OF(mask_rl),HSL_Not_Intended,
+						"TeileNr:\t%s\n"
+						"Bez:    \t%s\n"
+						"Menge:  \t%d %s\n"
+						" \t\t\t\tanmelden ?",
+						rec->tst.tstTeilNr,
+						rec->tst.tstTeilBez,
+						rec->recTeilMng[0],
+						MngEinh2Str(&rec->tst.tstMngEinh,NULL) ) != IS_Ok ) {
+					rv=MSK_OK_UPDATEVAR;
+					break;
+				}
+
+				rec->koe[0].KorbMng=rec->recTeilMng[0];
+				rec->koe[0].AnzKoe=1;
+				rec->koe[0].GebSize=rec->recGebSize[0];
+				if( rec->koe[0].GebSize==GEB_UNDEF )
+					rec->koe[0].GebSize=DEFAULT_GEBSIZE;
+			}
+			
+			rv=ApBoxInform (SHELL_OF(mask_rl), "Einlagerungen\ngenerieren...", 
+				make_elas, (Value)rec);
+			if(rv < 0) {
+				SqlRollback();
+			}
+			else {
+				SqlCommit();
+
+				strcpy(rec->recTeilNr[4],rec->recTeilNr[3]);
+				strcpy(rec->recTeilNr[3],rec->recTeilNr[2]);
+				strcpy(rec->recTeilNr[2],rec->recTeilNr[1]);
+				strcpy(rec->recTeilNr[1],rec->recTeilNr[0]);
+				strcpy(rec->recTeilNr[0],"");
+				rec->recTeilMng[4] = rec->recTeilMng[3];
+				rec->recTeilMng[3] = rec->recTeilMng[2];
+				rec->recTeilMng[2] = rec->recTeilMng[1];
+				rec->recTeilMng[1] = rec->recTeilMng[0];
+				rec->recTeilMng[0] = 0;
+				rec->recMaxMng[4] = rec->recMaxMng[3];
+				rec->recMaxMng[3] = rec->recMaxMng[2];
+				rec->recMaxMng[2] = rec->recMaxMng[1];
+				rec->recMaxMng[1] = rec->recMaxMng[0];
+				rec->recMaxMng[0] = -1;
+				rec->recGebSize[4] = rec->recGebSize[3];
+				rec->recGebSize[3] = rec->recGebSize[2];
+				rec->recGebSize[2] = rec->recGebSize[1];
+				rec->recGebSize[1] = rec->recGebSize[0];
+				rec->recGebSize[0] = GEB_UNDEF;
+				rec->recMngEinh[4] = rec->recMngEinh[3];
+				rec->recMngEinh[3] = rec->recMngEinh[2];
+				rec->recMngEinh[2] = rec->recMngEinh[1];
+				rec->recMngEinh[1] = rec->recMngEinh[0];
+				rec->recMngEinh[0] = 0;
+				strcpy(rec->recFirstElaStr[4], rec->recFirstElaStr[3]);
+				strcpy(rec->recFirstElaStr[3], rec->recFirstElaStr[2]);
+				strcpy(rec->recFirstElaStr[2], rec->recFirstElaStr[1]);
+				ptm = localtime(&rec->recFirstEla);
+				if (ptm != NULL)
+					strftime(rec->recFirstElaStr[1], DATE_STR_LEN+1,
+						"%d.%m.%y", ptm);
+				else
+					rec->recFirstElaStr[1][0] = '\0';
+				rec->recFirstEla = getDefFirstEla();
+
+				rec->recMlzt[4] = rec->recMlzt[3];
+				rec->recMlzt[3] = rec->recMlzt[2];
+				rec->recMlzt[2] = rec->recMlzt[1];
+				rec->recMlzt[1] = rec->recMlzt[0];
+				rec->recMlzt[0] = -1;
+
+				rec->recMaxMlzt[4] = rec->recMaxMlzt[3];
+				rec->recMaxMlzt[3] = rec->recMaxMlzt[2];
+				rec->recMaxMlzt[2] = rec->recMaxMlzt[1];
+				rec->recMaxMlzt[1] = rec->recMaxMlzt[0];
+				rec->recMaxMlzt[0] = -1;
+
+				memset(&rec->tst, 0, sizeof(rec->tst));
+
+				/*
+				 * NextTab Group auf letztes Feld
+				 * --> Focus ist auf erstem Feld (TeilNr)
+				 */
+				rl = MskQueryRl(mask_rl,  
+					&ef_dt_def,  KEY_DEF);
+				if (rl != NULL)
+					MskNextTabGroup((MskTgenericRl *)rl);
+				MskUpdateMaskVar(mask_rl);
+				WdgRemoveAccelerator(mask_rl->shell, &WKAccWaage);
+				MskVaAssign(mask_rl,  &_ef_Waage, 
+					MskNkey,        	(Value) KEY_DEF, 
+					MskNattrOr, 		(Value) EF_ATTR_INACTIVE, 
+					MskNupdate, 		(Value) 1, 
+					NULL);
+			}
+
+			rv=MSK_OK_UPDATEVAR;
+			break;
+		}
+		break;
+
+	case MSK_ESC:
+		if( mask_rl->status == Step_1 || mask_rl->status == Step_2) {
+			strcpy(rec->recTeilNr[0],"");
+			rec->recTeilMng[0] = 0;
+			rec->recGebSize[0] = GEB_UNDEF;
+			rec->recMngEinh[0] = 0;
+			rec->recFirstEla = getDefFirstEla();
+			rec->recMlzt[0] = -1;
+			rec->recMaxMlzt[0] = -1;
+			memset(&rec->tst, 0, sizeof(rec->tst));
+			rec->recStkGew = -1;
+			SetMaskState(mask_rl,EF_ATTR_NONE,Step_0);
+			MskUpdateMaskVar(mask_rl);
+			WdgRemoveAccelerator(mask_rl->shell, &WKAccWaage);
+
+
+			rv=0;
+			break;
+		}
+		break;
+	
+	case MSK_DM:
+		WdgRemoveAccelerator(mask_rl->shell, &WKAccWaage);
+		break;
+	}
+
+	return rv;
+}
+
+
+
+/******************************************************************************/
+/************************* Menue ZOB ******************************************/
+/******************************************************************************/
+int me_zob(OWidget w, int menu_id, char *menu_title, Value userdata)
+{
+	MskTmaskRl		*mask_rl;
+	OWidget			m_sh;
+	// int				rv = 0;
+	ZOB_REC			rec;
+
+	memset( &rec, 0, sizeof(ZOB_REC) );
+
+
+	mask_rl = MskOpenMask(mask, NULL);
+	mask_rl->cb_mask = cb_mask;
+	m_sh = ApShellModalCreate(w,AP_CENTER,AP_CENTER);
+
+	MskRlMaskSet(mask_rl,MskNmaskCalldata,(Value)&rec);
+	
+
+	MskCreateDialog(m_sh, mask_rl, "ZOB", NULL,
+					HSL_Not_Intended, SMB_Ignore);
+
+	WdgMainLoop();
+
+	SqlRollback();
+
+	return IS_Ok;
+}
+
