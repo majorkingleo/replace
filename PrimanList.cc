@@ -139,6 +139,11 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 
 		std::string line = get_whole_line(file,pos);
 
+		if( line.find("=") == std::string::npos ) {			;
+			start = pos + function.size();
+			continue;
+		}
+
 		if( line.find("NULL") != std::string::npos )
 			return SEL_CALLBACK::IS_NULL;
 

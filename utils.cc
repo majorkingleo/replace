@@ -72,8 +72,10 @@ std::string::size_type find_function( const std::string & function,
 
 		DEBUG( format( "found %s at line %d => %s", function, get_linenum(s,pos), get_whole_line(s, pos) ));
 
-		if( isalpha( s[pos-1] ) || isalpha( s[pos+function.size()] ) || 
-			s[pos-1] == '_' || s[pos-1] == '$' )
+		if( isalpha( s[pos-1] ) ||
+		    isalpha( s[pos+function.size()] ) ||
+			s[pos-1] == '_' ||
+			s[pos-1] == '$' )
 		{ 
 			start = pos + function.size();
 			continue;
@@ -117,8 +119,7 @@ std::string::size_type find_function( const std::string & function,
 
 			if( !is_in( s[i], " \t\n" ) ) {
 				start = pos + function.size();
-				continue;
-				// return std::string::npos;
+				break;
 			}
 		}
     }
