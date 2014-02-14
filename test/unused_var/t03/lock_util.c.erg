@@ -1,0 +1,356 @@
+/**
+* @file
+* @todo describe file content
+* @author Copyright (c) 2013 Salomon Automation GmbH
+*/
+#include <sstd20.h>
+#include <logtool.h>
+#include <base/buser.h>
+#include <dbsqlstd.h>
+#include <fes.h>
+#include <fsp.h>
+#include <tek.h>
+#include <tep.h>
+#include <spo.h>
+#include <pspo.h>
+#include <sfac20.h>
+#include <svar20.h>
+
+#include "lock_util.h"
+#include "sperr_util.h"
+#include "hist_util.h"
+#include "auf_util.h"
+
+/* [endfold] */
+
+/* [[ Lock_LockPos ]] */
+
+/*
+=head1 Sperren eines Feldes
+=head2 Signatur
+   
+
+=head2 Beschreibung
+sperrt oder entsperrt das angegebene Feld. Ist der Wert !=0,
+dann ist der Platz gesperrt.
+
+=head2 Argumente
+=over 3
+=item tid
+Transaktionsid oder NULL
+=item feldid
+Name des Feldes, z.B. 'KL-02-28'
+=item lockflag
+Vorgehensweise - C<LOCK_LOCK> zum sperren, C<LOCK_UNLOCK> zum
+Freigeben, C<LOCK_CHECK> zum lesen.
+=item grund
+Sperrgrund, String mit Laenge FSPGRUND_LEN.
+Wenn bei C<LOCK_CHECK> hier NULL angegeben wird, dann wird
+ueberprueft, ob die angegebene Position irgendeine Sperre hat,
+ansonsten ob die Position aus dem angegebenen Grund gesperrt ist.
+Wenn bei C<LOCK_UNLOCK> hier NULL angegeben wird, dann werden alle
+Sperren fuer dieses Feld aufgehoben.
+=item user
+Benutzer, der sperrt, ignoriert fuer C<LOCK_CHECK>.
+=item aflag
+gibt an ob eventuelle Auslagerauftraege fuer TE's auf diesem Platz
+geloescht werden sollen oder nicht
+=back
+
+=head2 Rueckgabewert
+liefert RETURN_ERROR bei einem Fehler, RETURN_FOUND wenn die Sperre
+existiert oder angelegt werden konnte und RETURN_NOTFOUND wenn es
+keine derartige Sperre gibt. Fehler findet man im C<Lib>-Logfile.
+*/
+PUBLIC int Lock_LockPos(void *tid,char *feldid,int lockflag,
+						char *grund,int modus,
+                        char *user,
+						int aflag) 
+{
+	int status,lock=0;
+	FSP fsp;
+	char *aaarg_user="grr";
+	long prio = Var_GetInt("Snd.Prio_Sperre",2);
+	
+	memset(&fsp,0,sizeof(FSP));
+	if(grund!=NULL) {
+		strncpy(fsp.fspFspGrund,grund,FSPGRUND_LEN);
+	}
+	if(feldid!=NULL) {
+		strncpy(fsp.fspPos.FeldId,feldid,FELDID_LEN);
+	}
+    fsp.fspFspModus=modus;
+
+	switch(lockflag) {
+	case LOCK_LOCK:
+		if((user==NULL)||(user[0]=='\0')) {
+			user=aaarg_user;
+		}
+		SetHist(TN_FSP,&fsp,HIST_INSERT,user);
+		status=TExecStdSql(tid,StdNinsert,TN_FSP,&fsp);
+		/* ueberpruefen, ob auf diesem Lagerplatz Paletten stehen, die
+		   einem Auslagerauftrag zugeteilt sind. Diese Paletten wieder
+		   aus dem Auftrag nehmen und die TPA's stornieren. */
+		if(status>0 && aflag==LOCK_DEL_AUF) {
+			if(Auf_NimmPlatzAusAuftrag(tid,feldid,user)!=RETURN_ACCEPTED) {
+				LogPrintf(FAC_LIB,LT_ERROR,
+						  "LockPos (%s): Auftragszuteilung konnte nicht"
+						  "aufgehoben werden",feldid);
+				return(RETURN_ERROR);
+			}
+		}
+		break;
+	case LOCK_UNLOCK:
+		if(grund==NULL) {
+			status=TExecSql(tid,"DELETE fsp"
+							" WHERE pos_feldid=:a",
+							SQLSTR(feldid,FELDID_LEN+1),
+							NOCODE);
+		} else {
+			status=TExecSql(tid,"DELETE fsp"
+							" WHERE pos_feldid=:a"
+							" AND fspgrund=:b",
+							SQLSTR(feldid,FELDID_LEN+1),
+							SQLSTR(grund,FSPGRUND_LEN+1),
+							NOCODE);
+		}
+		
+		break;
+	case LOCK_CHECK:
+		if(grund==NULL) {
+			status=TExecSql(tid,"SELECT count(*)"
+							" FROM fsp "
+							" WHERE pos_feldid=:a",
+							SELLONG(lock),
+							SQLSTR(feldid,FELDID_LEN+1),
+							NOCODE);
+		} else {
+			status=TExecStdSql(tid,StdNselect,TN_FSP,&fsp);
+			if (status>0)
+				lock=1;
+		}
+		if(status>0) {
+			if(lock==0) {
+				return(RETURN_NOTFOUND);
+			}
+			return(RETURN_FOUND);
+		}
+		break;
+	default:
+		LogPrintf(FAC_LIB,LT_ERROR,
+				  "unbekanntes Lock-Flag %s (bei %d",feldid,lock);
+		return(RETURN_ERROR);
+	}
+	if(status<0) {
+		if(TSqlError(tid)!=SqlNotFound) {
+			LogPrintf(FAC_LIB,LT_ERROR,
+					  "LockPos (%s) : Fehler %s",
+					  feldid,TSqlErrTxt(tid));
+			return(RETURN_ERROR);
+		}
+		return(RETURN_NOTFOUND);
+	} else {
+		/* Alle Paletten auf diesem Platz sperren */
+		/* sis: Aber nur bei Totalsperre !! */
+		if ((lockflag==LOCK_LOCK) && (modus!=FSPMODUS_EIN))
+			status=Sperr_doPosTEsperr(tid, feldid, grund,
+									  AKTSP_GE, user,
+									  0, SPSTAT_S, 1, prio);
+		else if (lockflag==LOCK_UNLOCK)
+			status=Sperr_doPosTEsperr(tid, feldid, grund,
+									  AKTSP_EN, user,
+									  0, SPSTAT_N, 1, prio);
+		if (status<0) {
+			LogPrintf(FAC_LIB,LT_ERROR,
+					  "LockPos TE-Sperre (%s) : Fehler %s",
+					  feldid,TSqlErrTxt(tid));
+			return(RETURN_ERROR);
+		}
+	}
+	return(RETURN_FOUND);
+}
+
+/* [endfold] */
+/* [[ Lock_LockBereich ]] */
+
+/*
+=head1 Sperren eines Bereiches
+=head2 Signatur
+   
+
+=head2 Beschreibung
+sperrt oder entsperrt den angegebenen Bereich. Bereiche werden derzeit
+durch die Angabe eines SQL-Teilstatements festgelegt, das einen
+bestimmten Bereich des Lagers selektiert. Sucht zuerst alle passenden
+Lagerplaetze und verwendet dann C<Lock_LockPos()> zum Sperren/Entsperren.
+
+ACHTUNG: Alle % muessen doppelt auftreten oder nichts geht mehr!!!
+
+=head2 Argumente
+=over 3
+=item tid
+Transaktionsid oder NULL
+=item sql
+das C<WHERE> Statement fuer die Bereichsauswahl, z.B. C<lagid='AL'>
+=item lockflag
+Vorgehensweise - C<LOCK_LOCK> zum sperren, C<LOCK_UNLOCK> zum
+Freigeben.
+=item grund
+Sperrgrund
+=item user
+Benutzer
+=item aflag
+gibt an ob eventuelle Auslagerauftraege fuer TE's auf diesem Platz
+geloescht werden sollen oder nicht
+=back
+
+=head2 Rueckgabewert
+liefert RETURN_ERROR bei einem Fehler, RETURN_FOUND wenn was gesperrt
+werden konnte ansonsten RETURN_NOTFOUND.
+*/
+PUBLIC int Lock_LockBereich(void *tid,char *sql,int lockflag,
+							char *grund,int modus,
+                            char *user,int aflag) 
+{
+
+
+	int numrecs;
+#define LOCKBUF_SIZE 30
+	char buf[300];
+	char pos[LOCKBUF_SIZE][FELDID_LEN+1];
+	OwObject sc=NULL;
+	
+	sc = TSqlNewContext(tid, NULL);
+	if (sc == NULL ) {
+		LogPrintf(FAC_LIB, LT_ALERT,"lock_util.c: Can't get SqlContext!\n");
+		return -1;
+	}
+	LogPrintf(FAC_LIB,LT_NOTIFY,
+			  "LockBereich: %s (%s:%s) %s",sql,
+			  (lockflag==LOCK_LOCK)?"Ein":"Aus",
+			  user,grund);
+
+	strcpy(buf,"SELECT feldid FROM fes WHERE ");
+	strcat(buf,sql);
+	/* get all the corresponding positions */
+	numrecs=TExecSqlX(tid,sc,buf,
+					  LOCKBUF_SIZE,0,
+					  SELSTR(pos,FELDID_LEN+1),NOCODE);	
+	if(numrecs<0) {
+		if(TSqlError(tid)==SqlNotFound) {
+			TSqlDestroyContext(tid,sc);
+			return(RETURN_NOTFOUND);
+		} else {
+			TSqlDestroyContext(tid,sc);
+			LogPrintf(FAC_LIB,LT_ERROR,
+					  "LockBereich (%s): Fehler %s",
+					  sql,TSqlErrTxt(tid));
+			return(RETURN_ERROR);
+		}
+	}
+	while(1) {
+		int i;
+		for(i=0;i<numrecs;i++) {
+			if(Lock_LockPos(tid,pos[i],lockflag,grund,modus,user,aflag)
+				==RETURN_ERROR) {
+				TSqlDestroyContext(tid,sc);
+				return(RETURN_ERROR);
+			}
+		}
+		if(numrecs<LOCKBUF_SIZE) {
+			/* we are done */
+			TSqlDestroyContext(tid,sc);
+			return(RETURN_FOUND);
+		}
+		numrecs=TExecSqlV(tid,sc,NULL,NULL,NULL,NULL);
+		if(numrecs<0) {
+			if(TSqlError(tid)!=SqlNotFound) {
+				LogPrintf(FAC_LIB,LT_ERROR,
+						  "LockBereich: Schleifenfehler %s",TSqlErrTxt(tid));
+				TSqlDestroyContext(tid,sc);
+				return(RETURN_ERROR);
+			}
+		}
+	}
+	/* notreached */
+	return(RETURN_ERROR);
+}
+
+/* [endfold] */
+/* [[ Lock_LockKanal ]] */
+
+/*
+=head1 Sperren eines Kanals im Muli
+=head2 Signatur
+   
+
+=head2 Beschreibung
+sperrt oder entsperrt den angegebenen Kanal im Muli. Es werden alle
+Lagerplaetze dieses Kanals gesperrt. Als Basisfunktion zum Sperren
+wird C<Lock_LockBereich()> verwendet.
+
+=head2 Argumente
+=over 3
+=item tid
+Transaktionsid oder NULL
+=item pos
+Position im Muli, der entsprechende Kanal wird gesperrt. Kann eine der
+folgenden Formen annaehmen
+
+   AL-1-1-01-1
+   AL-1-1-01
+   
+=item lockflag
+Vorgehensweise - C<LOCK_LOCK> zum sperren, C<LOCK_UNLOCK> zum
+Freigeben.
+=item grund
+Sperrgrund
+=item user
+Benutzer
+=item aflag
+gibt an ob eventuelle Auslagerauftraege fuer TE's auf diesem Platz
+geloescht werden sollen oder nicht
+=back
+
+=head2 Rueckgabewert
+liefert RETURN_ERROR bei einem Fehler, ansonsten RETURN_FOUND oder
+RETURN_NOTFOUND.
+*/
+PUBLIC int Lock_LockKanal(void *tid,char *pos,int lockflag,
+						  char *grund,int modus,
+                          char *user,int aflag) 
+{
+
+
+
+	char feld[FELDID_LEN+1];
+	char buf[100];
+
+	LogPrintf(FAC_LIB,LT_NOTIFY,
+			  "LockKanal: %s (%s:%s) %s",pos,
+			  (lockflag==LOCK_LOCK)?"Ein":"Aus",
+			  user,grund);
+
+	/* AL-1-1-01-1
+	   01234567890 */
+	strncpy(feld,pos,FELDID_LEN);
+	if(strlen(feld)<strlen("AL-1-1-01-1")) {
+		strcat(feld,"-%%");		/* ExecSql strips one */
+	} else {
+		feld[10]='%';
+		feld[11]='%';
+		feld[13]='\0';			/* ggr: junky ExecSql */
+	}
+	
+	strcpy(buf,"feldid like '");
+	strcat(buf,feld);
+	strcat(buf,"'");
+
+	return(Lock_LockBereich(tid,buf,lockflag,grund,modus,user,aflag));
+}
+
+/* [endfold] */
+
+#undef _lock_util_c
+
+/* EOF */

@@ -24,35 +24,13 @@
 #include "fix_mlm.h"
 #include "correct_va_multiple_malloc.h"
 #include "remove_generic_cast.h"
+#include "fix_from_compile_log.h"
 
 using namespace Tools;
 
 std::string patch_file( const std::string & file, std::string search, std::string repl )
 {
   return substitude( file, search, repl );
-}
-
-std::string diff_lines( const std::string & orig, std::string & modded )
-{
-  std::vector<std::string> sl_orig, sl_modded;
-
-  sl_orig = split_simple( orig, "\n" );
-  sl_modded = split_simple( modded, "\n" );
-  
-  std::string res;
-
-  for( unsigned i = 0; i < sl_orig.size() && i < sl_modded.size(); i++ )
-	{
-	  if( sl_orig[i] != sl_modded[i] )
-		{
-		  if( !res.empty() )
-			res += '\n';
-
-		  res += "\t" + strip( sl_orig[i] ) + " => " + strip( sl_modded[i] );
-		}
-	}
-
-  return res;
 }
 
 void usage( const std::string & prog )
@@ -248,6 +226,32 @@ int main( int argc, char **argv )
      o_remove_generic_cast.setRequired(true);
      oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
 
+
+
+
+     Arg::OptionChain oc_fix_warnings_from_compile_log;
+     arg.addChainR(&oc_fix_warnings_from_compile_log);
+     oc_fix_warnings_from_compile_log.setMinMatch(2);
+     oc_fix_warnings_from_compile_log.setContinueOnFail(true);
+     oc_fix_warnings_from_compile_log.setContinueOnMatch(true);
+
+     Arg::FileOption o_compile_log("compile-log");
+     oc_fix_warnings_from_compile_log.addOptionR(&o_compile_log);
+     o_compile_log.setMaxValues(1);
+     o_compile_log.setMinValues(1);
+     o_compile_log.setRequired(true);
+     o_compile_log.setDescription("Compiler output logfile. Create it by using 'umake clean && umake > compile.log 2>&1'");
+
+     Arg::FlagOption o_comment_out("comment-out");
+     o_comment_out.setDescription("do not remove code, just comment it out");
+     o_comment_out.setRequired(false);
+     oc_fix_warnings_from_compile_log.addOptionR(&o_comment_out);
+
+     Arg::FlagOption o_remove_unused_variables("unused-variable");
+     o_remove_unused_variables.setDescription("remove unused variables (can be combined with --comment-out)");
+     o_remove_unused_variables.setRequired(false);
+     oc_fix_warnings_from_compile_log.addOptionR(&o_remove_unused_variables);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -282,6 +286,7 @@ int main( int argc, char **argv )
 	  !o_restoreshell.isSet() &&
 	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_remove_generic_cast.isSet() &&
+	  !o_compile_log.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -293,6 +298,31 @@ int main( int argc, char **argv )
   std::string replace = "";
   bool doit =  o_doit.getState();
   bool show_diff = false;
+
+  if( o_compile_log.isSet() )
+  {
+
+	  try {
+		  FixFromCompileLog fix_from_log(
+				  o_path.getValues()->at(0),
+				  o_compile_log.getValues()->at(0),
+				  o_comment_out.isSet(),
+				  o_remove_unused_variables.isSet());
+
+		  fix_from_log.run();
+
+		  if( doit )
+		  {
+			  fix_from_log.doit();
+		  }
+
+	  } catch( ReportException & err ) {
+		  std::cerr << err.simple_what() << std::endl;
+		  return 11;
+	  }
+
+	  return 0;
+  }
 
   if( o_replace.isSet() )
   {

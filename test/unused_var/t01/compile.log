@@ -1,0 +1,12 @@
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tpa_util.o -c ./tpa_util.c
+./tpa_util.c: In function ‘TDB_tpaAnlegen’:
+./tpa_util.c:74: warning: unused variable ‘no_tpa’
+./tpa_util.c:73: warning: unused variable ‘dbrv’
+./tpa_util.c: In function ‘TDB_clear_tpa_FORCE’:
+./tpa_util.c:149: warning: unused variable ‘count’
+./tpa_util.c:149: warning: unused variable ‘aidx’
+./tpa_util.c: In function ‘GenTa4TeWithAktpos’:
+./tpa_util.c:208: warning: unused variable ‘last’
+./tpa_util.c:207: warning: unused variable ‘ret’
+./tpa_util.c:207: warning: unused variable ‘rv’
+./tpa_util.c:207: warning: unused variable ‘i’

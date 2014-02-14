@@ -1,0 +1,310 @@
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/auf_util.o -c ./auf_util.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/date_util.o -c ./date_util.c
+./date_util.c: In function 'Date_MhdToString':
+./date_util.c:37: warning: passing argument 1 of 'strlen' from incompatible pointer type
+./date_util.c: In function 'Date_DateToString':
+./date_util.c:76: warning: passing argument 1 of 'strlen' from incompatible pointer type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/db_util.o -c ./db_util.c
+./db_util.c: In function ‘TDB_CheckSeqFormat’:
+./db_util.c:127: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long unsigned int’
+./db_util.c: In function ‘TDB_SPO_anlegen’:
+./db_util.c:341: warning: unused variable ‘flag’
+./db_util.c:340: warning: unused variable ‘no_tpa’
+./db_util.c:340: warning: unused variable ‘i’
+./db_util.c:339: warning: unused variable ‘trnr’
+./db_util.c: In function ‘TDB_TPA_anlegen’:
+./db_util.c:459: warning: format ‘%d’ expects type ‘int’, but argument 5 has type ‘long int’
+./db_util.c:459: warning: format ‘%d’ expects type ‘int’, but argument 6 has type ‘long int’
+./db_util.c:459: warning: format ‘%d’ expects type ‘int’, but argument 7 has type ‘long int’
+./db_util.c:421: warning: unused variable ‘flag’
+./db_util.c:420: warning: unused variable ‘no_tpa’
+./db_util.c:420: warning: unused variable ‘i’
+./db_util.c: In function ‘TDB_protTpa’:
+./db_util.c:493: warning: format ‘%d’ expects type ‘int’, but argument 5 has type ‘long int’
+./db_util.c:490: warning: unused variable ‘anz’
+./db_util.c:489: warning: unused variable ‘i’
+./db_util.c:487: warning: unused variable ‘aktTime’
+./db_util.c: In function ‘TDB_protLAS’:
+./db_util.c:580: warning: unused variable ‘aktTime’
+./db_util.c: In function ‘TDB_protKomTekTep’:
+./db_util.c:646: warning: passing argument 3 of ‘TDB_protTpa’ discards qualifiers from pointer target type
+./db_util.c:613: warning: unused variable ‘anzahl’
+./db_util.c:612: warning: unused variable ‘sollMng’
+./db_util.c: In function ‘TDB_protTekTep’:
+./db_util.c:757: warning: passing argument 3 of ‘TDB_protTpa’ discards qualifiers from pointer target type
+./db_util.c:727: warning: unused variable ‘anzahl’
+./db_util.c:726: warning: unused variable ‘sollMng’
+./db_util.c: In function ‘TDB_protMap’:
+./db_util.c:850: warning: unused variable ‘i’
+./db_util.c:850: warning: unused variable ‘anz’
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_convert.o -c ./edi_convert.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_db.o -c ./edi_db.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_dispatch.o -c ./edi_dispatch.c
+./edi_dispatch.c: In function 'SEdiGetArbGebTextFromArbGeb':
+./edi_dispatch.c:181: warning: assignment discards qualifiers from pointer target type
+./edi_dispatch.c: In function 'SEdiGetArbGebShortFromArbGeb':
+./edi_dispatch.c:198: warning: assignment discards qualifiers from pointer target type
+./edi_dispatch.c: In function 'SEdiGetArbGebFromArbGebShort':
+./edi_dispatch.c:215: warning: assignment discards qualifiers from pointer target type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_file.o -c ./edi_file.c
+./edi_file.c: In function 'SEdiGetFileSequenz':
+./edi_file.c:443: warning: missing braces around initializer
+./edi_file.c:443: warning: (near initialization for 'acResult[0]')
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_invrpt.o -c ./edi_invrpt.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_wr.o -c ./edi_wr.c
+./edi_wr.c: In function '_EDI_writePGR':
+./edi_wr.c:220: warning: format '%ld' expects type 'long int', but argument 5 has type 'int'
+./edi_wr.c: In function '_EDI_writeMVMT':
+./edi_wr.c:397: warning: assignment discards qualifiers from pointer target type
+./edi_wr.c:446: warning: statement with no effect
+./edi_wr.c:447: warning: statement with no effect
+./edi_wr.c:455: warning: statement with no effect
+./edi_wr.c:456: warning: statement with no effect
+./edi_wr.c:464: warning: statement with no effect
+./edi_wr.c:465: warning: statement with no effect
+./edi_wr.c:471: warning: statement with no effect
+./edi_wr.c:472: warning: statement with no effect
+./edi_wr.c:483: warning: statement with no effect
+./edi_wr.c:484: warning: statement with no effect
+./edi_wr.c:506: warning: value computed is not used
+./edi_wr.c:565: warning: statement with no effect
+./edi_wr.c:315: warning: unused variable 'iIntBew'
+./edi_wr.c: In function 'EDI_WriteSPERR':
+./edi_wr.c:967: warning: enumeration value 'MAX_SPSTAT' not handled in switch
+./edi_wr.c:1018: warning: enumeration value 'MAX_SPSTAT' not handled in switch
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/err_util.o -c ./err_util.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/handler.o -c ./handler.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/info.o -c ./info.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/lager.o -c ./lager.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/lock_util.o -c ./lock_util.c
+./lock_util.c: In function ‘Lock_LockPos’:
+./lock_util.c:70: warning: unused variable ‘ret’
+./lock_util.c: In function ‘Lock_LockBereich’:
+./lock_util.c:223: warning: assignment from incompatible pointer type
+./lock_util.c:238: warning: passing argument 2 of ‘_TExecSqlX’ from incompatible pointer type
+./lock_util.c:241: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./lock_util.c:244: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./lock_util.c:256: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./lock_util.c:262: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./lock_util.c:265: warning: passing argument 2 of ‘_TExecSqlV’ from incompatible pointer type
+./lock_util.c:270: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./lock_util.c:216: warning: unused variable ‘lock’
+./lock_util.c:215: warning: unused variable ‘status’
+./lock_util.c: In function ‘Lock_LockKanal’:
+./lock_util.c:325: warning: unused variable ‘spalte’
+./lock_util.c:325: warning: unused variable ‘ebene’
+./lock_util.c:325: warning: unused variable ‘seite’
+./lock_util.c:324: warning: unused variable ‘lock’
+./lock_util.c:323: warning: unused variable ‘status’
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/map_util.o -c ./map_util.c
+./map_util.c: In function ‘TDB_buche_MAP’:
+./map_util.c:481: warning: format ‘%d’ expects type ‘int’, but argument 7 has type ‘long int’
+./map_util.c:481: warning: format ‘%d’ expects type ‘int’, but argument 8 has type ‘long int’
+./map_util.c:481: warning: format ‘%d’ expects type ‘int’, but argument 9 has type ‘long int’
+./map_util.c: In function ‘TDB_buche_Leergut’:
+./map_util.c:938: warning: suggest parentheses around && within ||
+./map_util.c: In function ‘TDB_CheckWE’:
+./map_util.c:1929: warning: format ‘%d’ expects type ‘int’, but argument 7 has type ‘long int’
+./map_util.c:2093: warning: format ‘%d’ expects type ‘int’, but argument 4 has type ‘long int’
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/pos_util.o -c ./pos_util.c
+./pos_util.c:28: warning: missing braces around initializer
+./pos_util.c:28: warning: (near initialization for ‘postable[0]’)
+./pos_util.c: In function ‘GetPos’:
+./pos_util.c:36: warning: unused variable ‘fes’
+./pos_util.c: In function ‘util_sqlCmpBindDescTable’:
+./pos_util.c:149: warning: comparison between pointer and integer
+./pos_util.c:149: warning: comparison between pointer and integer
+./pos_util.c:155: warning: comparison between pointer and integer
+./pos_util.c: In function ‘Util_Pos2Str’:
+./pos_util.c:213: warning: format ‘%.2d’ expects type ‘int’, but argument 4 has type ‘long int’
+./pos_util.c:192: warning: unused variable ‘first’
+./pos_util.c:192: warning: unused variable ‘rv’
+./pos_util.c: In function ‘Util_Str2Pos’:
+./pos_util.c:228: warning: missing braces around initializer
+./pos_util.c:228: warning: (near initialization for ‘pos.FeldId’)
+./pos_util.c:276: warning: format ‘%d’ expects type ‘int *’, but argument 3 has type ‘long int *’
+./pos_util.c:286: warning: format ‘%.2d’ expects type ‘int’, but argument 4 has type ‘long int’
+./pos_util.c:231: warning: unused variable ‘pposstrg’
+./pos_util.c: In function ‘Util_PosCmp’:
+./pos_util.c:301: warning: passing argument 1 of ‘util_sqlCmpBindDescTable’ from incompatible pointer type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/print.o -c ./print.c
+In file included from ./print.c:7:
+/tools/dist/toolsbox-2010.0/usr/include/printcap.h:57:1: warning: "PCAP_NAME_LEN" redefined
+In file included from ./prnint.h:25,
+                 from ./print.c:6:
+./sprn20.h:95:1: warning: this is the location of the previous definition
+./print.c: In function 'Prn_Init':
+./print.c:22: warning: unused variable 'prnPtr'
+./print.c:21: warning: unused variable 'rv'
+./print.c: In function 'Prn_Exit':
+./print.c:35: warning: unused variable 'prnPtr'
+./print.c: In function 'Var_ExistsListString':
+./print.c:51: warning: unused variable 'll'
+./print.c: In function 'prn_Conditions':
+./print.c:284: warning: comparison between signed and unsigned
+./print.c: In function 'prn_Substitute':
+./print.c:402: warning: comparison between signed and unsigned
+./print.c: In function 'prn_EAN_Tray':
+./print.c:671: warning: missing braces around initializer
+./print.c:671: warning: (near initialization for 's[15]')
+./print.c:706: warning: '0' flag ignored with precision and '%d' printf format
+./print.c:721: warning: '0' flag used with '%s' printf format
+./print.c:649: warning: unused variable 'teid'
+./print.c:642: warning: unused variable 'pz'
+./print.c:641: warning: unused variable 'buf2'
+./print.c: In function 'prn_EAN_Pal':
+./print.c:823: warning: missing braces around initializer
+./print.c:823: warning: (near initialization for 's[25]')
+./print.c:873: warning: '0' flag ignored with precision and '%d' printf format
+./print.c:789: warning: unused variable 'teid'
+./print.c:777: warning: unused variable 'sscc'
+./print.c: In function 'prn_Begleitschein':
+./print.c:1105: warning: missing braces around initializer
+./print.c:1105: warning: (near initialization for 's[15]')
+./print.c:1136: warning: format '%d' expects type 'int', but argument 3 has type 'long int'
+./print.c: In function 'Prn_PrintEANLabel':
+./print.c:1156: warning: unused variable 'extra'
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/prn_lade.o -c ./prn_lade.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/prn_liefschein.o -c ./prn_liefschein.c
+In file included from ./prn_liefschein.c:22:
+/tools/dist/toolsbox-2010.0/usr/include/printcap.h:57:1: warning: "PCAP_NAME_LEN" redefined
+In file included from ./prn_liefschein.c:6:
+./sprn20.h:95:1: warning: this is the location of the previous definition
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_edi.o -c ./rx_edi.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_insdes02.o -c ./rx_insdes02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_orders02.o -c ./rx_orders02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_partin02.o -c ./rx_partin02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_porder02.o -c ./rx_porder02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/rx_prodat02.o -c ./rx_prodat02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/scan_util.o -c ./scan_util.c
+./scan_util.c: In function 'Ean_getArtRec':
+./scan_util.c:1047: warning: passing argument 4 of 'Ean_getNewArtRec' discards qualifiers from pointer target type
+./scan_util.c:1047: warning: passing argument 4 of 'Ean_getNewArtRec' discards qualifiers from pointer target type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/shost.o -c ./shost.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/sperr_util.o -c ./sperr_util.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tele_wr.o -c ./tele_wr.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/teleconv2.o -c ./teleconv2.c
+./teleconv2.c: In function ‘nVarLenTele’:
+./teleconv2.c:3052: warning: assignment discards qualifiers from pointer target type
+./teleconv2.c: In function ‘ParseNewUserString’:
+./teleconv2.c:3189: warning: passing argument 1 of ‘StrToStrArray’ discards qualifiers from pointer target type
+./teleconv2.c: In function ‘TC_VDATE’:
+./teleconv2.c:3945: warning: ‘cnt’ may be used uninitialized in this function
+./teleconv2.c: In function ‘TC_DATE’:
+./teleconv2.c:1441: warning: ‘cnt’ may be used uninitialized in this function
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tet_util.o -c ./tet_util.c
+./tet_util.c:43: warning: missing braces around initializer
+./tet_util.c:43: warning: (near initialization for ‘ttstable[0]’)
+./tet_util.c: In function ‘GetTts’:
+./tet_util.c:63: warning: unused variable ‘tts’
+./tet_util.c: In function ‘Util_Tet2Str’:
+./tet_util.c:200: warning: '0' flag ignored with precision and ‘%d’ printf format
+./tet_util.c:200: warning: format ‘%0*.*d’ expects type ‘int’, but argument 5 has type ‘long int’
+./tet_util.c: In function ‘Util_Str2Tet’:
+./tet_util.c:211: warning: missing braces around initializer
+./tet_util.c:211: warning: (near initialization for ‘tet.TetId’)
+./tet_util.c:248: warning: format ‘%d’ expects type ‘int *’, but argument 3 has type ‘long int *’
+./tet_util.c:270: warning: format ‘%d’ expects type ‘int *’, but argument 3 has type ‘long int *’
+./tet_util.c:306: warning: '0' flag ignored with precision and ‘%d’ printf format
+./tet_util.c:306: warning: format ‘%0*.*d’ expects type ‘int’, but argument 5 has type ‘long int’
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tpa_util.o -c ./tpa_util.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_desadv02.o -c ./tx_desadv02.c
+./tx_desadv02.c: In function '_DESADV02_ProzessDESADV':
+./tx_desadv02.c:311: warning: assignment discards qualifiers from pointer target type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_edi.o -c ./tx_edi.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_goodsr02.o -c ./tx_goodsr02.c
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_invrpt02.o -c ./tx_invrpt02.c
+./tx_invrpt02.c: In function '_INVRPT02_GetData':
+./tx_invrpt02.c:78: warning: assignment discards qualifiers from pointer target type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_movmnt02.o -c ./tx_movmnt02.c
+./tx_movmnt02.c: In function '_MOVMNT02_ProzessMOVMNT':
+./tx_movmnt02.c:146: warning: unused variable 'pcSeq'
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tx_recadv02.o -c ./tx_recadv02.c
+./tx_recadv02.c: In function '_RECADV02_ProzessRECADV':
+./tx_recadv02.c:254: warning: assignment discards qualifiers from pointer target type
+gcc -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/write.o -c ./write.c
+./write.c: In function 'Host_WriteMAE':
+./write.c:133: warning: passing argument 8 of 'EDI_WriteMAE' discards qualifiers from pointer target type
+./write.c: In function 'Host_WriteMBM':
+./write.c:169: warning: passing argument 4 of 'EDI_WriteMBM' discards qualifiers from pointer target type
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/akp_util.o -c ./akp_util.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/check.o -c ./check.cc
+./check.cc: In constructor ‘<unnamed>::Table::Table(const std::string&, int, int)’:
+./check.cc:134: warning: ‘<unnamed>::Table::diff_text’ should be initialized in the member initialization list
+./check.cc:134: warning: ‘<unnamed>::Table::diff_text_mesg’ should be initialized in the member initialization list
+./check.cc: In function ‘int scpp_overload(char*, void*, char*, void*, void*, char*)’:
+./check.cc:309: warning: enumeration value ‘MAX_OVERLOAD_TYPE’ not handled in switch
+./check.cc: In function ‘int scpp_check_art(char*, void*, ART*)’:
+./check.cc:472: warning: deprecated conversion from string constant to ‘char*’
+./check.cc:476: warning: deprecated conversion from string constant to ‘char*’
+./check.cc: In function ‘int scpp_check_ean(char*, void*, EAN*, char*)’:
+./check.cc:516: warning: deprecated conversion from string constant to ‘char*’
+./check.cc:520: warning: deprecated conversion from string constant to ‘char*’
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/edi_util.o -c ./edi_util.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/ediwr.o -c ./ediwr.cc
+./ediwr.cc: In function ‘char* scpp_SEDIGetSchichtKZ(void*, char*, int)’:
+./ediwr.cc:91: warning: deprecated conversion from string constant to ‘char*’
+./ediwr.cc:92: warning: deprecated conversion from string constant to ‘char*’
+./ediwr.cc:93: warning: deprecated conversion from string constant to ‘char*’
+./ediwr.cc:96: warning: deprecated conversion from string constant to ‘char*’
+./ediwr.cc: In function ‘bool create_lrd(const std::string&, void*, const std::string&)’:
+./ediwr.cc:446: warning: comparison between signed and unsigned integer expressions
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/fet_util.o -c ./fet_util.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/is_testsystem.o -c ./is_testsystem.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/ma_stat.o -c ./ma_stat.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/scpp.o -c ./scpp.cc
+./scpp.cc: In function ‘int scpp_strip_artnr(char*, char*)’:
+./scpp.cc:251: warning: deprecated conversion from string constant to ‘char*’
+./scpp.cc:252: warning: deprecated conversion from string constant to ‘char*’
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/sedi.o -c ./sedi.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D__SUCHARD__ -DTOOLS_VERSION=37 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2010.0/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fstack-protector -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../Linux/include -I/tools/dist/toolsbox-2010.0/usr/share/owil/include -I/tools/dist/toolsbox-2010.0/usr/share/tools/include   -O2 -I/usr/X11R6/include -D_COMPILING_sold_=1 -o Linux/tek_util.o -c ./tek_util.cc
+Loading ../Linux/lib/libsold.a ...
+r - Linux/auf_util.o
+r - Linux/date_util.o
+r - Linux/db_util.o
+r - Linux/edi_convert.o
+r - Linux/edi_db.o
+r - Linux/edi_dispatch.o
+r - Linux/edi_file.o
+r - Linux/edi_invrpt.o
+r - Linux/edi_wr.o
+r - Linux/err_util.o
+r - Linux/handler.o
+r - Linux/info.o
+r - Linux/lager.o
+r - Linux/lock_util.o
+r - Linux/map_util.o
+r - Linux/pos_util.o
+r - Linux/print.o
+r - Linux/prn_lade.o
+r - Linux/prn_liefschein.o
+r - Linux/rx_edi.o
+r - Linux/rx_insdes02.o
+r - Linux/rx_orders02.o
+r - Linux/rx_partin02.o
+r - Linux/rx_porder02.o
+r - Linux/rx_prodat02.o
+r - Linux/scan_util.o
+r - Linux/shost.o
+r - Linux/sperr_util.o
+r - Linux/tele_wr.o
+r - Linux/teleconv2.o
+r - Linux/tet_util.o
+r - Linux/tpa_util.o
+r - Linux/tx_desadv02.o
+r - Linux/tx_edi.o
+r - Linux/tx_goodsr02.o
+r - Linux/tx_invrpt02.o
+r - Linux/tx_movmnt02.o
+r - Linux/tx_recadv02.o
+r - Linux/write.o
+r - Linux/akp_util.o
+r - Linux/check.o
+r - Linux/edi_util.o
+r - Linux/ediwr.o
+r - Linux/fet_util.o
+r - Linux/is_testsystem.o
+r - Linux/ma_stat.o
+r - Linux/scpp.o
+r - Linux/sedi.o
+r - Linux/tek_util.o

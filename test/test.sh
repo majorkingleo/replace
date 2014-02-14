@@ -7,4 +7,5 @@
 ./test_restoreshell.sh
 ./test_vamultiplemalloc.sh
 ./test_genericpointer.sh
+./test_unused_var.sh
 
