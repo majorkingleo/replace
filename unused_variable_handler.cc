@@ -86,7 +86,12 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::string
 
 	// 1st find starting pos
 
-	std::string::size_type var_start = line.find( warning.var_name );
+	std::string::size_type var_start = find_var_name( line, warning.var_name );
+
+	DEBUG( format("%s var_start: %d", warning.var_name, var_start) );
+
+	if( var_start == std::string::npos )
+		return;
 
 	// find first space, or comma before the var name
 	std::string::size_type start = line.find_last_of( ",", var_start);
@@ -94,7 +99,7 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::string
 	std::string new_line;
 
 	if( start == std::string::npos ) {
-		start = line.find_last_of( " \t,", var_start);
+		start = line.find_last_of( " ,\t", var_start);
 
 		// we have no comma till the end, remove the complete line
 		std::string::size_type next_v = line.find_first_of( ",;", var_start + warning.var_name.size() );
@@ -126,6 +131,8 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::string
 			warning.fixed = true;
 
 			return;
+		} else {
+			DEBUG( format("start: %d var_start: %d for '%s'", start, var_start, warning.var_name) );
 		}
 	}
 
@@ -139,7 +146,11 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::string
 
 	std::string left  = line.substr(0, start );
 
-	if( line[end] == ',' ) {
+	if( line[start] == ',' && line[end] == ',' ) {
+		start += 1;
+
+	} else if( line[end] == ',' ) {
+
 		end += 1;
 	}
 
@@ -176,4 +187,65 @@ void UnusedVariableHandler::replace_line( std::string & buffer, std::string::siz
 	std::string right = buffer.substr( end_of_line );
 
 	buffer = left + new_line + right;
+}
+
+std::string::size_type UnusedVariableHandler::find_var_name( const std::string line, const std::string & var_name )
+{
+	 std::string::size_type pos  = 0;
+
+	 do
+	 {
+		 pos = line.find( var_name, pos );
+
+		 if( pos == std::string::npos )
+			 return pos;
+
+		 bool failed = false;
+
+		 if( pos > 0 ) {
+			 switch( line[pos-1] )
+			 {
+			 case ' ': break;
+			 case '\t': break;
+			 case ',': break;
+			 case ';': break;
+			 case '*': break;
+			 default:
+				 DEBUG( format("prevsign: %c Dec: %d", line[pos-1], (int)line[pos-1] ) );
+				 failed = true;
+				 break;
+			 }
+
+			 if( failed ) {
+				 pos++;
+				 continue;
+			 }
+		 }
+
+		 if( pos + var_name.size() < line.size()-1 ) {
+			 switch( line[pos+var_name.size()] )
+			 {
+			 case ' ': break;
+			 case '[': break;
+			 case '=': break;
+			 case '\t': break;
+			 case ',': break;
+			 case ';': break;
+			 default:
+				 DEBUG( format("nextsign: '%c' Dec: %d", line[pos+1], (int)line[pos+1] ) );
+				 failed = true;
+				 break;
+			 }
+
+			 if( failed ) {
+				 pos++;
+				 continue;
+			 }
+		 }
+
+		 return pos;
+
+	 } while( pos != std::string::npos );
+
+	 return std::string::npos;
 }

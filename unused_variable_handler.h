@@ -46,7 +46,9 @@ public:
 
 	void fix_warning( UnusedVarWarnigs & warning, std::string & content );
 
-	void replace_line( std::string & buffer, std::string::size_type pos, const std::string & new_line );
+	static void replace_line( std::string & buffer, std::string::size_type pos, const std::string & new_line );
+
+	static std::string::size_type find_var_name( const std::string line, const std::string & var_name );
 };
 
 

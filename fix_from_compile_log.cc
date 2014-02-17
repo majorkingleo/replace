@@ -82,9 +82,13 @@ void FixFromCompileLog::run()
 	}
 
 	std::set<std::string> file_names;
+	std::set<std::string> already_warned_file_names;
 
 	for( unsigned i = 0; i < all_files.size(); i++ )
 	{
+		if(  all_files[i].first != FILE_TYPE::C_FILE )
+			continue;
+
 		File file;
 
 		file.path_name = all_files[i].second;
@@ -92,7 +96,12 @@ void FixFromCompileLog::run()
 		file.name = f.get_name();
 
 		if( file_names.find(file.name) != file_names.end() ) {
-			std::cout << format("warning duplicate filename %s detected. Can't be automatically fixed.\n", file.name );
+
+			if(already_warned_file_names.find(file.name) == already_warned_file_names.end() )
+			{
+				std::cout << format("warning duplicate filename %s detected. Can't be automatically fixed.\n", file.name );
+				already_warned_file_names.insert( file.name );
+			}
 
 			for( FILE_LIST::iterator it = files.begin(); it != files.end(); it++ ) {
 				if( it->name == file.name ) {

@@ -1,0 +1,4 @@
+./me_art.c: In function 'artikel_ok':
+./me_art.c:641: warning: unused variable 'i'
+./me_art.c:641: warning: unused variable 'last'
+./me_art.c:641: warning: unused variable 'rv'

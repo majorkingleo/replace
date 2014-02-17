@@ -1,0 +1,51 @@
+./me_art.c: In function 'pos_schreiben':
+./me_art.c:215: warning: unused variable 'pStr'
+./me_art.c:214: warning: unused variable 'rv'
+./me_art.c:214: warning: unused variable 'a'
+./me_art.c: In function 'lang_write':
+./me_art.c:286: warning: implicit declaration of function 'Util_IsEmptyStr'
+./me_art.c: In function 'cb_list_Art':
+./me_art.c:314: warning: unused variable 'cbc_lb'
+./me_art.c: In function 'cb_pos_edit':
+./me_art.c:330: warning: unused variable 'le'
+./me_art.c:329: warning: unused variable 'kind'
+./me_art.c:329: warning: unused variable 'last_index'
+./me_art.c: In function 'TDB_protArtEan_1':
+./me_art.c:421: warning: unused variable 'anzahl'
+./me_art.c:420: warning: unused variable 'sollMng'
+./me_art.c: In function 'cb_delete_Art':
+./me_art.c:531: warning: implicit declaration of function 'ToBoxCommit'
+./me_art.c:535: warning: implicit declaration of function 'GetTermUser'
+./me_art.c:505: warning: unused variable 'w'
+./me_art.c:504: warning: unused variable 'pStr'
+./me_art.c: In function 'artikel_ok':
+./me_art.c:641: warning: unused variable 'i'
+./me_art.c:641: warning: unused variable 'last'
+./me_art.c:641: warning: unused variable 'rv'
+./me_art.c:640: warning: unused variable 'tep'
+./me_art.c:639: warning: unused variable 'Art'
+./me_art.c:638: warning: unused variable 'w'
+./me_art.c: In function 'cb_write_Art':
+./me_art.c:701: warning: unused variable 'ok_flag'
+./me_art.c:701: warning: unused variable 'brbFlag'
+./me_art.c:700: warning: unused variable 'Art_ok'
+./me_art.c:700: warning: unused variable 'mode'
+./me_art.c:700: warning: unused variable 'last'
+./me_art.c:700: warning: unused variable 'rv'
+./me_art.c:699: warning: unused variable 'art'
+./me_art.c:698: warning: unused variable 'w'
+./me_art.c: In function 'cb_read_Art':
+./me_art.c:769: warning: unused variable 'w'
+./me_art.c: In function 'cb_mask_Art':
+./me_art.c:878: warning: implicit declaration of function 'VaMultipleMalloc'
+./me_art.c:878: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_art.c:865: warning: unused variable 'pLang'
+./me_art.c: In function 'kkCbXeanTyp':
+./me_art.c:954: warning: assignment discards qualifiers from pointer target type
+./me_art.c: In function 'kkCbXmaeEanTyp':
+./me_art.c:963: warning: assignment discards qualifiers from pointer target type
+./me_art.c: At top level:
+./me_art.c:972: warning: missing braces around initializer
+./me_art.c:972: warning: (near initialization for 'args_ean[0].var')
+./me_art.c: In function 'CompFct':
+./me_art.c:31: warning: control reaches end of non-void function
