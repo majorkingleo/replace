@@ -69,7 +69,8 @@ public:
 	FixFromCompileLog( const std::string & path, // SRCDIR
 					   const std::string & compile_log,
 				       bool only_comment_out,
-				       bool remove_unused_variables );
+				       bool remove_unused_variables,
+				       bool initialize_variables_);
 
 	void run();
 	void doit();

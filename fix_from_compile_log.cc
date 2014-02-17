@@ -19,6 +19,7 @@
 #include <fstream>
 #include "debug.h"
 #include <set>
+#include "uninitialized_variable_handler.h"
 
 using namespace Tools;
 
@@ -55,7 +56,8 @@ FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_fr
 FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  const std::string & compile_log_,
 									  bool only_comment_out_,
-									  bool remove_unused_variables_ )
+									  bool remove_unused_variables_,
+									  bool initialize_variables_ )
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
@@ -64,9 +66,12 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
   files()
 {
 
-	if( remove_unused_variables_ )
-	{
+	if( remove_unused_variables_ ) {
 		handlers.push_back( new UnusedVariableHandler( only_comment_out ) );
+	}
+
+	if( initialize_variables_ ) {
+		handlers.push_back( new UninitializedVariableHandler() );
 	}
 }
 

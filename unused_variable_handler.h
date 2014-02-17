@@ -13,6 +13,7 @@
 
 class UnusedVariableHandler : public FixFromCompileLog::Handler
 {
+protected:
 	class UnusedVarWarnigs : public Location
 	{
 	public:
@@ -44,7 +45,7 @@ public:
 
 	virtual void report_unfixed_compile_logs();
 
-	void fix_warning( UnusedVarWarnigs & warning, std::string & content );
+	virtual void fix_warning( UnusedVarWarnigs & warning, std::string & content );
 
 	static void replace_line( std::string & buffer, std::string::size_type pos, const std::string & new_line );
 
