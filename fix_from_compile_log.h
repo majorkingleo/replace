@@ -70,7 +70,8 @@ public:
 					   const std::string & compile_log,
 				       bool only_comment_out,
 				       bool remove_unused_variables,
-				       bool initialize_variables_);
+				       bool initialize_variables_,
+				       bool handle_format_strings);
 
 	void run();
 	void doit();

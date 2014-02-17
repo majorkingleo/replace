@@ -258,6 +258,11 @@ int main( int argc, char **argv )
      o_initialize_variables.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_initialize_variables);
 
+     Arg::FlagOption o_format_string("format-string");
+     o_format_string.setDescription("autofix format string warnings");
+     o_format_string.setRequired(false);
+     oc_fix_warnings_from_compile_log.addOptionR(&o_format_string);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -314,7 +319,8 @@ int main( int argc, char **argv )
 				  o_compile_log.getValues()->at(0),
 				  o_comment_out.isSet(),
 				  o_remove_unused_variables.isSet(),
-				  o_initialize_variables.isSet());
+				  o_initialize_variables.isSet(),
+				  o_format_string.isSet());
 
 		  fix_from_log.run();
 

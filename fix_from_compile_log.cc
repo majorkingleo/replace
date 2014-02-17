@@ -20,6 +20,7 @@
 #include "debug.h"
 #include <set>
 #include "uninitialized_variable_handler.h"
+#include "format_string_handler.h"
 
 using namespace Tools;
 
@@ -57,7 +58,8 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  const std::string & compile_log_,
 									  bool only_comment_out_,
 									  bool remove_unused_variables_,
-									  bool initialize_variables_ )
+									  bool initialize_variables_,
+									  bool handle_format_strings )
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
@@ -72,6 +74,10 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 
 	if( initialize_variables_ ) {
 		handlers.push_back( new UninitializedVariableHandler() );
+	}
+
+	if( handle_format_strings ) {
+		handlers.push_back( new FormatStringHandler() );
 	}
 }
 
