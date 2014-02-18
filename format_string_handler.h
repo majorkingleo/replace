@@ -32,10 +32,26 @@ class FormatStringHandler : public FixFromCompileLog::Handler
 		  compile_log_line(),
 		  fixed(false)
 		{}
+	};
 
+	class FixTable
+	{
+	public:
+		std::string format;
+		std::string target_type;
+		std::string correct_type;
+
+		FixTable( const std::string & format_,
+				  const std::string & target_type_,
+				  const std::string & correct_type_ )
+		: format( format_ ),
+		  target_type( target_type_ ),
+		  correct_type( correct_type_ )
+		{}
 	};
 
 	std::vector<FormatWarnigs > format_warnings_locations;
+	std::vector<FixTable> fix_table;
 
 public:
 	FormatStringHandler();

@@ -1,0 +1,43 @@
+./me_prod.c: In function ‘pal_zuord’:
+./me_prod.c:243: warning: implicit declaration of function ‘tdb_LockRec’
+./me_prod.c: In function ‘_build_mstr’:
+./me_prod.c:319: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c:319: warning: format ‘%d’ expects type ‘int’, but argument 4 has type ‘long int’
+./me_prod.c:322: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c: In function ‘feed_lb_auftrag’:
+./me_prod.c:518: warning: assignment from incompatible pointer type
+./me_prod.c:593: warning: passing argument 2 of ‘_TExecSqlX’ from incompatible pointer type
+./me_prod.c:596: warning: passing argument 2 of ‘_TExecSqlV’ from incompatible pointer type
+./me_prod.c:649: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c:654: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c:654: warning: format ‘%d’ expects type ‘int’, but argument 4 has type ‘long int’
+./me_prod.c:664: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c:667: warning: format ‘%d’ expects type ‘int’, but argument 3 has type ‘long int’
+./me_prod.c:667: warning: format ‘%d’ expects type ‘int’, but argument 4 has type ‘long int’
+./me_prod.c:698: warning: passing argument 2 of ‘_TSqlDestroyContext’ from incompatible pointer type
+./me_prod.c: In function ‘cbStartAuftragDlg’:
+./me_prod.c:816: warning: implicit declaration of function ‘VaMultipleMalloc’
+./me_prod.c: In function ‘cbbt_prodZuordnen’:
+./me_prod.c:1038: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1044: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c: In function ‘cbbt_prodCharge’:
+./me_prod.c:1092: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1098: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1104: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c: In function ‘cbbt_prodDruckenEAN128’:
+./me_prod.c:1390: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c: In function ‘cbbt_prodFertig’:
+./me_prod.c:1582: warning: format ‘%d’ expects type ‘int’, but argument 2 has type ‘long int’
+./me_prod.c: In function ‘cbWamDlgZuord’:
+./me_prod.c:1721: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1723: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1725: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c: In function ‘cbbt_zuordOk’:
+./me_prod.c:1855: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c:1857: warning: dereferencing type-punned pointer will break strict-aliasing rules
+./me_prod.c: At top level:
+./me_prod.c:1938: warning: missing braces around initializer
+./me_prod.c:1938: warning: (near initialization for ‘args_pal[0].var’)
+./me_prod.c:1959: warning: missing braces around initializer
+./me_prod.c:1959: warning: (near initialization for ‘args_auftrag[0].var’)
+./me_prod.c:959: warning: ‘_ist_pal_auftrag’ defined but not used

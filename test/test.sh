@@ -8,4 +8,5 @@
 ./test_vamultiplemalloc.sh
 ./test_genericpointer.sh
 ./test_unused_var.sh
+./test_format-string.sh
 
