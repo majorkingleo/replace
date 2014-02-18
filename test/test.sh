@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 ./test_remove_versid.sh
 ./test_primanlist.sh

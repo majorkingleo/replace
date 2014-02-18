@@ -263,6 +263,11 @@ int main( int argc, char **argv )
      o_format_string.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_format_string);
 
+     Arg::FlagOption o_implicit("implicit");
+     o_implicit.setDescription("autoinclude implicit declared functions");
+     o_implicit.setRequired(false);
+     oc_fix_warnings_from_compile_log.addOptionR(&o_implicit);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -320,7 +325,8 @@ int main( int argc, char **argv )
 				  o_comment_out.isSet(),
 				  o_remove_unused_variables.isSet(),
 				  o_initialize_variables.isSet(),
-				  o_format_string.isSet());
+				  o_format_string.isSet(),
+				  o_implicit.isSet());
 
 		  fix_from_log.run();
 

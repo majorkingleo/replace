@@ -21,6 +21,7 @@
 #include <set>
 #include "uninitialized_variable_handler.h"
 #include "format_string_handler.h"
+#include "implicit_handler.h"
 
 using namespace Tools;
 
@@ -59,7 +60,8 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  bool only_comment_out_,
 									  bool remove_unused_variables_,
 									  bool initialize_variables_,
-									  bool handle_format_strings )
+									  bool handle_format_strings,
+									  bool handle_implicit)
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
@@ -78,6 +80,10 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 
 	if( handle_format_strings ) {
 		handlers.push_back( new FormatStringHandler() );
+	}
+
+	if( handle_implicit ) {
+			handlers.push_back( new ImplicitHandler(path) );
 	}
 }
 

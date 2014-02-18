@@ -71,7 +71,8 @@ public:
 				       bool only_comment_out,
 				       bool remove_unused_variables,
 				       bool initialize_variables_,
-				       bool handle_format_strings);
+				       bool handle_format_strings,
+				       bool handle_implicit);
 
 	void run();
 	void doit();
