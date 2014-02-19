@@ -82,7 +82,7 @@ void ImplicitHandler::search_for_header_files()
 
 			HeaderFile header;
 
-			header.path = files[i].first;
+			header.path = files[i].second;
 
 			CppDir::File file( header.path );
 			header.name = file.get_name();
@@ -149,7 +149,118 @@ void ImplicitHandler::report_unfixed_compile_logs()
 
 void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::string & content )
 {
+	for( HEADER_FILE::iterator it = header_files.begin(); it != header_files.end(); it++ )
+	{
+		if( it->path.find("cpputils") != std::string::npos )
+			continue;
 
+		if( is_symbol_in_header_file( it->content, warning.symbol ) )
+		{
+			bool already_included = false;
+
+			if( insert_include_for( warning, it->name, content, already_included ) )
+			{
+				warning.fixed = true;
+				break;
+			} else if( already_included ) {
+				warning.fixed = true;
+				break;
+			}
+		}
+	}
 }
 
+bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, const std::string & symbol )
+{
+	for( std::string::size_type pos = content.find( symbol ); pos != std::string::npos; pos = content.find( symbol, pos+1 ) )
+	{
+		std::string line = get_whole_line( content, pos );
+
+		if( line.find( "#define" ) != std::string::npos ) {
+			continue;
+		}
+
+		if( pos == 0 ) {
+			continue;
+		}
+
+		if( pos+symbol.size()+1+1 >= content.size() )
+			return false;
+
+		char pos_before = content[pos-1];
+
+		switch( pos_before )
+		{
+		case ' ': break;
+		case '\t': break;
+		case '*': break;
+		case '\n': break;
+		case '\r': break;
+		default:
+			// this is no symbol
+			continue;
+		}
+
+		char pos_after = content[pos+symbol.size()];
+
+		switch( pos_after )
+		{
+		case ' ': break;
+		case '\t': break;
+		case '\n': break;
+		case '\r': break;
+		case '(': break;
+		case ';': break;
+		default:
+			// this is no symbol
+			continue;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool ImplicitHandler::insert_include_for( const ImplicitWarnigs & warning, const std::string & file_name, std::string & content, bool & already_included )
+{
+	if( file_name.empty() )
+		return false;
+
+	const std::string include_string = format("#include \"%s\"", file_name);
+
+	DEBUG( format( "%s %s %s", warning, warning.symbol, include_string ) );
+
+	std::string::size_type pos = content.rfind( "#include" );
+
+	if( pos == std::string::npos )
+		return false;
+
+	pos = content.find( '\n', pos );
+
+	if( pos == std::string::npos )
+		return false;
+
+
+	// include bereits vorhanden?
+	if( content.find( include_string ) != std::string::npos ) {
+		already_included = true;
+		return false;
+	}
+
+	pos++;
+
+	std::string left = content.substr( 0, pos );
+	std::string right = content.substr( pos );
+
+	if( !left.empty() && left[left.size()-1] != '\n')
+	{
+		left += '\n';
+	}
+
+	content = left + include_string + "\n" + right;
+
+	return true;
+}
 

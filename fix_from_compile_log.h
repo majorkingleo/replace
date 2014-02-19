@@ -64,6 +64,7 @@ protected:
 	HANDLER_LIST handlers;
 	typedef std::list<File> FILE_LIST;
 	FILE_LIST files;
+	bool handle_implicit;
 
 public:
 	FixFromCompileLog( const std::string & path, // SRCDIR

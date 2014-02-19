@@ -61,13 +61,14 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  bool remove_unused_variables_,
 									  bool initialize_variables_,
 									  bool handle_format_strings,
-									  bool handle_implicit)
+									  bool handle_implicit_)
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
   remove_unused_variables(remove_unused_variables_),
   handlers(),
-  files()
+  files(),
+  handle_implicit(handle_implicit_)
 {
 
 	if( remove_unused_variables_ ) {
@@ -137,7 +138,8 @@ void FixFromCompileLog::run()
 
 	fix_from_compile_log();
 
-	show_diffs();
+	if( !handle_implicit )
+		show_diffs();
 
 	report_unfixed_files();
 }

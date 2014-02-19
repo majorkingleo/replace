@@ -1,0 +1,24 @@
+./me_bzset.c: In function 'SetFsp':
+./me_bzset.c:227: warning: implicit declaration of function 'GetUserOrTaskName'
+./me_bzset.c:227: warning: format '%s' expects type 'char *', but argument 5 has type 'int'
+./me_bzset.c: In function 'RemoveFsp':
+./me_bzset.c:255: warning: format '%s' expects type 'char *', but argument 5 has type 'int'
+./me_bzset.c: In function 'DoPosSperre':
+./me_bzset.c:310: warning: implicit declaration of function 'SetErrmsg1'
+./me_bzset.c: In function 'DoEinAusSperre':
+./me_bzset.c:351: warning: comparison between signed and unsigned
+./me_bzset.c:389: warning: comparison between signed and unsigned
+./me_bzset.c:427: warning: comparison between signed and unsigned
+./me_bzset.c:465: warning: comparison between signed and unsigned
+./me_bzset.c:503: warning: comparison between signed and unsigned
+./me_bzset.c:541: warning: comparison between signed and unsigned
+./me_bzset.c: In function 'DoLiftSperre':
+./me_bzset.c:938: warning: comparison between signed and unsigned
+./me_bzset.c:976: warning: comparison between signed and unsigned
+./me_bzset.c:1014: warning: comparison between signed and unsigned
+./me_bzset.c: In function 'cb_ueb':
+./me_bzset.c:1634: warning: format '%s' expects type 'char *', but argument 4 has type 'int'
+./me_bzset.c:1647: warning: implicit declaration of function 'GetErrmsg1'
+./me_bzset.c:1857: warning: format '%s' expects type 'char *', but argument 4 has type 'int'
+./me_bzset.c: In function 'cb_mask':
+./me_bzset.c:2330: warning: implicit declaration of function 'EfcbmInstByName'

@@ -60,6 +60,10 @@ public:
 
 private:
 	void search_for_header_files();
+
+	bool is_symbol_in_header_file( const std::string & content, const std::string & symbol );
+
+	bool insert_include_for( const ImplicitWarnigs & warning, const std::string & file_name, std::string & content, bool & already_included );
 };
 
 

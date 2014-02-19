@@ -25,6 +25,10 @@ FormatStringHandler::FormatStringHandler()
 	fix_table.push_back( FixTable( "%d",  "unsigned long int",  "%ld"));
 	fix_table.push_back( FixTable( "%f",  "double",  			"%lf"));
 	fix_table.push_back( FixTable( "%lf", "float",  			"%f"));
+	fix_table.push_back( FixTable( "%ld", "unsigned int",  		"%u"));
+	fix_table.push_back( FixTable( "%d",  "unsigned int",  		"%u"));
+	fix_table.push_back( FixTable( "%d",  "unsigned long",  	"%lu"));
+	fix_table.push_back( FixTable( "%ld", "unsigned long",  	"%lu"));
 }
 
 void FormatStringHandler::read_compile_log_line( const std::string & line )
