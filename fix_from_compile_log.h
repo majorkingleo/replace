@@ -41,8 +41,8 @@ public:
 		Handler() {}
 		virtual ~Handler();
 
-		virtual void read_compile_log_line( const std::string & line ) = 0;
-		virtual void fix_file( File & file ) = 0;
+		virtual void read_compile_log_line( const std::string & line ) {};
+		virtual void fix_file( File & file ) {};
 
 		Location get_location_from_line( const std::string & line );
 

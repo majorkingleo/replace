@@ -24,9 +24,9 @@ public:
 
 	bool should_skip_file( const std::string & file ) const;
 
-	virtual std::string patch_file( const std::string & file ) = 0;
+	virtual std::string patch_file( const std::string & file ) { return file; }
 
-	virtual bool want_file( const FILE_TYPE & file_type ) = 0;
+	virtual bool want_file( const FILE_TYPE & file_type ) { return false; }
 };
 
 
