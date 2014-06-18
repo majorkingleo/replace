@@ -25,6 +25,7 @@
 #include "correct_va_multiple_malloc.h"
 #include "remove_generic_cast.h"
 #include "fix_from_compile_log.h"
+#include "colored_output.h"
 
 using namespace Tools;
 
@@ -75,7 +76,10 @@ int main( int argc, char **argv )
   return 1;
 #endif
 
+  ColoredOutput colored_output;
+
   try {
+
 
   std::vector<std::pair<FILE_TYPE,std::string> > files;
   
@@ -293,6 +297,18 @@ int main( int argc, char **argv )
   if( o_debug.getState() )
   {
 	  Tools::x_debug = new OutDebug();
+  }
+
+  if( !o_path.isSet() )
+  {
+	  usage(argv[0]);
+	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
+
+	  std::cout << "\n\n"
+			  	<< colored_output.color_output( ColoredOutput::BRIGHT_RED, "PATH is missing")
+			  	<< "\n";
+
+	  return 13;
   }
 
   if( !o_replace.isSet() &&
