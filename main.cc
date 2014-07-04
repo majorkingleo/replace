@@ -26,6 +26,7 @@
 #include "remove_generic_cast.h"
 #include "fix_from_compile_log.h"
 #include "colored_output.h"
+#include "add_wdgassign.h"
 
 using namespace Tools;
 
@@ -208,6 +209,18 @@ int main( int argc, char **argv )
      o_mlm.setRequired(true);
      oc_mlm.addOptionR(&o_mlm);
 
+
+     Arg::OptionChain oc_assign;
+     arg.addChainR(&oc_assign);
+     oc_assign.setMinMatch(1);
+     oc_assign.setContinueOnFail(true);
+     oc_assign.setContinueOnMatch(true);
+
+     Arg::FlagOption o_assign("wamas_assign_menu");
+     o_assign.setDescription("add WamasWdgAssignMenu() after ApShellModalCreate()");
+     o_assign.setRequired(true);
+     oc_assign.addOptionR(&o_assign);
+
      Arg::OptionChain oc_correct_va_multiple_malloc;
      arg.addChainR(&oc_correct_va_multiple_malloc);
      oc_correct_va_multiple_malloc.setMinMatch(1);
@@ -319,6 +332,7 @@ int main( int argc, char **argv )
 	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_remove_generic_cast.isSet() &&
 	  !o_compile_log.isSet() &&
+	  !o_assign.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -395,8 +409,16 @@ int main( int argc, char **argv )
 	  handlers.push_back( new RestoreShell() );
   }
 
-  if( o_mlm.getState() )
+  if( o_mlm.getState() ) {
 	  handlers.push_back( new FixMlM() );
+  }
+
+  if( o_assign.getState() ) {
+	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModelessCreate") );
+	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModalCreate" ) );
+	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModalCreateRel" ) );
+  }
+
 
   if( o_correct_va_multiple_malloc.getState() ) {
 	  handlers.push_back( new CorrectVaMultipleMalloc() );
@@ -448,6 +470,7 @@ int main( int argc, char **argv )
 		  for( unsigned j = 0; j < handlers.size(); j++ )
 		  {
 			  if( handlers[j]->want_file( file_type ) ) {
+				  handlers[j]->set_file_name( files[i].second );
 				  file_erg = handlers[j]->patch_file( file_erg );
 			  }
 		  }

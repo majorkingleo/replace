@@ -10,3 +10,4 @@
 ./test_unused_var.sh
 ./test_format-string.sh
 ./test_implicit.sh
+./test_assign.sh

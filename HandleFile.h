@@ -16,6 +16,7 @@ class HandleFile
 {
 protected:
 	std::vector<std::string> keywords;
+	std::string file_name;
 
 
 public:
@@ -23,6 +24,8 @@ public:
 	virtual ~HandleFile();
 
 	bool should_skip_file( const std::string & file ) const;
+
+	void set_file_name( const std::string file_name_ ) { file_name = file_name_; }
 
 	virtual std::string patch_file( const std::string & file ) { return file; }
 
