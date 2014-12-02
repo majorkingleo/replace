@@ -1,0 +1,1304 @@
+/**
+* @file
+* @todo describe file content
+* @author Copyright (c) 2014 Salomon Automation GmbH
+*/
+#include <stdio.h>
+#include <errno.h>
+#include <time.h>
+#include <stddef.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <fcntl.h>
+
+#include "ipcdefs.h"
+#include "global.h"
+#include "file.h"
+#include "com.h"
+#include "comm.h"
+#include "llr.h"
+#include "commutil.h"
+#include "tr_core.h"
+#include "tr_rbg.h"
+#include "lager.h"
+#include "log.h"
+#include "meldp.h"
+#include "tsleep.h"
+#include "misc.h"
+#include "ts.h"
+#include "logtool.h"
+#include <facility.h>
+
+#define TR_RBG_LOG
+#define	CTREE
+
+#define BIT_IS_SET(bytearray,bit) ((bytearray)[(bit)/NBBY]&(1<<((bit)%NBBY)))
+
+#define	ERR_INTERN			0x99
+#define	BOA_ERSATZ
+
+#define	MAX_INT_ERR			12
+#define	INT_ERR_START_IDX	128
+
+#define	TRB_TA_A	(TRB_TA | 0xa0)
+
+#define rcv_clear(bef, stat)	(((bef)==RBA_CLR||(bef)==RBA_NONE) && \
+								 ((stat)==RST_FREE))
+
+static int RBG;
+static unsigned ts_poll_tf;
+
+static char log_file_name[MAX_FNAME_LEN];
+
+static SendTeleMgr *IdToSendTeleMgr(int);
+static int SndIdTel(int, int);
+
+static int xvt_trigger_TA(void);
+static int xvt_trigger_TS(void);
+static int xvt_trigger_BZ(void);
+static int xvt_trigger_SS(void);
+static int xvt_trigger_TF(void);
+
+static int send_TA(void);
+static int send_TS(void);
+static int send_BZ(void);
+static int send_SS(void);
+static int send_TF(void);
+
+static int receive_TAQ(rbg_taq_tele *);
+static int receive_BZQ(rbg_bzq_tele *);
+static int receive_SSQ(rbg_ssq_tele *);
+static int receive_TFQ(rbg_tfq_tele *);
+static int receive_UFO(unsigned char *);
+
+
+#ifdef TR_RBG_LOG
+static void log_buchen(struct RBG_auftrag *ra, int bew_stat, char *mess)
+{
+	LogPrintf(FAC_RBG,LT_DEBUG, 
+	"%s: TaNr [%d] anr: %d phase: %d bstat: %d fehl: %x "
+	"z: %d/%d/%d", mess, ra->ta_nr, ra->ra_anr, ra->phase, bew_stat,
+	ra->fehler, ra->zpos.z, ra->zpos.x, ra->zpos.y);
+}
+#endif
+
+
+static int rbg_auf_buchen(struct RBG_auftrag *ra, int bew_stat)
+{
+	if (RBG_aufBuchen(ra, bew_stat) == BU_OK) {
+#ifdef TR_RBG_LOG
+		log_buchen(ra, bew_stat, "RBG_aufBuchen Commit");
+#endif
+#ifdef	CTREE
+		DB_commit();
+#else
+		SqlCommit();
+#endif	/* CTREE */
+		return TRUE;
+	} else {
+#ifdef TR_RBG_LOG
+		log_buchen(ra, bew_stat, "RBG_aufBuchen Rollback");
+#endif
+#ifdef	CTREE
+		DB_rollback();
+#else
+		SqlRollback();
+#endif	/* CTREE */
+	}
+	return FALSE;
+}
+
+
+static int rbg_abg_buchen(struct RBG_auftrag *ra, int bew_stat)
+{
+	if (RBG_abgBuchen(ra, bew_stat) == BU_OK) {
+#ifdef TR_RBG_LOG
+		log_buchen(ra, bew_stat, "RBG_abgBuchen Commit");
+#endif
+#ifdef	CTREE
+		DB_commit();
+#else
+		SqlCommit();
+#endif	/* CTREE */
+		return TRUE;
+	} else {
+#ifdef TR_RBG_LOG
+		log_buchen(ra, bew_stat, "RBG_abgBuchen Rollback");
+#endif
+#ifdef	CTREE
+		DB_rollback();
+#else
+		SqlRollback();
+#endif	/* CTREE */
+	}
+	return FALSE;
+}
+
+
+static int rbg_ersatz_buchen(struct RBG_auftrag *re, int bew_stat)
+{
+	if (RBG_ersatzBuchen(re, bew_stat) == BU_OK) {
+#ifdef TR_RBG_LOG
+		log_buchen(re, bew_stat, "RBG_ersatzBuchen Commit");
+#endif
+#ifdef	CTREE
+		DB_commit();
+#else
+		SqlCommit();
+#endif	/* CTREE */
+		return TRUE;
+	} else {
+#ifdef TR_RBG_LOG
+		log_buchen(re, bew_stat, "RBG_ersatzBuchen Rollback");
+#endif
+#ifdef	CTREE
+		DB_rollback();
+#else
+		SqlRollback();
+#endif	/* CTREE */
+	}
+	return FALSE;
+}
+
+
+static int copy_ta(struct RBG_auftrag *ra, int bef)
+{
+	int i, anr_bit, anr_cnt, shift_anr, anr;
+
+	if (ra->ra_anr == 0) {		/* Auftragsnummer noch nicht vergeben ? */
+		for (i = 0, anr_bit = anr_cnt = 0; i < MAX_RBG_AUFTRAG; i++) {
+			if ((shift_anr = C->ra[RBG][i].ra_anr) > 0 &&
+					shift_anr <= MAX_RBG_SPS_AUFTRAG) {
+				anr_bit |= (1 << (shift_anr-1));
+				++anr_cnt;
+			}
+		}
+		if (anr_cnt >= 2)	/* max. 2 RBG Auftraege aktiv */
+			return FALSE;
+
+		for (i = MAX_RBG_SPS_AUFTRAG-1, anr = 0; i >= 0; --i) {
+			if (! (anr_bit & (1 << i))) {
+				anr = i+1;	/* found uppermost unused RBG anr */
+			} else if (anr)
+				break;
+		}
+		if (!anr)
+			return FALSE;	/* all RBG anr's in use */
+		ra->ra_anr = anr;
+	}
+
+	C->rbg_ta[RBG].anr = ra->ra_anr;
+	C->rbg_ta[RBG].bef = bef;
+	C->rbg_ta[RBG].zpos = ra->zpos;
+	return TRUE;
+}
+
+
+static void copy_taq(struct RBG_auftrag *ra, rbg_taq_tele *tele)
+{
+	ra->status = tele->status;
+	ra->fehler = tele->fehler;
+	ra->akt_nr = tele->akt_nr;
+	ra->gbist = tele->gbist;
+}
+
+
+static void get_taq(rbg_taq_tele *tele)
+{
+	int i, aidx;
+	struct RBG_auftrag *ra;
+	static int err_ab, err_rf, err_pf;
+
+	if (tele->anr < 1 || tele->anr > MAX_RBG_SPS_AUFTRAG) {
+#ifdef TR_RBG_LOG
+		LogPrintf(FAC_RBG,LT_DEBUG, "get_taq: illegal anr: %d", tele->anr);
+#endif
+		return;
+	}
+
+	for (i = 0, aidx = -1; i < MAX_RBG_AUFTRAG; i++) {
+		ra = (struct RBG_auftrag *) &C->ra[RBG][i];
+		if (ra->ra_anr == tele->anr) {
+			aidx = i;
+			break;
+		}
+	}
+	if (aidx < 0) {	/* Anr nicht aktiv (zykl. Statusanfrage) */
+		if (/* !C->halbauto && */ tele->status != RST_FREE) {	/* Zombi ? */
+#ifdef TR_RBG_LOG
+			LogPrintf(FAC_RBG,LT_DEBUG,
+			"ZOMBI CLR anr: %d stat: %d fehl: %d pos: %d/%d/%d",
+			tele->anr, tele->status, tele->fehler,
+			tele->zpos.zx, tele->zpos.x, tele->zpos.y);
+#endif
+			C->rbg_ta[RBG].anr = tele->anr;
+			C->rbg_ta[RBG].bef = RBA_CLR;
+			SndIdTel(0, TRB_TA_A);
+		}
+		return;
+	}
+
+
+	ra = (struct RBG_auftrag *) &C->ra[RBG][aidx];
+	switch (ra->phase) {
+		case RPH_NEW:
+		case RPH_SEND:
+		case RPH_BUSY:
+#ifdef INCO_CHECK
+			if (ra->bef != tele->bef ||
+				ra->zpos.z != tele->zpos.zx ||
+				ra->zpos.x != tele->zpos.x ||
+				ra->zpos.y != tele->zpos.y) {
+
+#ifdef TR_RBG_LOG
+				LogPrintf(FAC_RBG,LT_DEBUG,
+				"INCO anr: %d aidx: %d TaNr [%d] phase %d",
+				ra->ra_anr, aidx, ra->ta_nr, ra->phase);
+#endif
+				send_clr(ra->ra_anr);
+				ra->phase = RPH_ERASE;
+			}
+#endif
+			switch (tele->status) {
+				case RST_NEW:
+				case RST_BUSY:
+				case RST_AUAB:
+					ra->phase = RPH_BUSY;
+					err_ab = err_rf = 0;
+					break;
+				case RST_READY:
+					ra->phase = RPH_READY;
+					err_ab = err_rf = 0;
+					err_pf = 0;
+					break;
+				case RST_FAULT:
+#ifdef TR_RBG_LOG
+					LogPrintf(FAC_RBG,LT_DEBUG,
+					"get_taq: RST_FAULT: %x anr: %d TaNr [%d] phase: %d",
+					tele->fehler, ra->ra_anr, ra->ta_nr, ra->phase);
+#endif
+					/* Fehler Auftragsnr. schon belegt ignorieren */
+					if (tele->fehler == 0x06) {
+						if (++err_ab >= 3) {
+							ra->phase = RPH_WAIT_STO;
+							err_ab = 0;
+#ifdef TR_RBG_LOG
+							LogPrintf(FAC_RBG,LT_DEBUG,
+							"get_taq: CLR Anr belegt : %x anr: %d TaNr [%d] "
+							"phase: %d", tele->fehler, ra->ra_anr,
+							ra->ta_nr, ra->phase);
+#endif
+						}
+						goto get_taq_end;
+					}
+
+					err_ab = err_rf = 0;
+
+					switch (tele->fehler) {
+						case 0x2:	/* RBG nicht betriebsbereit */
+							ra->phase = RPH_SEND;		/* Wiederholung */
+							break;
+						case 0x1a:	/* Uebergabe nicht bereit */
+						case 0x10:	/* LAM belegt vor Aufnahme */
+							ra->phase = RPH_FLT_STO;
+							break;
+						case 0x16:	/* LAM belegt nach Abgabe */
+						case 0x15:	/* Quell-/Zielfach belegt */
+						case 0x17:	/* Quell-/Zielfach belegt */
+						case 0x1c:	/* LAM frei nach Aufnahme */
+						case 0x2b:	/* Positionierfehler o.W. */
+							/* Visi Fehlerbehandlung noetig ! */
+							ra->phase = RPH_FLT_FB;
+							err_pf = 0;
+
+							if (tele->fehler == 0x2b) {
+								LogPrintf(FAC_RBG,LT_DEBUG,
+									"Repeat FAULT 2B anr: %d TaNr [%d] "
+									"%d/%d/%d", ra->ra_anr, ra->ta_nr,
+									ra->zpos.z, ra->zpos.x, ra->zpos.y);
+							}
+
+							break;
+						case 0x1b:	/* Positionierfehler Fahren*/
+							/* 2 x automatisch wiederholen ! */
+							if (++err_pf < 3) {
+								ra->phase = RPH_FLT_STO;
+/*
+#ifdef TR_RBG_LOG
+*/
+								LogPrintf(FAC_RBG,LT_DEBUG,
+									"Repeat FAULT 1B anr: %d TaNr [%d] "
+									"%d/%d/%d", ra->ra_anr, ra->ta_nr,
+									ra->zpos.z, ra->zpos.x, ra->zpos.y);
+/*
+#endif
+*/
+							} else {
+								err_pf = 0;
+								/* Visi Fehlerbehandlung noetig ! */
+								ra->phase = RPH_FLT_FB;
+								/* Keine weiter Wiederholung */
+								tele->fehler = 0x2b;
+							}
+							break;
+						case 0x03:	/* Koordinatenfehler */
+							if (ra->bef == RBA_AB)
+								ra->phase = RPH_FLT_STO;	/* Ersatz noetig */
+							else
+								ra->phase = RPH_FAULT;
+							break;
+						default:
+							ra->phase = RPH_FAULT;
+							break;
+					}
+					break;
+				case RST_FREE:
+					if (ra->phase == RPH_BUSY) {
+						if (++err_rf >= 3) {
+							err_rf = 0;
+#ifdef TR_RBG_LOG
+							LogPrintf(FAC_RBG,LT_DEBUG,
+							"get_taq: RST_FREE while BUSY anr: %d TaNr [%d]",
+							ra->ra_anr, ra->ta_nr);
+#endif
+							ra->phase = RPH_FAULT;	/* Auftrag storniert ? */
+						}
+					}
+					break;
+			}
+			copy_taq(ra, tele);
+			break;
+		case RPH_STORNO:
+			if (rcv_clear(tele->bef, tele->status)) {
+				ra->fehler = ERR_INTERN;
+				switch (ra->bef) {
+					case RBA_AUF:
+						if (rbg_auf_buchen(ra, BEW_FE_NSP))
+							ra->phase = RPH_FREE;
+						break;
+					case RBA_AB:
+						if (rbg_abg_buchen(ra, BEW_FE_NSP))
+							ra->phase = RPH_FREE;
+						break;
+					case RBA_FA:
+						ra->phase = RPH_FREE;
+						break;
+				}
+			}
+			err_ab = err_rf = err_pf = 0;
+			break;
+		case RPH_ERASE:
+		case RPH_CLEAR:
+			if (rcv_clear(tele->bef, tele->status))
+				ra->phase = RPH_FREE;
+			err_ab = err_rf = err_pf = 0;
+			break;
+		case RPH_WAIT_STO:
+			if (rcv_clear(tele->bef, tele->status)) {
+				ra->phase = RPH_WAIT;			/* deaktiviert */
+				ra->ra_anr = 0;
+			}
+			break;
+		case RPH_FLT_STO:
+			if (rcv_clear(tele->bef, tele->status)) {
+				ra->phase = RPH_FLT_WAIT;		/* deaktiviert */
+				ra->ra_anr = 0;
+			}
+			break;
+		case RPH_FREE:
+			switch (tele->status) {
+				case RST_FREE:
+					break;		/* OK */
+				default:
+					ra->phase = RPH_STORNO;
+#ifdef TR_RBG_LOG
+					LogPrintf(FAC_RBG,LT_DEBUG,
+					"illegal status %d aidx: %d anr: %d TaNr [%d] phase: %d",
+					tele->status, aidx, ra->ra_anr, ra->ta_nr, ra->phase);
+#endif
+					break;
+			}
+			break;
+		case RPH_READY:
+		case RPH_FAULT:
+		case RPH_FLT_FB:
+			/* Mehrfachquittung */
+			break;
+		default:
+#ifdef TR_RBG_LOG
+			LogPrintf(FAC_RBG,LT_DEBUG,
+			"illegal phase %d aidx: %d anr: %d TaNr [%d]",
+			ra->phase, aidx, ra->ra_anr, ra->ta_nr);
+#endif
+			break;
+	}
+
+get_taq_end:;
+}
+
+
+static int stop_pending()
+{
+	return(C->vdp.rbg[RBG].state[5]);	/* Auftragsbearbeitung gestoppt ? */
+}
+
+
+static int online()
+{
+	C->vdp.rbg[RBG].state[RBG_OFFLINE-1] = C->rbg_offline[RBG];
+	MP_AreaPulseIdx(AREA_RBG, GROUP_STATE, RBG_OFFLINE-1, 1,
+			 (unsigned char *) &C->vdp.rbg[RBG_1].state[RBG_OFFLINE-1]);
+	return (C->rbg_offline[RBG] ? FALSE : TRUE);
+}
+
+
+/*--- Timer f. Rcv timeout ---*/
+
+static INDEXED_TIMER	TsqToTimer;
+static TimeOutMgr		TsqTo = {3, SndIdTel, TRB_TS, &TsqToTimer };
+static INDEXED_TIMER	BzqToTimer;
+static TimeOutMgr		BzqTo = {20, SndIdTel, TRB_BZ, &BzqToTimer };
+static INDEXED_TIMER	TfqToTimer;
+static TimeOutMgr		TfqTo = {10, SndIdTel, TRB_TF, &TfqToTimer };
+
+
+/*--- Empfangstelegramme ---*/
+
+#define	RT_TO	500	/* receive telegram timeout [ms] */
+#define	KO		0	/* offset Telegramm Kennung */
+
+static ReceiveTeleDesc	r_rbg[] = {
+/*Typ  offs, kenn,		procfct	 	 { To,Action,Arg,IDXTIMER to use } */
+
+{RT_CHAR, KO, TRB_TAQ, 	receive_TAQ, },
+{RT_CHAR, KO, TRB_TSQ, 	receive_TAQ, },
+{RT_CHAR, KO, TRB_BZQ, 	receive_BZQ, },
+{RT_CHAR, KO, TRB_SSQ, 	receive_SSQ, },
+{RT_CHAR, KO, TRB_TFQ, 	receive_TFQ, },
+{RT_CHAR, KO, TRB_UFO, 	receive_UFO, },
+
+};
+
+
+/*--- Sendetelegramme ---*/
+
+static SendTeleMgr s_rbg[] = {
+
+/* Id,		(*SendTele)(),	RepeatRate,	(*enable)(),	(*conditional)() */
+{TRB_TA,	send_TA,		4,			online,			xvt_trigger_TA },
+{TRB_TA_A,	send_TA,		5,			online,			NEVER },
+{TRB_TS,	send_TS,		2,			online,			xvt_trigger_TS },
+{TRB_BZ,	send_BZ,		10,			NULL,			xvt_trigger_BZ },
+{TRB_SS,	send_SS,		2,			online,			xvt_trigger_SS },
+{TRB_TF,	send_TF,		3,			online,			xvt_trigger_TF },
+};
+
+
+static SendTeleMgr *IdToSendTeleMgr(int Id)
+{
+	int i;
+
+	for (i = 0; i < NOELE(s_rbg); i++) {
+		if (s_rbg[i].Id == Id)
+			return (&s_rbg[i]);
+	}
+	return NULL;
+}
+
+
+static int SndIdTel(int index, int Id)
+{
+	SendTeleMgr *mgr;
+
+	if (mgr = IdToSendTeleMgr(Id)) {
+		return SendTelegram(mgr, index);
+	}
+	return (-1);
+}
+
+
+/*--- Send Telegram Functions ---*/
+
+static int xvt_trigger_TA()
+{
+	return (C->rbg_ta[RBG].sig == SIG_SND) ? TRUE : FALSE;
+}
+
+static int send_TA()
+{
+	rbg_ta_tele		ta_tele;
+	rbg_clr_tele	clr_tele;
+
+	if (C->rbg_ta[RBG].bef == RBA_CLR) {
+		memset(&clr_tele, 0, sizeof(clr_tele));
+		clr_tele.kennung = TRB_TA;
+		clr_tele.anr = C->rbg_ta[RBG].anr;
+		clr_tele.bef = C->rbg_ta[RBG].bef;
+
+		C->rbg_ta[RBG].sig = SIG_OUT;
+		return SendTele((unsigned char *)&clr_tele, sizeof(clr_tele));
+	} else {
+		memset(&ta_tele, 0, sizeof(ta_tele));
+		ta_tele.kennung = TRB_TA;
+		ta_tele.anr = C->rbg_ta[RBG].anr;
+		ta_tele.bef = C->rbg_ta[RBG].bef;
+		ta_tele.zpos.x1 = ta_tele.zpos.y1 = 0xff;
+		ta_tele.zpos.zx = ta_tele.zpos.zy = C->rbg_ta[RBG].zpos.z;
+		ta_tele.zpos.x = C->rbg_ta[RBG].zpos.x;
+		ta_tele.zpos.y = C->rbg_ta[RBG].zpos.y;
+		ta_tele.zpos.gb = C->rbg_ta[RBG].zpos.gb;
+		ta_tele.zpos.k1 = C->rbg_ta[RBG].zpos.k >> 8;
+		ta_tele.zpos.k2 = C->rbg_ta[RBG].zpos.k & 0xff;
+
+		C->rbg_ta[RBG].sig = SIG_OUT;
+		return SendTele((unsigned char *)&ta_tele, sizeof(ta_tele));
+	}
+}
+
+
+static int xvt_trigger_TS()
+{
+	return (C->rbg_ts[RBG].sig == SIG_SND) ? TRUE : FALSE;
+}
+
+static int send_TS()
+{
+	rbg_ts_tele	tele;
+
+	memset(&tele, 0, sizeof(tele));
+	tele.kennung = TRB_TS;
+	if ((tele.anr = C->rbg_ts[RBG].anr) < 1)
+		tele.anr = 1;
+	C->rbg_ts[RBG].sig = SIG_OUT;
+	return SendTele((unsigned char *)&tele, sizeof(tele));
+}
+
+
+static int bz_fail = 0;
+
+static int xvt_trigger_BZ()
+{
+	return (C->rbg_bz[RBG].sig == SIG_SND) ? TRUE : FALSE;
+}
+
+static int send_BZ()
+{
+	rbg_bz_tele	tele;
+
+	if (++bz_fail > 3) {
+		C->rbg_offline[RBG] = TRUE;
+		TimeOutReset(&BzqTo, 0);
+	}
+	memset(&tele, 0, sizeof(tele));
+	tele.kennung = TRB_BZ;
+	C->rbg_bz[RBG].sig = SIG_OUT;
+	return SendTele((unsigned char *)&tele, sizeof(tele));
+}
+
+
+static int xvt_trigger_SS()
+{
+	return (C->rbg_ss[RBG].sig == SIG_SND) ? TRUE : FALSE;
+}
+
+static int send_SS()
+{
+	rbg_ss_tele	tele;
+	memset(&tele, 0, sizeof(tele));
+	tele.kennung = TRB_SS;
+	tele.wert = C->rbg_ss[RBG].wert;
+	C->rbg_ss[RBG].sig = SIG_OUT;
+	return SendTele((unsigned char *)&tele, sizeof(tele));
+}
+
+
+static int xvt_trigger_TF()
+{
+	return (C->rbg_tf[RBG].sig == SIG_SND) ? TRUE : FALSE;
+}
+
+static int send_TF()
+{
+	rbg_tf_tele	tele;
+	memset(&tele, 0, sizeof(tele));
+	tele.kennung = TRB_TF;
+	C->rbg_tf[RBG].sig = SIG_OUT;
+	return SendTele((unsigned char *)&tele, sizeof(tele));
+}
+
+
+/*--- Receive Telegram Functions ---*/
+
+static int next_ts_anr(int akt_anr)
+{
+	int i, ai, aidx = akt_anr;
+
+	aidx %= MAX_RBG_SPS_AUFTRAG;
+
+	if (ts_poll_tf) {
+		for (i = 0, ai = aidx; i < MAX_RBG_SPS_AUFTRAG; i++) {
+			if ((1 << ai) & ts_poll_tf) {
+				aidx = ai;	/* next active */
+				break;
+			}
+			++ai;
+			ai %= MAX_RBG_SPS_AUFTRAG;
+		}
+	}
+	return (aidx + 1);
+}
+
+
+static receive_TAQ(rbg_taq_tele *tele)
+{
+	C->rbg_taq[RBG].anr = tele->anr;
+	C->rbg_taq[RBG].bef = tele->bef;
+	C->rbg_taq[RBG].zpos.z = tele->zpos.zx;
+	C->rbg_taq[RBG].zpos.x = tele->zpos.x;
+	C->rbg_taq[RBG].zpos.y = tele->zpos.y;
+	C->rbg_taq[RBG].zpos.gb = tele->zpos.gb;
+	C->rbg_taq[RBG].zpos.k = (tele->zpos.k1 << 8) | tele->zpos.k2;
+	C->rbg_taq[RBG].status = tele->status;
+	C->rbg_taq[RBG].fehler = tele->fehler;
+	C->rbg_taq[RBG].akt_nr = tele->akt_nr;
+	C->rbg_taq[RBG].gbist = tele->gbist;
+
+	map_rbg_visi(RBG, tele->gbist);
+
+	C->rbg_taq[RBG].sig = SIG_RCV;	/* tele received info */
+	TimeOutReset(&TsqTo, 0);
+
+	get_taq(tele);
+
+	/* anr cycle */
+	C->rbg_ts[RBG].anr = next_ts_anr(C->rbg_ts[RBG].anr);
+
+	return 0;
+}
+
+
+static receive_BZQ(rbg_bzq_tele *tele)
+{
+	static int save_alarm = -1;
+
+	bz_fail = 0;
+	C->rbg_offline[RBG] = FALSE;
+	TimeOutReset(&BzqTo, 0);
+
+	C->rbg_bzq[RBG].ipos.z = tele->ipos.zx;
+	C->rbg_bzq[RBG].ipos.x = tele->ipos.x;
+	C->rbg_bzq[RBG].ipos.y = tele->ipos.y;
+
+	switch(RBG) {
+		case RBG1:
+			C->rbg1_z = tele->ipos.zx;
+			C->rbg1_x = tele->ipos.x;
+			C->rbg1_y = tele->ipos.y;
+			LogPrintf("ansi",LT_ALERT, "GSTAT: %s, POS: %d/%d/%d",
+				tele->gstat, C->rbg1_z, C->rbg1_x, C->rbg1_y);
+			C->rbg1_k = (tele->ipos.k1 << 8) | tele->ipos.k2;
+			break;
+	}
+
+	map_rbg_state(RBG, (unsigned char *)&tele->gstat);
+
+	C->rbg_ss_ist[RBG] = (C->vdp.rbg[RBG].state[5]) ? 0 : 1;
+
+
+	/* Alarm RFZ set/reset via VZS2 Alarm Lamp
+	if ((C->vzs2_al.rfz = check_rbg_alarm()) != save_alarm) {
+		save_alarm = C->vzs2_al.rfz;
+		C->vzs2_al.sig = SIG_SND;
+	}
+	*/
+
+	C->rbg_bzq[RBG].sig = SIG_RCV;	/* tele received info */
+	return 0;
+}
+
+
+static receive_SSQ(rbg_ssq_tele *tele)
+{
+	if (tele->wert == 0)	/* Auftragsbearbeitung gestoppt ? */
+		C->vdp.rbg[RBG].state[5] = 1;
+	else
+		C->vdp.rbg[RBG].state[5] = 0;
+	C->rbg_ssq[RBG].wert = tele->wert;
+	C->rbg_ssq[RBG].sig = SIG_RCV;	/* tele received info */
+
+	return 0;
+}
+
+
+static receive_TFQ(rbg_tfq_tele *tele)
+{
+	ts_poll_tf = tele->wert & 0xff;
+	C->rbg_tfq[RBG].wert = tele->wert;
+	C->rbg_tfq[RBG].sig = SIG_RCV;	/* tele received info */
+
+	TimeOutReset(&TfqTo, 0);
+	return 0;
+}
+
+
+static receive_UFO(unsigned char *tele)
+{
+	/* nothing to do with it */
+	return 0;
+}
+
+
+/*---------------------------------------------------------*/
+
+
+static void send_auftrag()
+{
+	int i, ii, t, stop;
+	int send_out = FALSE;
+	struct RBG_auftrag *ra;
+	static int idx[MAX_RBG_AUFTRAG];
+
+	memset(idx, 0, sizeof(idx));
+
+	ii = C->ra_start[RBG];
+	for (i = t = 0; i < MAX_RBG_AUFTRAG; i++) {
+		if (!in_range(ii, MAX_RBG_AUFTRAG))
+			break;
+		idx[t++] = ii;		/* Index sammeln */
+		ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+		ii = ra->next;
+	}
+
+	/* Loeschen in umgekehrter Reihenfolge */
+	for (i = MAX_RBG_AUFTRAG-1; i >= 0; i--) {
+		if (!in_range(ii = idx[i], MAX_RBG_AUFTRAG))
+			continue;
+		ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+		switch (ra->phase) {
+			case RPH_STORNO:
+			case RPH_ERASE:
+			case RPH_FLT_STO:
+			case RPH_WAIT_STO:
+			case RPH_CLEAR:
+				if (copy_ta(ra, RBA_CLR)) {
+					send_out = TRUE;
+					SndIdTel(0, TRB_TA_A);
+				}
+				break;
+		}
+	}
+
+	if (!send_out && !stop_pending()) {
+		/* Auftrag senden nur wenn kein Loeschauftrag aktiv */
+		for (i = 0; i < MAX_RBG_AUFTRAG; i++) {
+			if (!in_range(ii = idx[i], MAX_RBG_AUFTRAG))
+				break;
+			ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+			switch (ra->phase) {
+				case RPH_NEW:
+				case RPH_SEND:
+					if (!send_out) {	/* Nur einen Auftrag absenden */
+						send_out = TRUE;
+						if (copy_ta(ra, ra->bef))
+							SndIdTel(0, TRB_TA);
+					}
+					break;
+			}
+		}
+	}
+}
+
+
+/* Fehlerbehandlung via Visi durchgefuehrt */
+
+static void chk_vis_fb(struct RBG_auftrag *ra)
+{
+	if (ra->phase == RPH_FLT_FB) {
+		if (C->rbg_fb_quit[RBG]) {
+			C->rbg_fb_quit[RBG] = FALSE;
+			if (C->rbg_fb_ianz[RBG]) {
+				ra->phase = RPH_READY;
+#ifdef TR_RBG_LOG
+				LogPrintf(FAC_RBG,LT_DEBUG, 
+				"CHK_VIS_FB READY: TaNr [%d] fehl: %x z: %d/%d/%d",
+				ra->ta_nr, ra->fehler, ra->zpos.z, ra->zpos.x, ra->zpos.y);
+#endif
+			} else {
+				switch (ra->fehler) {
+					case 0x16:	/* LAM belegt nach Abgabe */
+						ra->phase = RPH_FLT_STO;		/* Ersatz noetig */
+						break;
+					case 0x15:	/* Quell-/Zielfach belegt */
+					case 0x17:	/* Quell-/Zielfach belegt */
+					case 0x1b:	/* Positionierfehler */
+					case 0x2b:	/* Positionierfehler o.W. */
+						if (ra->bef == RBA_AB)
+							ra->phase = RPH_FLT_STO;	/* Ersatz noetig */
+						else
+							ra->phase = RPH_FAULT;
+						break;
+					default:
+						ra->phase = RPH_FAULT;
+						break;
+				}
+#ifdef TR_RBG_LOG
+				LogPrintf(FAC_RBG,LT_DEBUG, 
+				"CHK_VIS_FB FAULT: TaNr [%d] fehl: %x z: %d/%d/%d",
+				ra->ta_nr, ra->fehler, ra->zpos.z, ra->zpos.x, ra->zpos.y);
+#endif
+			}
+		}
+	}
+}
+
+
+static void cleanup_checks()
+{
+	int i, ii, idx, fault = FALSE;
+	unsigned char int_err[MAX_INT_ERR];
+	struct RBG_auftrag *ra;
+
+	memset(int_err, 0, sizeof(int_err));
+
+	for (i = 0; i < MAX_RBG_AUFTRAG; i++) {
+		switch (C->ra[RBG][i].phase) {
+			case RPH_STORNO:
+				ra = (struct RBG_auftrag *) &C->ra[RBG][i];
+				if (ra->status == RST_FREE && ra->bef == RBA_NONE) { 	
+#ifdef TR_RBG_LOG
+					LogPrintf(FAC_RBG,LT_DEBUG,
+					"clean RPH_STORNO phase %d i: %d anr: %d TaNr [%d] fehl: %x z: %d/%d/%d",
+					ra->phase, i, ra->ra_anr, ra->ta_nr,  ra->fehler, ra->zpos.z, ra->zpos.x, ra->zpos.y);
+#endif
+					ra->phase = RPH_FREE;
+				}
+				break;
+			case RPH_FREE:
+				if (tr_rbg_slot_used(RBG, i))
+					tr_rbg_delete_idx(RBG, i);
+				break;
+			case RPH_FAULT:
+			case RPH_FLT_STO:
+			case RPH_FLT_WAIT:
+				fault = TRUE;
+				break;
+		}
+	}
+
+	/* WAIT Phasenzustaende reaktivieren / Visi Fehlerhandlung ? */
+	if (!fault) {
+		ii = C->ra_start[RBG];
+		for (i = 0; i < MAX_RBG_AUFTRAG; i++) {
+			if (!in_range(ii, MAX_RBG_AUFTRAG))
+				break;
+			ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+			if (ra->phase == RPH_WAIT)
+				ra->phase = RPH_NEW;	/* Reaktivierung */
+			else
+				chk_vis_fb(ra);			/* Fehlerbehandlung ? */
+			ii = ra->next;
+		}
+	}
+
+	/* RBG Interne AF-Fehler set/reset */
+	ii = C->ra_start[RBG];
+	for (i = 0; i < MAX_RBG_AUFTRAG; i++) {
+		if (!in_range(ii, MAX_RBG_AUFTRAG))
+			break;
+		ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+		switch (ra->phase) {
+			case RPH_ERASE:
+			case RPH_FAULT:
+			case RPH_FLT_CLR:
+			case RPH_FLT_STO:
+			case RPH_FLT_WAIT:
+			case RPH_FLT_FB:
+				switch (ra->fehler) {
+					case 0x01: int_err[0] = TRUE; break;
+					case 0x03: int_err[1] = TRUE; break;
+					case 0x04: int_err[2] = TRUE; break;
+					case 0x06: int_err[3] = TRUE; break;
+					case 0x07: int_err[4] = TRUE; break;
+					case 0x10: int_err[5] = TRUE; break;
+					case 0x11: int_err[6] = TRUE; break;
+					case 0x16: int_err[7] = TRUE; break;
+					case 0x15: int_err[8] = TRUE; break;
+					case 0x17: int_err[8] = TRUE; break;
+					case 0x1a: int_err[9] = TRUE; break;
+					case 0x1b: int_err[10] = TRUE; break;
+					case 0x2b: int_err[10] = TRUE; break;
+					case 0x1c: int_err[11] = TRUE; break;
+					default:   break;
+				}
+				break;
+		}
+		ii = ra->next;
+	}
+	for (i = 0; i < MAX_INT_ERR; i++) {
+		idx = INT_ERR_START_IDX + i;
+		C->vdp.rbg[RBG].state[idx] = int_err[i] ? 1 : 0;
+	}
+	MP_AreaPulseIdx(AREA_RBG, GROUP_STATE, INT_ERR_START_IDX, MAX_INT_ERR,
+			 (unsigned char *) &C->vdp.rbg[RBG_1].state[INT_ERR_START_IDX]);
+}
+
+
+static void chk_auto_ss()
+{
+	int i, vis_fb_pending = FALSE;
+	struct RBG_auftrag *ra;
+
+	/* force START
+	ra = (struct RBG_auftrag *)&C->ra[RBG][0];
+	for (i = 0; i < MAX_RBG_AUFTRAG; i++, ra++) {
+		if (ra->phase == RPH_FLT_FB)
+			vis_fb_pending = TRUE;
+	}
+	if (stop_pending() && !vis_fb_pending && C->rbg_ss_soll[RBG]) {
+		C->rbg_ss[RBG].wert = 1;
+		SndIdTel(0, TRB_SS);
+	}
+	*/
+
+	/* VZS Spaltkontrolle Pos 38, 40 ? - darf nicht vom visi starten
+	if (C->vdp.vzs[VZS_1].state[81] || C->vdp.vzs[VZS_1].state[82]) {
+		C->rbg_ss[RBG].wert = 0;
+		SndIdTel(0, TRB_SS);
+		return;
+	}
+	else
+	*/
+	if ( C->rbg_ss_soll[RBG] != C->rbg_ss_ist[RBG] ) {
+		C->rbg_ss[RBG].wert = C->rbg_ss_soll[RBG];
+		SndIdTel(0, TRB_SS);
+	}
+}
+
+
+/*---------------------------------------------------------*/
+
+static int opt_get_stat(int phase, int fehler)
+{
+	int ret;
+
+	if (phase == RPH_READY)
+		return BEW_OK;
+
+	switch (fehler) {
+		default:
+		case 0x01:				/* unerlaubter Befehl */
+		case 0x02:				/* RBG nicht betriebsbereit */
+		case 0x06:				/* Anr schon belegt */
+		case 0x07:				/* unerlaubte Anr */
+		case 0x10:				/* LAM belegt vor Aufnahme */
+		case 0x11:				/* LAM frei vor Abgabe */
+		case 0x1a:				/* Uebergabe nicht bereit */
+			ret = BEW_FE_NSP;
+			break;
+		case 0x03:				/* Koordinatenfehler */
+		case 0x04:				/* Platz gesperrt */
+		case 0x16:				/* belegt nach Abgabe */
+		case 0x15:				/* Quellfach / Zielfach verdeckt */
+		case 0x17:				/* Quellfach / Zielfach verdeckt */
+		case 0x1b:				/* Pos.Fehler */
+		case 0x2b:				/* Pos.Fehler */
+		case 0x1c:				/* LAM frei nach Aufnahme */
+			ret = BEW_FE_SP;
+	}
+	return ret;
+}
+
+
+static void auftrag_reakt(struct RBG_auftrag *ra)
+{
+	ra->status = RST_FREE;
+	ra->fehler = 0;
+	ra->phase = RPH_NEW;			/* Reaktivierung */
+}
+
+
+static void opt_auf_buchen(struct RBG_auftrag *ra, int folge_fehler)
+{
+	int i, bew_stat;
+	struct RBG_auftrag re;
+
+	if (folge_fehler)
+		bew_stat = BEW_FE_NSP;
+	else
+		bew_stat = opt_get_stat(ra->phase, ra->fehler);
+
+	switch (ra->phase) {
+		case RPH_READY:
+		case RPH_FAULT:
+		case RPH_FLT_CLR:
+			if (rbg_auf_buchen(ra, bew_stat)) {
+				if (ra->phase == RPH_FLT_CLR)
+					ra->phase = RPH_CLEAR;
+				else
+					ra->phase = RPH_ERASE;
+			}
+			break;
+		case RPH_FLT_WAIT:
+#ifdef BOA_ERSATZ
+			if (ra->fehler == 0x1b    		/* Pos.Fehler Wiederholung ? */
+			||  ra->fehler == 0x1a ) {		/* Uebergabe nicht bereit Wiederholung ? */
+				if (!stop_pending())
+					auftrag_reakt(ra);		/* Reaktivierung */
+			} else {
+				bew_stat = BEW_FE_BOA;
+				memcpy(&re, ra, sizeof(struct RBG_auftrag));
+				if (rbg_ersatz_buchen(&re, bew_stat)) {
+					re.bef	= RBA_AB;
+					re.phase = RPH_NEW;
+					tr_rbg_insert_idx(RBG, &re, re.ra_idx);
+					ra->phase = RPH_NEW;	/* Reaktivierung */
+				}
+			}
+#else
+			if (!stop_pending())
+				auftrag_reakt(ra);			/* Reaktivierung */
+#endif
+			break;
+	}
+}
+
+
+static void opt_abg_buchen(struct RBG_auftrag *ra, int folge_fehler)
+{
+	int i, bew_stat;
+	struct RBG_auftrag re;
+
+	if (folge_fehler)
+		bew_stat = BEW_FE_NSP;
+	else
+		bew_stat = opt_get_stat(ra->phase, ra->fehler);
+
+	switch (ra->phase) {
+		case RPH_READY:
+		case RPH_FAULT:
+		case RPH_FLT_CLR:
+			if (rbg_abg_buchen(ra, bew_stat)) {
+				if (ra->phase == RPH_FLT_CLR)
+					ra->phase = RPH_CLEAR;
+				else
+					ra->phase = RPH_ERASE;
+			}
+			break;
+		case RPH_FLT_WAIT:
+			if (ra->fehler == 0x03) {			/* Koordinatenfehler ? */
+				if (rbg_ersatz_buchen(ra, bew_stat)) {
+					ra->bef	= RBA_AB;
+					ra->phase = RPH_NEW;
+				}
+			} else if (ra->fehler == 0x1b) {	/* Pos.Fehler Wiederholung ? */
+				if (!stop_pending())
+					auftrag_reakt(ra);			/* Reaktivierung */
+			} else {
+				memcpy(&re, ra, sizeof(struct RBG_auftrag));
+				if (rbg_ersatz_buchen(&re, bew_stat)) {
+					re.bef	= RBA_AB;
+					re.phase = RPH_NEW;
+					tr_rbg_insert_idx(RBG, &re, re.ra_idx);
+					ra->phase = RPH_ERASE;		/* Loeschfreigabe */
+				}
+			}
+			break;
+	}
+}
+
+
+#define	F_AUF_NOAB	1
+#define	F_AUF_AB	2
+
+static void opt_interface()
+{
+	int i, ii;
+	int fault_auf = 0, fault_ab = FALSE, fault_boa = FALSE;
+	int auf_fehler = 0, folge_fehler = FALSE;
+	struct RBG_auftrag *ra;
+
+	/* nicht bei Halbautomatikbetrieb
+	if (C->halbauto)
+		return;
+	*/
+
+	/*--- FAULT Reaktionen ---*/
+	ii = C->ra_start[RBG];
+	for (i = 0; i < MAX_RBG_AUFTRAG; i++) {
+		if (!in_range(ii, MAX_RBG_AUFTRAG))
+			break;
+		ra = (struct RBG_auftrag *)&C->ra[RBG][ii-1];
+		switch (ra->bef) {
+			case RBA_AUF:
+				switch (ra->phase) {
+					case RPH_FLT_STO:			/* zykl. check */
+					case RPH_FLT_WAIT:
+						fault_boa = TRUE;
+						break;
+					case RPH_FLT_FB:
+						fault_auf = F_AUF_AB;
+						break;
+					case RPH_FAULT:
+						fault_auf = F_AUF_NOAB;
+						auf_fehler = ra->fehler;
+						break;
+					case RPH_NEW:
+					case RPH_BUSY:
+						if (fault_boa || fault_ab || fault_auf == F_AUF_AB) {
+							if (!ra->ra_anr	) 		/* Auftrag aktiv ? */
+								ra->phase = RPH_WAIT;		/* Rueckstellung */
+							else
+								ra->phase = RPH_WAIT_STO;	/* Rueckstellung */
+						} else if (fault_auf == F_AUF_NOAB) {
+							ra->phase = RPH_FAULT;			/* Folgefehler */
+							ra->fehler = auf_fehler;		/* Ursache ! */
+							folge_fehler = TRUE;
+						}
+						break;
+				}
+				opt_auf_buchen(ra, folge_fehler);
+				folge_fehler = FALSE;
+				break;
+			case RBA_AB:
+				switch (ra->phase) {
+					case RPH_FLT_STO:		/* zykl. check */
+					case RPH_FLT_WAIT:
+					case RPH_FLT_FB:
+					case RPH_FAULT:
+						fault_ab = TRUE;
+						break;
+					case RPH_NEW:
+					case RPH_BUSY:
+					case RPH_WAIT:
+					case RPH_WAIT_STO:
+						if (fault_boa || fault_ab || fault_auf == F_AUF_AB) {
+							if (!ra->ra_anr) 		/* Auftrag aktiv ? */
+								ra->phase = RPH_WAIT;		/* Rueckstellung */
+							else
+								ra->phase = RPH_WAIT_STO;	/* Rueckstellung */
+						} else if (fault_auf == F_AUF_NOAB) {
+							/*
+							 * zugehoerige Abgabe, nachfolgende Auftraege
+							 * werden zurueckgestellt.
+							 */
+							fault_auf = F_AUF_AB;
+							ra->phase = RPH_FAULT; 			/* Folgefehler */
+							ra->fehler = auf_fehler;		/* Ursache ! */
+							folge_fehler = TRUE;
+						}
+						break;
+				}
+				opt_abg_buchen(ra, folge_fehler);
+				folge_fehler = FALSE;
+				break;
+			case RBA_FA:
+				switch (ra->phase) {
+					case RPH_READY:
+					case RPH_FAULT:
+					case RPH_FLT_CLR:
+					case RPH_FLT_WAIT:
+						ra->phase = RPH_ERASE; 	/* FA wird nicht verbucht */
+						break;
+				}
+				break;
+		}
+		ii = ra->next;
+	}
+}
+
+
+/*---------------------------------------------------------*/
+
+static void TrRBG(int rbg_id, int device)
+{
+	int i, len;
+	char *log_fname;
+	unsigned char rbuf[MAX_TELE_LEN];
+
+	RBG = rbg_id;
+
+	switch (RBG) {
+		case RBG1:
+			strcpy(log_file_name, TR_RBG1_ACT_LOGFILE);
+			break;
+	}
+
+#ifdef TR_RBG_LOG
+	LogPrintf(FAC_RBG,LT_DEBUG, 
+	"TrRBG Startup: C->ra_start[%d] %d", RBG+1, C->ra_start[RBG]);
+#endif
+
+	TrTimer = time((time_t *)0);
+
+	ConnectToComm(device);
+
+	RecTelTimeOutInstall(NOELE(r_rbg), r_rbg);
+
+	TimeOutInstall(&TsqTo, 0);
+	TimeOutInstall(&BzqTo, 0);
+	TimeOutInstall(&TfqTo, 0);
+
+	for (;; tsleep(500)) {
+		if (TsStopRequest())
+			return;
+
+		/* Telegramm empfangen */
+		len = ReceiveTele(rbuf, RT_TO);
+
+		/* aktuelle Zeit */
+		TrTimer = time((time_t *)0);
+
+		/* Verarbeitung des empfangenden Telegr. */
+		if (len >= 0) {
+			if (ProcessReceivedTelegram(rbuf, len, NOELE(r_rbg), r_rbg) < 0) {
+#ifdef TR_RBG_LOG
+				/* unknown protoc log */
+				switch (RBG) {
+					case RBG1:
+						log_fname = TR_RBG1_LOGFILE;
+						break;
+					default:
+						log_fname = NULL;
+						break;
+				}
+				llr_log_printf(log_fname, "%s %s", "?",
+				conv2HexAscii(rbuf, len));
+#else
+				;
+#endif
+			}
+		}
+
+		/* send all telegrams with (*condition)() != 0 */
+		for (i = 0; i < NOELE(s_rbg); i++)
+			SendTelegramConditional(&s_rbg[i], 0);
+
+		/* Start/Stop checker/controller */
+		chk_auto_ss();
+
+		/* RBG-Auftraege senden */
+		send_auftrag();
+
+		/* inspect timeouts */
+		TimeOutWatch();
+
+		/* OPT-TR Interface */
+		opt_interface();
+
+		/* cleanup & phase checks */
+		cleanup_checks();
+	}
+}
+
+
+/*--- process entry points ---*/
+
+
+tr_rbg1(int argc, char *argv[])
+{
+	TrRBG(RBG1, DEV_RBG1);
+	TsProcExit(0);
+}
+
+

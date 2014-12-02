@@ -56,6 +56,30 @@ void usage( const std::string & prog )
   			<< prog << " PATH -remove-versid [-doit]\n";
 }
 
+static std::string unescape( std::string search, const std::string & what, const std::string & with )
+{
+	std::string::size_type pos = 0;
+
+	do {
+		pos = search.find( what, pos );
+
+		if( pos == std::string::npos ) {
+			return search;
+		}
+
+		if( pos == 0 )
+		{
+			std::string left = search.substr( 0, pos );
+			std::string right = search.substr( pos + what.size() );
+			search = left + with + right;
+			pos += with.size();
+		}
+
+	} while( pos < search.size() && pos != std::string::npos );
+
+	return search;
+}
+
 struct EnumMode
 {
 	enum ETYPE
@@ -376,7 +400,20 @@ int main( int argc, char **argv )
   if( o_replace.isSet() )
   {
 	  search = o_replace.getValues()->at(0);
+
+	  search = unescape( search, "\\t", "\t" );
+	  search = unescape( search, "\\n", "\n" );
+
+	  DEBUG( format(  "unescaped search string: '%s'", search) );;
+
 	  replace = o_replace.getValues()->at(1);
+
+	  replace = unescape( replace, "\\t", "\t" );
+	  replace = unescape( replace, "\\n", "\n" );
+
+	  DEBUG( format(  "unescaped replac string: '%s'", replace) );;
+
+
 	  show_diff = true;
   }
 

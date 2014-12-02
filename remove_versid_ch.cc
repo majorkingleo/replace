@@ -15,6 +15,7 @@ RemoveVersidCh::RemoveVersidCh( bool noheader_ )
     keywords.push_back("<versid.h>");
     keywords.push_back("\"versid.h\"");
     keywords.push_back("$Log:");
+    keywords.push_back("SCCSID");
 
     header_template = make_header_template();
 	// test
@@ -259,7 +260,8 @@ std::string RemoveVersidCh::remove_versid( const std::string & file_)
 
 		if( line.find("<versid.h>") != std::string::npos ||
 			line.find("\"versid.h\"") != std::string::npos ||
-			line.find("__LINT__") != std::string::npos ) {
+			line.find("__LINT__") != std::string::npos ||
+			line.find("lint") != std::string::npos) {
 			start = pos + line.size();
 			continue;
 		}
