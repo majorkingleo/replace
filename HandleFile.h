@@ -29,7 +29,15 @@ public:
 
 	virtual std::string patch_file( const std::string & file ) { return file; }
 
-	virtual bool want_file( const FILE_TYPE & file_type ) { return false; }
+	virtual bool want_file( const FILE_TYPE & file_type )
+	{
+		return false;
+	}
+
+	virtual bool want_file_ext( const FILE_TYPE & file_type, bool is_cpp_file )
+	{
+		return want_file( file_type );
+	}
 };
 
 

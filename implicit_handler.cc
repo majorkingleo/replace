@@ -29,7 +29,7 @@ ImplicitHandler::ImplicitHandler( const std::string & srcdir_ )
 
 void ImplicitHandler::search_for_header_files()
 {
-	std::vector<std::pair<FILE_TYPE,std::string> > files;
+	FILE_SEARCH_LIST files;
 
 	find_files( srcdir, files );
 
@@ -69,20 +69,20 @@ void ImplicitHandler::search_for_header_files()
 	}
 
 
-	for( unsigned i = 0; i < files.size(); i++ )
+	for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )
 	{
-		if( files[i].first == FILE_TYPE::HEADER )
+		if( it->getType() == FILE_TYPE::HEADER )
 		{
 			std::string content;
-			if( !XML::read_file( files[i].second, content ) )
+			if( !XML::read_file( it->getPath(), content ) )
 			{
-				std::cerr << "cannot read " << files[i].second << std::endl;
+				std::cerr << "cannot read " << it->getPath() << std::endl;
 				continue;
 			}
 
 			HeaderFile header;
 
-			header.path = files[i].second;
+			header.path = it->getPath();
 
 			CppDir::File file( header.path );
 			header.name = file.get_name();

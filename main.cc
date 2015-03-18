@@ -27,6 +27,7 @@
 #include "fix_from_compile_log.h"
 #include "colored_output.h"
 #include "add_wdgassign.h"
+#include "fix_sprintf.h"
 
 using namespace Tools;
 
@@ -106,7 +107,7 @@ int main( int argc, char **argv )
   try {
 
 
-  std::vector<std::pair<FILE_TYPE,std::string> > files;
+  FILE_SEARCH_LIST files;
   
   std::string mode;
   EMODE emode;
@@ -309,6 +310,18 @@ int main( int argc, char **argv )
      o_implicit.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_implicit);
 
+
+     Arg::OptionChain oc_sprintf;
+     arg.addChainR(&oc_sprintf);
+     oc_sprintf.setMinMatch(1);
+     oc_sprintf.setContinueOnFail(true);
+     oc_sprintf.setContinueOnMatch(true);
+
+      Arg::FlagOption o_sprintf("sprintf");
+      o_sprintf.setDescription("replace sprintf() with StrCpy( dest, format(...)) in .cc files");
+      o_sprintf.setRequired(true);
+      oc_sprintf.addOptionR(&o_sprintf);
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -357,6 +370,7 @@ int main( int argc, char **argv )
 	  !o_remove_generic_cast.isSet() &&
 	  !o_compile_log.isSet() &&
 	  !o_assign.isSet() &&
+	  !o_sprintf.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -450,6 +464,10 @@ int main( int argc, char **argv )
 	  handlers.push_back( new FixMlM() );
   }
 
+  if( o_sprintf.getState() ) {
+	  handlers.push_back( new FixSprintf() );
+  }
+
   if( o_assign.getState() ) {
 	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModelessCreate") );
 	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModalCreate" ) );
@@ -468,18 +486,19 @@ int main( int argc, char **argv )
 	  handlers.push_back( new RemoveGenericCast("LmskGetVar") );
   }
 
-  for( unsigned i = 0; i < files.size(); i++ )
+  for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )
 	{
 	  std::string file;
-	  FILE_TYPE file_type = files[i].first;
+	  FILE_TYPE file_type = it->getType();
+	  bool is_cpp_file = it->isCppFile();
 
-	  if( !XML::read_file( files[i].second, file ) )
+	  if( !XML::read_file( it->getPath(), file ) )
 		{
 		  std::cerr << "cannot open file: " << file << std::endl;
 		  continue;
 		}
 
-	  DEBUG( format( "working on file %s", files[i].second ) );
+	  DEBUG( format( "working on file %s",  it->getPath() ) );
 
 	  std::string file_erg = file;
 
@@ -506,15 +525,15 @@ int main( int argc, char **argv )
 	  try {
 		  for( unsigned j = 0; j < handlers.size(); j++ )
 		  {
-			  if( handlers[j]->want_file( file_type ) ) {
-				  handlers[j]->set_file_name( files[i].second );
+			  if( handlers[j]->want_file_ext( file_type, is_cpp_file ) ) {
+				  handlers[j]->set_file_name( it->getPath() );
 				  file_erg = handlers[j]->patch_file( file_erg );
 			  }
 		  }
 
 		  if( file_erg != file )
 		  {
-			  std::cout << "patching file " << files[i].second << std::endl;
+			  std::cout << "patching file " << it->getPath() << std::endl;
 
 			  if( show_diff ) {
 				  std::cout << diff_lines( file, file_erg ) << std::endl;
@@ -531,15 +550,15 @@ int main( int argc, char **argv )
 
 	  if( doit )
 		{
-		  if( rename( files[i].second.c_str(), TO_CHAR(files[i].second + ".save") ) != 0 )
+		  if( rename( it->getPath().c_str(), TO_CHAR(it->getPath() + ".save") ) != 0 )
 			{
 			  std::cerr << strerror(errno) << std::endl;
 			}
-		  std::ofstream out( files[i].second.c_str(), std::ios_base::trunc );
+		  std::ofstream out( it->getPath().c_str(), std::ios_base::trunc );
 		  
 		  if( !out )
 			{
-			  std::cerr << "cannot overwrite file " << files[i].second << std::endl;
+			  std::cerr << "cannot overwrite file " << it->getPath() << std::endl;
 			  continue;
 			}
 		  

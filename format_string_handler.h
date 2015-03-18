@@ -8,6 +8,7 @@
 #ifndef FORMAT_STRING_HANDLER_H_
 #define FORMAT_STRING_HANDLER_H_
 
+#include <vector>
 #include "fix_from_compile_log.h"
 
 class FormatStringHandler : public FixFromCompileLog::Handler

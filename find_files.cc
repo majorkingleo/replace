@@ -3,8 +3,7 @@
 
 using namespace Tools;
 
-bool find_files( const std::string & path,
-				   std::vector<std::pair<FILE_TYPE,std::string> > & files )
+bool find_files( const std::string & path, FILE_SEARCH_LIST & files )
 {
   CppDir::File file( path );
 
@@ -45,9 +44,8 @@ bool find_files( const std::string & path,
 	  FILE_TYPE file_type = get_file_type( file.get_name(), is_cpp_file );
 
 	  if( file_type != FILE_TYPE::UNKNOWN ) {
-		files.push_back(
-				std::pair<FILE_TYPE,std::string>(file_type,
-						CppDir::concat_dir( file.get_path(), file.get_name() ) ) );
+		// std::cout << file.get_name() << " is_cpp_file: " << is_cpp_file << std::endl;
+		files.push_back( Files( CppDir::concat_dir( file.get_path(), file.get_name() ), file_type, is_cpp_file ) );
 	  }
     }
 

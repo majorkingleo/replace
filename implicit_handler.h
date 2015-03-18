@@ -8,6 +8,7 @@
 #ifndef IMPLICIT_HANDLER_H_
 #define IMPLICIT_HANDLER_H_
 
+#include <vector>
 #include "fix_from_compile_log.h"
 
 class ImplicitHandler : public FixFromCompileLog::Handler

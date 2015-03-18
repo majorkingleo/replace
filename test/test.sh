@@ -11,3 +11,4 @@
 ./test_format-string.sh
 ./test_implicit.sh
 ./test_assign.sh
+./test_sprintf.sh

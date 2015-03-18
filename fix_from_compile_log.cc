@@ -92,7 +92,7 @@ void FixFromCompileLog::run()
 {
 	read_compile_log();
 
-	std::vector<std::pair<FILE_TYPE,std::string> > all_files;
+	FILE_SEARCH_LIST all_files;
 
 	if( !find_files( path, all_files ) )
 	{
@@ -102,14 +102,14 @@ void FixFromCompileLog::run()
 	std::set<std::string> file_names;
 	std::set<std::string> already_warned_file_names;
 
-	for( unsigned i = 0; i < all_files.size(); i++ )
+	for( FILE_SEARCH_LIST::iterator fit = all_files.begin(); fit != all_files.end(); fit++ )
 	{
-		if(  all_files[i].first != FILE_TYPE::C_FILE )
+		if(  fit->getType() != FILE_TYPE::C_FILE )
 			continue;
 
 		File file;
 
-		file.path_name = all_files[i].second;
+		file.path_name = fit->getPath();
 		CppDir::File f( file.path_name );
 		file.name = f.get_name();
 

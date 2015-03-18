@@ -1,0 +1,4 @@
+
+
+ 	StrCpy( acBuf, format(  "%s %d",  xxx,  5 ));
+
