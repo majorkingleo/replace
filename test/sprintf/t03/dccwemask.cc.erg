@@ -1892,7 +1892,7 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
 			}
 		} else {
 			/* Negativ Mng ??? */
-			sprintf(acLineBuf[8], "0");
+			StrCpyDestLen(acLineBuf[8],  "0");
 		}
 
     }
@@ -2294,7 +2294,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 				fs->dSaveMngWE = 0.0;
 				SmaBuildTEBilden(dccw,scl, EANART128, JANEIN_J);
 			} else {
-				sprintf(acMsg,MlMsg("Schnell-Erfassung nicht möglich"));
+				StrCpyDestLen(acMsg, MlMsg("Schnell-Erfassung nicht möglich"));
                 SendError(dccw,scl, acMsg, DCC_ERROR,
                     DCC_NO_LOG, GetFunkFac(fs));
 			}

@@ -55,27 +55,36 @@ std::string FixSprintf::patch_file( const std::string & file )
 		}
 
 
-		if( func.args.size() < 3 ) {
+		if( func.args.size() < 2 ) {
 			start_in_file = end;
 			continue;
 		}
 
-		// aus
-		//    sprintf( acBuf, "%s %d", xxx,yyy )
-		// das machen
-		//    StrCpy( acBuf, format( "%s %d", xxx, yyy ) )
 
-		// aus
-		//    sprintf( acBuf, "%s", xxx )
-		// das machen
-		//    StrCpyDestLen( acBuf, xxx )
 
 
 		bool changed_something = false;
 
-		if( func.args.size() == 3 &&
+		if( func.args.size() == 2 )
+		{
+			// aus
+			//   sprintf(acLabZiel, MlMsg("Ziel"));
+			// das machen
+			//   StrCpyDestLen(acLabZiel, MlMsg("Ziel"));
+
+			func.name = "StrCpyDestLen";
+
+			changed_something = true;
+		}
+		else if( func.args.size() == 3 &&
 			strip(func.args[1]) == "\"%s\"" )
 		{
+
+			// aus
+			//    sprintf( acBuf, "%s", xxx )
+			// das machen
+			//    StrCpyDestLen( acBuf, xxx )
+
 			func.name = "StrCpyDestLen";
 			func.args[1] = func.args[2];
 
@@ -85,6 +94,12 @@ std::string FixSprintf::patch_file( const std::string & file )
 		}
 		else
 		{
+			// aus
+			//    sprintf( acBuf, "%s %d", xxx,yyy )
+			// das machen
+			//    StrCpy( acBuf, format( "%s %d", xxx, yyy ) )
+
+
 			func.name = "StrCpy";
 			func.args[1] = "format( " + func.args[1];
 			*func.args.rbegin() += ")";
@@ -94,6 +109,14 @@ std::string FixSprintf::patch_file( const std::string & file )
 
 		if( changed_something )
 		{
+			static const std::string STRFORM = "StrForm";
+
+			if( strip( func.args[1] ).find( STRFORM ) != std::string::npos )
+			{
+				std::string a = func.args[1].substr( STRFORM.size() + 1 );
+				func.args[1] = "format" + a;
+			}
+
 			std::string first_part_of_file = res.substr(0,pos);
 
 			std::stringstream str;

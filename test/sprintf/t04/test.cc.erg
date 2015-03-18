@@ -1,0 +1,5 @@
+
+	StrCpyDestLen(acLabZiel,  MlMsg("Ziel"));
+
+	StrCpyDestLen(acLabZiel, format( "%s",  MlMsg("Ziel") ) );
+
