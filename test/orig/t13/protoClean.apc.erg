@@ -1,0 +1,24 @@
+/**
+* @file
+* @todo describe file content
+* @author Copyright (c) 2015 Salomon Automation GmbH
+*/
+#ifndef PROTOCLEAN_H_INCLUDED
+#define PROTOCLEAN_H_INCLUDED
+
+
+
+#  if defined(__STDC__) || defined(__cplusplus)
+
+int ProtoClean(int DbKey,void *Record,int DbMode,
+				unsigned timeroffset,unsigned age_days,char * log);
+
+#else
+int ProtoClean();
+
+
+#endif
+
+
+#endif 
+

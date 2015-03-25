@@ -16,7 +16,7 @@ FILE_TYPE get_file_type( const std::string & file, bool & is_cpp_file )
 
   std::string ext = toupper(file.substr( pos + 1 ));
 
-  if( ext == "C" )
+  if( ext == "C" || ext == "APC" )
     {
       return FILE_TYPE::C_FILE;
     }

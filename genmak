@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.23
+VERSION=0.24
 BASE=`pwd`
 
 if [ $# -gt 1 ] ; then
@@ -70,7 +70,8 @@ done
 
 DFILES=$BUF
 
-echo "EXTENSION=$EXTENSION" > Makefile
+echo "SHELL=bash" > Makefile
+echo "EXTENSION=$EXTENSION" >> Makefile
 echo "HOST=$HOST" >> Makefile
 echo "HFILES=$HFILES" >> Makefile
 echo "CFILES=$CFILES" >> Makefile
