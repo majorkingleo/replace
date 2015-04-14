@@ -1370,7 +1370,7 @@ int SmaGetRetoureMainInput(dccw_context *dccw,dccclient_stm *scl)
 		case '1':
 /*
 			if (!(fs->lUserRights2 & FS_USER_RETOUREERSTERF)) {
-				StrCpyDestLen(acMsg, DCCMSG_FALSCHETASTE);
+				StrCpy(acMsg, format( "%s", DCCMSG_FALSCHETASTE));
 				SendError(dccw,scl, acMsg, DCC_ERROR,
 				   DCC_WRITE_LOG, GetFunkFac(fs));
 				break;
@@ -1382,7 +1382,7 @@ int SmaGetRetoureMainInput(dccw_context *dccw,dccclient_stm *scl)
 		case '2':
 /*
 			if (!(fs->lUserRights2 & FS_USER_RETOUREVERRAEUMEN)) {
-				StrCpyDestLen(acMsg, DCCMSG_FALSCHETASTE);
+				StrCpy(acMsg, format( "%s", DCCMSG_FALSCHETASTE));
 				SendError(dccw,scl, acMsg, DCC_ERROR,
 					DCC_WRITE_LOG, GetFunkFac(fs));
 				break;
@@ -1530,21 +1530,21 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
 	    StrCpy(acLineBuf[0],format("%20s",MlMsg("      Misch-TE      ")));
 	}
 	StrCpy(acLineBuf[1], format( "%s:",  MlMsg("ArtNr")));
-	StrCpyDestLen(acLineBuf[2],  fs->tArt.artArtBez);
+	StrCpy(acLineBuf[2], format( "%s",  fs->tArt.artArtBez));
 	StrCpy(acLineBuf[3], format( "%s:",  MlMsg("Charge")));
 	StrCpy(acLineBuf[4], format( "%s:",  MlMsg("VarBez")));
 	StrCpy(acLineBuf[5], format( "%s:",  MlMsg("Mng")));
 	StrCpy(acLineBuf[6], format( "%s:",  MlMsg("Gew")));
-	StrCpyDestLen(acLineBuf[7],  MlMsg("TE"));
+	StrCpy(acLineBuf[7], format( "%s",  MlMsg("TE")));
 	StrCpy(acLineBuf[10], format( "%s:",  MlMsg("T")));
 	StrCpy(acLineBuf[12], format(  "%s:",  MlMsg("EVE/HE")));
-    StrCpyDestLen(acLineBuf[15],  MlMsg("Charge:"));
+    StrCpy(acLineBuf[15], format(  "%s",  MlMsg("Charge:")));
 	
 	/* data */
-	StrCpyDestLen(acLineBuf2[1],  fs->tArt.artAId.ArtNr);
-	StrCpyDestLen(acLineBuf2[4],  fs->tArt.artVarBez);
-    StrCpyDestLen(acLineBuf[14],  fs->tArt.artAId.Var);
-	StrCpyDestLen(acLineBuf2[3],  fs->tTep.tepMId.Charge);
+	StrCpy(acLineBuf2[1], format(  "%s",  fs->tArt.artAId.ArtNr));
+	StrCpy(acLineBuf2[4], format(  "%s",  fs->tArt.artVarBez));
+    StrCpy(acLineBuf[14], format(  "%s",  fs->tArt.artAId.Var));
+	StrCpy(acLineBuf2[3], format(  "%s",  fs->tTep.tepMId.Charge));
 	StrCpy(acLineBuf[13], format(  "%.0f",  fs->tTep.tepMngs.VeHeFa));
 
 	if (NOT_SELLABLE_OR_THM == eRetWareType ||
@@ -1575,7 +1575,7 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
     }
 
 	if (iWert == JANEIN_J) {
-		StrCpyDestLen(acLineBuf2[8],  fs->tTep.tepTeId);
+		StrCpy(acLineBuf2[8], format(  "%s",  fs->tTep.tepTeId));
 	} else {
 		acLineBuf2[8][0]='\0';
 	}
@@ -1774,11 +1774,11 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
 	}
 
     if (1 == fs->iL2Erf) {
-		StrCpyDestLen(acLineBuf[8],  fs->tArt.artLe2Einheit);
-    	StrCpyDestLen(acLineBuf[9],  fs->tArt.artHeEinheit);
+		StrCpy(acLineBuf[8], format( "%s",  fs->tArt.artLe2Einheit));
+    	StrCpy(acLineBuf[9], format( "%s",  fs->tArt.artHeEinheit));
 	} else {
-		StrCpyDestLen(acLineBuf[8],  fs->tArt.artHeEinheit);
-    	StrCpyDestLen(acLineBuf[9],  fs->tArt.artVeEinheit);
+		StrCpy(acLineBuf[8], format( "%s",  fs->tArt.artHeEinheit));
+    	StrCpy(acLineBuf[9], format( "%s",  fs->tArt.artVeEinheit));
 	}
 
 	
@@ -1823,7 +1823,7 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
 		/* Kort Found */
 		Pos2Str(NULL, &tKort.kortKomPos, acZielPosStr);
 
-		StrCpyDestLen(acLineBuf[3],  acZielPosStr);	
+		StrCpy(acLineBuf[3], format(  "%s",  acZielPosStr));	
 	
 	} else {
 		MskParData = fs_put_Maskparam (MskParData, LparEfAttrSet,
@@ -1854,11 +1854,11 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
 	}
 	if (fs->iMischCount == 0 && lCalcTeTypMng == JANEIN_N) {
 		if (IsEmptyStrg(fs->tArt.artTet.TetId) == 0) {
-			StrCpyDestLen(acLineBuf[11],  fs->tArt.artTet.TetId);
+			StrCpy(acLineBuf[11], format(  "%s",  fs->tArt.artTet.TetId));
 		}
 	} else {
 		if (IsEmptyStrg(fs->tElsp.elspTet.TetId) == 0) {
-			StrCpyDestLen(acLineBuf[11],  fs->tElsp.elspTet.TetId);
+			StrCpy(acLineBuf[11], format(  "%s",  fs->tElsp.elspTet.TetId));
 		}
 	}
 
@@ -1912,7 +1912,7 @@ void SmaBuildTEBilden(dccw_context *dccw,dccclient_stm *scl,
                                 NULL, 0,
                                 "@VK_ENTER:FinishMask");
     } else {
-		StrCpyDestLen(acLineBuf2[7],  "MHD");	
+		StrCpy(acLineBuf2[7], format(  "%s",  "MHD"));	
 		if (fs->tTep.tepMHD > 100000) {
 			strftime(acLineBuf2[10], 11, "%d%m%Y",
                 localtime(&fs->tTep.tepMHD));
@@ -2003,7 +2003,7 @@ void SmaBuildAnmeldWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 	StrCpy(acLineBuf[1], format( "%s:",  MlMsg("Man")));
 	StrCpy(acLineBuf[2], format( "%s:",  MlMsg("MatKz")));
 	StrCpy(acLineBuf[3], format( "%s:",  MlMsg("BuSchl")));
-	StrCpyDestLen(acLineBuf[4],  MlMsg("Pos"));
+	StrCpy(acLineBuf[4], format( "%s",  MlMsg("Pos")));
 
 	Pos2Str(NULL, &fs->tAktposPOS,  acPosStrg);
 
@@ -2098,7 +2098,7 @@ int SmaGetUngeplWeAnm(dccw_context *dccw,dccclient_stm *scl)
 		case DCCAPP_VK_ESC:
 #ifdef UHU
 			if (DeleteAllOfDummyNr(NULL, GetFunkFac(fs), fs->lDummyNr) < 0) {
-    			StrCpyDestLen(acMsg,  DCCMSG_ERRORDBREAD);
+    			StrCpy(acMsg, format(  "%s",  DCCMSG_ERRORDBREAD));
     			SendError(dccw,scl, acMsg, DCC_ERROR,
             		DCC_WRITE_LOG, GetFunkFac(fs));
     			return(-1);
@@ -2108,7 +2108,7 @@ int SmaGetUngeplWeAnm(dccw_context *dccw,dccclient_stm *scl)
 			SmaBuildWeMainMenu(dccw,scl);
 			return 0;
 		default:
-			StrCpyDestLen(acMsg, DCCMSG_FALSCHETASTE);
+			StrCpy(acMsg, format( "%s", DCCMSG_FALSCHETASTE));
 			SendError(dccw,scl, acMsg, DCC_ERROR,
 				DCC_WRITE_LOG, GetFunkFac(fs));
 			return -1;
@@ -2140,8 +2140,8 @@ int SmaGetUngeplWeAnm(dccw_context *dccw,dccclient_stm *scl)
 		DccSetAktpos(fs, &tPos);
 	} else {
 		/* vielleich noch verbessern */
-		StrCpyDestLen(acMsg, 
-                (MlMsg("Kein Lagerplatz gefunden!")));
+		StrCpy(acMsg, format( "%s", 
+                (MlMsg("Kein Lagerplatz gefunden!"))));
         SendErrorNoBack(dccw, scl, acMsg,
                         DCC_ERROR, DCC_WRITE_LOG, GetFunkFac(fs));
         return (0);
@@ -2176,13 +2176,13 @@ int SmaGetUngeplWeAnm(dccw_context *dccw,dccclient_stm *scl)
 	if (IsEmptyStrg(fs->acMatKz) == 0) {
 		iRv = ReadMKz(NULL, GetFunkFac(fs), fs->acMand, fs->acMatKz, NULL);
 		if (iRv <= 0) {
-			StrCpyDestLen(acMsg,  MlMsg("Unbekanntes Materialkennzeichen!"));
+			StrCpy(acMsg, format( "%s",  MlMsg("Unbekanntes Materialkennzeichen!")));
 			SendErrorNoBack(dccw,scl, acMsg, DCC_ERROR,
 					DCC_NO_LOG, GetFunkFac(fs));
 			return (0);
 		}
 	} else {
-		StrCpyDestLen(acMsg,  MlMsg("Materialkennzeichen eingeben!"));
+		StrCpy(acMsg, format( "%s",  MlMsg("Materialkennzeichen eingeben!")));
 		SendErrorNoBack(dccw,scl, acMsg, DCC_ERROR,
 				DCC_NO_LOG, GetFunkFac(fs));
 		return (0);
@@ -2195,7 +2195,7 @@ int SmaGetUngeplWeAnm(dccw_context *dccw,dccclient_stm *scl)
 		iRv = CheckBuSchlExists(NULL, GetFunkFac(fs), fs->acBuSchl);
 		if (iRv <= 0) {
 			/* ungültiger Buchungsschlüssel */
-			StrCpyDestLen(acMsg,  MlMsg("Unbekannter Buchungsschlüssel!"));
+			StrCpy(acMsg, format( "%s",  MlMsg("Unbekannter Buchungsschlüssel!")));
 			SendErrorNoBack(dccw,scl, acMsg, DCC_ERROR,
 					DCC_NO_LOG, GetFunkFac(fs));
 			return (0);
@@ -2311,7 +2311,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
                     				fs->lDummyNr, fs->iMischCount,
                     				&fs->tTep) <= 0) {
 				
-    				StrCpyDestLen(acMsg,  DCCMSG_ERRORDBREAD);
+    				StrCpy(acMsg, format(  "%s",  DCCMSG_ERRORDBREAD));
     				SendError(dccw,scl, acMsg, DCC_SQLERROR,
         				DCC_WRITE_LOG, GetFunkFac(fs));
     				return -1;
@@ -2319,7 +2319,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 				memcpy(&fs->tArt.artAId, &fs->tTep.tepMId.AId, sizeof(AID));
 				if (TExecStdSql(NULL, StdNselect, TN_ART, &fs->tArt) <= 0)  {
 
-    				StrCpyDestLen(acMsg,  DCCMSG_ERRORDBREAD);
+    				StrCpy(acMsg, format(  "%s",  DCCMSG_ERRORDBREAD));
     				SendError(dccw,scl, acMsg, DCC_SQLERROR,
         				DCC_WRITE_LOG, GetFunkFac(fs));
     				return -1;
@@ -2331,7 +2331,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
                 if (DeleteLastOfDummyNr(NULL, GetFunkFac(fs),
                                 fs->lDummyNr) < 0) {
 
-                    StrCpyDestLen(acMsg,  DCCMSG_ERRORDBREAD);
+                    StrCpy(acMsg, format(  "%s",  DCCMSG_ERRORDBREAD));
                     SendError(dccw,scl, acMsg, DCC_SQLERROR,
                         DCC_WRITE_LOG, GetFunkFac(fs));
                     return -1;
@@ -2346,7 +2346,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 			} else {
 
 				if (DeleteAllOfDummyNr(NULL, GetFunkFac(fs), fs->lDummyNr) < 0) {
-    				StrCpyDestLen(acMsg,  DCCMSG_ERRORDBREAD);
+    				StrCpy(acMsg, format(  "%s",  DCCMSG_ERRORDBREAD));
     				SendError(dccw,scl, acMsg, DCC_ERROR,
             			DCC_WRITE_LOG, GetFunkFac(fs));
     				return(-1);
@@ -2358,7 +2358,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 				return 0;
 			}
 		default:
-			StrCpyDestLen(acMsg, DCCMSG_FALSCHETASTE);
+			StrCpy(acMsg, format( "%s", DCCMSG_FALSCHETASTE));
 			SendError(dccw,scl, acMsg, DCC_ERROR,
 				DCC_WRITE_LOG, GetFunkFac(fs));
 			return -1;
@@ -2378,7 +2378,7 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 
 	/* check if Barcode is scanned */
 	if (IsEmptyStrg(acScanCode1)!= 0 && IsEmptyStrg(acScanCode2)!= 0) {
-		StrCpyDestLen(acMsg,  MlMsg("Bitte EAN-Code eingegeben!"));
+		StrCpy(acMsg, format(  "%s",  MlMsg("Bitte EAN-Code eingegeben!")));
         SendError(dccw, scl, acMsg, DCC_ERROR, DCC_NO_LOG, GetFunkFac(fs));
         return (-1);
 	}
@@ -2405,13 +2405,13 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 		SmaBuildTEBilden(dccw,scl,iEanArt, 0);
 	} else if (iRv < 0) {
 		/* Da ist was schief gegangen */
-		StrCpyDestLen(acMsg,  MlMsg("Fehler beim Auswerten des EAN-Codes!"));
+		StrCpy(acMsg, format(  "%s",  MlMsg("Fehler beim Auswerten des EAN-Codes!")));
 		SendError(dccw,scl, acMsg, DCC_ERROR,
 				DCC_WRITE_LOG, GetFunkFac(fs));
 		return (-1);
 	} else if (iRv == 0) {
 		/* Keinen Artikel gefunden  */
-		StrCpyDestLen(acMsg,  MlMsg("Keine Artikel für EAN-Code gefunden!"));
+		StrCpy(acMsg, format(  "%s",  MlMsg("Keine Artikel für EAN-Code gefunden!")));
 		SendError(dccw,scl, acMsg, DCC_ERROR,
 				DCC_NO_LOG, GetFunkFac(fs));
 		return -1;
@@ -2431,8 +2431,8 @@ int SmaGetEanWeUngpl(dccw_context *dccw,dccclient_stm *scl)
 		if (SearchArtforEan(GetFunkFac(fs), fs, &lAktCount, 
 							&lGesCount, fs->acEan13Code, 
 							NULL, PAGE_NONE,JANEIN_N)	<= 0) {
-			StrCpyDestLen(acMsg,  
-				MlMsg("Fehler beim Lesen des Artikels!"));
+			StrCpy(acMsg, format(  "%s",  
+				MlMsg("Fehler beim Lesen des Artikels!")));
 			SendError(dccw,scl, acMsg, DCC_ERROR,
 					DCC_NO_LOG, GetFunkFac(fs));
 			return -1;
@@ -2470,8 +2470,8 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 	switch(scl->endkey){
 		case DCCAPP_VK_KORTBUCH:
 			if (fs->iMischCount == 1) {
-            	StrCpyDestLen(acMsg, 
-					MlMsg("Misch-TE kann nicht auf KPL gebucht werden"));
+            	StrCpy(acMsg, format( "%s", 
+					MlMsg("Misch-TE kann nicht auf KPL gebucht werden")));
             	SendError(dccw,scl, acMsg, DCC_ERROR,
                 			DCC_WRITE_LOG, GetFunkFac(fs));
            		return -1;
@@ -2506,8 +2506,8 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 			}
 			return 0;
 		case DCCAPP_VK_LIEFBEW:
-			StrCpyDestLen(acMsg, 
-				MlMsg("Lieferantenbewertung nur für geplanter WE erlaubt!"));
+			StrCpy(acMsg, format( "%s", 
+				MlMsg("Lieferantenbewertung nur für geplanter WE erlaubt!")));
         	SendError(dccw,scl, acMsg, DCC_ERROR,
             			DCC_WRITE_LOG, GetFunkFac(fs));
        		return -1;	
@@ -2521,7 +2521,7 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 				the buffer-count */
 			break;
         default:
-            StrCpyDestLen(acMsg, DCCMSG_FALSCHETASTE);
+            StrCpy(acMsg, format( "%s", DCCMSG_FALSCHETASTE));
             SendError(dccw,scl, acMsg, DCC_ERROR,
                 DCC_WRITE_LOG, GetFunkFac(fs));
            return -1;
@@ -2570,14 +2570,14 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 
 		if (scl->endkey != DCCAPP_VK_MISCHTE) {
 			if (IsEmptyStrg(fs->tTep.tepTeId) != 0) {
-               	StrCpyDestLen(acMsg, MlMsg("Bitte TE-Id eingeben"));
+               	StrCpy(acMsg, format( "%s", MlMsg("Bitte TE-Id eingeben")));
                	SendError(dccw,scl, acMsg, DCC_ERROR,
                    	DCC_NO_LOG, GetFunkFac(fs));
                	return(0);
            	}
             if (CheckTeIdLenght(NULL, GetFunkFac(fs), fs->tTep.tepTeId) < 0) {
-                StrCpyDestLen(acMsg, 
-                        MlMsg ("TE-Id-Länge nicht korrekt!"));
+                StrCpy(acMsg, format(  "%s", 
+                        MlMsg ("TE-Id-Länge nicht korrekt!")));
                 SendError (dccw, scl, acMsg, DCC_ERROR, DCC_NO_LOG,
                                 GetFunkFac(fs));
                 return (0);
@@ -2607,8 +2607,8 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
 
 	iRv = AllDataForTep(&fs->tTep, &fs->tArt);
 	if (iRv <= 0) {	
-		StrCpyDestLen(acMsg, 
-				MlMsg ("Nicht alle notwendigen Daten angegeben!"));
+		StrCpy(acMsg, format(  "%s", 
+				MlMsg ("Nicht alle notwendigen Daten angegeben!")));
 		SendErrorNoBack (dccw, scl, acMsg, DCC_ERROR, DCC_NO_LOG,
                                 GetFunkFac(fs));
 		return (0);
@@ -2656,7 +2656,7 @@ int SmaGetTeBildenWeUngepl(dccw_context *dccw,dccclient_stm *scl)
             iSendError =  JANEIN_J;
             break;
 		default: /* Error */
-			StrCpyDestLen(acMsg,  GetErrmsg1());	
+			StrCpy(acMsg, format(  "%s",  GetErrmsg1()));	
 			SendError (dccw, scl, acMsg, DCC_ERROR, DCC_NO_LOG,
                                 	GetFunkFac(fs));
 			return (-1);
@@ -3539,8 +3539,8 @@ int SmaGetIndentifWeGepl(dccw_context *dccw,dccclient_stm *scl)
 
 			if (iRvDb <= 0 && TSqlError(NULL) != SqlNotFound) {
 				/* DB - Error */
-				StrCpyDestLen(acMsg,  
-						MlMsg("Fehler beim Lesen der Datenbank!"));
+				StrCpy(acMsg, format(  "%s",  
+						MlMsg("Fehler beim Lesen der Datenbank!")));
 				SendError(dccw,scl, acMsg, DCC_ERROR,
 						  DCC_NO_LOG, GetFunkFac(fs));
 				return -1;	
@@ -3549,7 +3549,7 @@ int SmaGetIndentifWeGepl(dccw_context *dccw,dccclient_stm *scl)
 			if (TSqlError(NULL) == SqlNotFound) {	
 				/* Check SapBestNr and WeavisNr */
 				scl->cur_maskid = ID_scanean;
-				StrCpyDestLen(acMsg,  MlMsg("WE-Avis stimmt mit SapBestNr nicht überein!"));
+				StrCpy(acMsg, format(  "%s",  MlMsg("WE-Avis stimmt mit SapBestNr nicht überein!")));
 				SendError(dccw,scl, acMsg, DCC_ERROR,
 					  DCC_WRITE_LOG, GetFunkFac(fs));
 				return (-1);

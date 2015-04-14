@@ -76,6 +76,7 @@ std::string FixSprintf::patch_file( const std::string & file )
 
 			changed_something = true;
 		}
+#if 0
 		else if( func.args.size() == 3 &&
 			strip(func.args[1]) == "\"%s\"" )
 		{
@@ -92,6 +93,7 @@ std::string FixSprintf::patch_file( const std::string & file )
 
 			changed_something = true;
 		}
+#endif
 		else
 		{
 			// aus
