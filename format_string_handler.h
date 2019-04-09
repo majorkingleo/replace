@@ -13,6 +13,7 @@
 
 class FormatStringHandler : public FixFromCompileLog::Handler
 {
+protected:
 	class FormatWarnigs : public Location
 	{
 	public:
@@ -66,6 +67,11 @@ public:
 	virtual void report_unfixed_compile_logs();
 
 	virtual void fix_warning( FormatWarnigs & warning, std::string & content );
+
+protected:
+	virtual bool is_interested_in_line( const std::string & line );
+
+	virtual void strip_target_type( FormatWarnigs & location ) {}
 };
 
 

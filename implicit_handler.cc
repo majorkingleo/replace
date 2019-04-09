@@ -21,7 +21,8 @@ ImplicitHandler::ImplicitHandler( const std::string & srcdir_ )
   implicit_warnings_locations(),
   srcdir(srcdir_),
   header_files(),
-  symbol_header_file_map()
+  symbol_header_file_map(),
+  warning_text("warning: implicit declaration of function")
 {
 	search_for_header_files();
 
@@ -29,6 +30,16 @@ ImplicitHandler::ImplicitHandler( const std::string & srcdir_ )
 
 void ImplicitHandler::search_for_header_files()
 {
+	// add some defaults
+	add_default( "memset", "string.h");
+	add_default( "strcpy", "string.h");
+	add_default( "memcpy", "string.h");
+	add_default( "bsearch", "stdlib.h");
+	add_default( "qsort", "stdlib.h");
+	add_default( "free", "stdlib.h");
+	add_default( "malloc", "stdlib.h");
+
+
 	FILE_SEARCH_LIST files;
 
 	find_files( srcdir, files );
@@ -91,14 +102,22 @@ void ImplicitHandler::search_for_header_files()
 			header_files.push_back( header );
 		}
 	}
+}
 
+void ImplicitHandler::add_default( const std::string & symbol, const std::string & header_file )
+{
+	HeaderFile header;
+	header.name = header_file;
+	header.content = format( "   %s();  ", symbol );
+	// DEBUG( format( "content: %s", header.content ));
+	header_files.push_back( header );
 }
 
 void ImplicitHandler::read_compile_log_line( const std::string & line )
 {
 	// warning: implicit declaration of function ‘tdb_LockRec’
 
-	if( line.find( "warning: implicit declaration of function") == std::string::npos )
+	if( line.find(warning_text) == std::string::npos )
 		return;
 
 	ImplicitWarnigs location = get_location_from_line( line );
@@ -107,11 +126,25 @@ void ImplicitHandler::read_compile_log_line( const std::string & line )
 
 	location.symbol = line.substr( start + 8 );
 	location.symbol = strip( location.symbol ,  "'‘’ " );
+
+	// test.c:7:2: warning: incompatible implicit declaration of built-in function ‘memset’ [enabled by default]
+
+	// uebrig bleibt:
+	// memset’ [enabled by default]
+
+	std::string::size_type end = location.symbol.find_first_of( "'‘’ ");
+
+	if( end != std::string::npos && end != 0 )
+	{
+		location.symbol = location.symbol.substr( 0, end );
+		location.symbol = strip( location.symbol ,  "'‘’ " );
+	}
+
 	location.compile_log_line = line;
 
 	implicit_warnings_locations.push_back( location );
 
-	DEBUG( format( "%s symbol: %s", location, location.symbol ) );
+//	DEBUG( format( "%s symbol: %s", location, location.symbol ) );
 }
 
 bool ImplicitHandler::want_file( const FixFromCompileLog::File & file )
@@ -165,7 +198,11 @@ void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::string & cont
 			} else if( already_included ) {
 				warning.fixed = true;
 				break;
+			} else {
+				DEBUG( format( "can't insert include for header '%s' for symbol '%s'", it->name, warning.symbol ) );
 			}
+		} else {
+			// DEBUG( format( "symbol: '%s' not found in header: '%s'", warning.symbol, it->name ));
 		}
 	}
 }
@@ -176,6 +213,8 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 	{
 		std::string line = get_whole_line( content, pos );
 
+		// DEBUG( format( "line: '%s'", line ) );
+
 		if( line.find( "#define" ) != std::string::npos ) {
 			continue;
 		}
@@ -184,8 +223,9 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 			continue;
 		}
 
-		if( pos+symbol.size()+1+1 >= content.size() )
+		if( pos+symbol.size()+1+1 >= content.size() ) {
 			return false;
+		}
 
 		char pos_before = content[pos-1];
 
@@ -196,6 +236,8 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 		case '*': break;
 		case '\n': break;
 		case '\r': break;
+		case '<': break;
+		case '"': break;
 		default:
 			// this is no symbol
 			continue;
@@ -210,7 +252,9 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 		case '\n': break;
 		case '\r': break;
 		case '(': break;
+		case '>': break;
 		case ';': break;
+		case '"': break;
 		default:
 			// this is no symbol
 			continue;
@@ -219,6 +263,7 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 		return true;
 	}
 
+	// DEBUG( format("return false symbol: '%s' in content '%s'", symbol, content  ));
 	return false;
 }
 

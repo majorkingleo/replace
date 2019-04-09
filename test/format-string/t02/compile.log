@@ -1,0 +1,44 @@
+Making all in comm/h1tcp
+gmake[3]: Entering directory '/big/project/KRINGS/llr/src/comm/h1tcp'
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -DTOOLS_VERSION=38 -pthread -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I/big/project/KRINGS/llr/Linux/prewmp/include -I/tools/dist/toolsbox-2015/usr/share/tools/include  -O2  -D_COMPILING_h1tcp_=1 -o Linux/comm_tcp.o -c ./comm_tcp.cc
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -DTOOLS_VERSION=38 -pthread -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I/big/project/KRINGS/llr/Linux/prewmp/include -I/tools/dist/toolsbox-2015/usr/share/tools/include  -O2  -D_COMPILING_h1tcp_=1 -o Linux/h1tcp.o -c ./h1tcp.cc
+./h1tcp.cc: In function 'int h1tcp_snd_send(int, u_char*, int)':
+./h1tcp.cc:190:21: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+   pod = (osi_data *)sbuf;
+                     ^
+./h1tcp.cc: In function 'int h1tcp_rcv_sock(h1tcp_data*, u_char*, int, int)':
+./h1tcp.cc:296:27: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+    pod = (osi_data *)phd->frag_buf;
+                           ^
+./h1tcp.cc: In function 'int h1tcp_rcv_send(int, u_char*, int, int)':
+./h1tcp.cc:405:21: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+   pod = (osi_data *)rbuf;
+                     ^
+./h1tcp.cc: In function 'int h1tcp_shutdown(int)':
+./h1tcp.cc:456:22: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+    poc = (osi_conn *)buf;
+                      ^
+./h1tcp.cc: In function 'int _h1tcp_connect_phase0(char*, char*)':
+./h1tcp.cc:565:57: warning: format '%ld' expects argument of type 'long int', but argument 4 has type 'unsigned int' [-Wformat=]
+     ((s+1) * sizeof(h1tcp_data)), errno, strerror(errno));
+                                                         ^
+./h1tcp.cc:614:37: warning: dereferencing type-punned pointer might break strict-aliasing rules [-Wstrict-aliasing]
+  rv = connect(s,(struct sockaddr *)&peeraddr_in, sizeof(struct sockaddr_in));
+                                     ^
+./h1tcp.cc: In function 'int _h1tcp_connect_phase0a(int)':
+./h1tcp.cc:661:42: warning: dereferencing type-punned pointer might break strict-aliasing rules [-Wstrict-aliasing]
+  rv = connect(s,(struct sockaddr *)&phd->peeraddr_in,
+                                          ^
+./h1tcp.cc: In function 'int _h1tcp_connect_phase1(int, char*, char*)':
+./h1tcp.cc:731:20: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  poc = (osi_conn *)buf;
+                    ^
+./h1tcp.cc: In function 'int _h1tcp_connect_phase2(int, int)':
+./h1tcp.cc:797:20: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  poc = (osi_conn *)buf;
+                    ^
+./h1tcp.cc:821:27: warning: format '%ld' expects argument of type 'long int', but argument 5 has type 'unsigned int' [-Wformat=]
+    len, sizeof(osi_conn),s);
+                           ^
+Loading ../../Linux/lib/libh1tcp.a ...
+

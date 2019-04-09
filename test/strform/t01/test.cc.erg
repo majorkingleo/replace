@@ -1,0 +1,3 @@
+WamasBox( y, y, 
+		  TO_CHAR(format( "%s",  hello )),
+		  NULL);

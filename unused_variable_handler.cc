@@ -29,7 +29,19 @@ void UnusedVariableHandler::read_compile_log_line( const std::string & line )
 
 	std::vector<std::string> sl = split_simple( line, " ");
 
-	location.var_name = *sl.rbegin();
+	std::vector<std::string>::reverse_iterator it = sl.rbegin();
+
+	// GCC 4.8 style: warning: unused variable 'dbrv' [-Wunused-variable]
+
+	if( *it->begin() == '[' && *it->rbegin() == ']' ) {
+		it++;
+	}
+
+	if( it == sl.rend() ) {
+		return;
+	}
+
+	location.var_name = *it;
 	location.var_name = strip( location.var_name, "'‘’");
 	location.compile_log_line = line;
 

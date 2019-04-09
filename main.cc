@@ -28,6 +28,7 @@
 #include "colored_output.h"
 #include "add_wdgassign.h"
 #include "fix_sprintf.h"
+#include "fix_StrForm.h"
 
 using namespace Tools;
 
@@ -322,6 +323,18 @@ int main( int argc, char **argv )
       o_sprintf.setRequired(true);
       oc_sprintf.addOptionR(&o_sprintf);
 
+      Arg::OptionChain oc_strform;
+      arg.addChainR(&oc_strform);
+      oc_strform.setMinMatch(1);
+      oc_strform.setContinueOnFail(true);
+      oc_strform.setContinueOnMatch(true);
+
+      Arg::FlagOption o_strform("strform");
+      o_strform.setDescription("replace StrForm() with TO_CHAR(format( dest, ...)) in .cc files");
+      o_strform.setRequired(true);
+      oc_strform.addOptionR(&o_strform);
+
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -371,6 +384,7 @@ int main( int argc, char **argv )
 	  !o_compile_log.isSet() &&
 	  !o_assign.isSet() &&
 	  !o_sprintf.isSet() &&
+	  !o_strform.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -467,6 +481,12 @@ int main( int argc, char **argv )
   if( o_sprintf.getState() ) {
 	  handlers.push_back( new FixSprintf() );
   }
+
+
+  if( o_strform.getState() ) {
+	  handlers.push_back( new FixStrForm() );
+  }
+
 
   if( o_assign.getState() ) {
 	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModelessCreate") );

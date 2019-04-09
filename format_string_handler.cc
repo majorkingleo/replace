@@ -33,11 +33,10 @@ FormatStringHandler::FormatStringHandler()
 
 void FormatStringHandler::read_compile_log_line( const std::string & line )
 {
-	if( line.find( "warning: format") == std::string::npos ||
-	    line.find( "expects type") == std::string::npos ||
-	    line.find( "but argument")  == std::string::npos ||
-	    line.find( "has type")  == std::string::npos )
+	if( !is_interested_in_line( line ) )
+	{
 		return;
+	}
 
 	FormatWarnigs location = get_location_from_line( line );
 
@@ -88,6 +87,8 @@ void FormatStringHandler::read_compile_log_line( const std::string & line )
 
 	location.target_type = line.substr( start + 4 );
 	location.target_type = strip(location.target_type, "'‘’, " );
+
+	strip_target_type( location );
 
 	/*
 	for( unsigned i = 0; i + 9 < sl.size(); i++ )
@@ -174,7 +175,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 	if( function_end == std::string::npos )
 	{
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -216,12 +217,12 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 
 	if( function_start == std::string::npos ) {
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
 	if( function_end == std::string::npos ) {
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -258,8 +259,8 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 		}
 	}
 
-	if( p < 0 ) {
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+	if( p <= 0 ) {
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -317,7 +318,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 		if( !found )
 		{
-			DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+			DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 			return;
 		}
 
@@ -326,7 +327,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 
 	if( !found ) {
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -374,7 +375,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 	if( format_string_start_pos == std::string::npos ) {
 		DEBUG( format( "no format_string_start_pos '%s'",  new_format_string_line ) );
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -390,7 +391,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	std::string::size_type format_string_start = content.find( format_string_line_orig, function_start );
 
 	if( format_string_start == std::string::npos ) {
-		DEBUG( format("Cannot handle %s", warning.compile_log_line ) );
+		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -402,4 +403,18 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	content = left + new_format_string_line + right;
 
 	warning.fixed = true;
+}
+
+
+bool FormatStringHandler::is_interested_in_line( const std::string & line )
+{
+	if( line.find( "warning: format") == std::string::npos ||
+	    line.find( "expects type") == std::string::npos ||
+	    line.find( "but argument")  == std::string::npos ||
+	    line.find( "has type")  == std::string::npos )
+	{
+		return false;
+	}
+
+	return true;
 }

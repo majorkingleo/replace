@@ -46,6 +46,9 @@ protected:
 
 	std::map<std::string,std::string> symbol_header_file_map;
 
+protected:
+	std::string warning_text;
+
 public:
 	ImplicitHandler( const std::string & srcdir );
 
@@ -65,7 +68,10 @@ private:
 	bool is_symbol_in_header_file( const std::string & content, const std::string & symbol );
 
 	bool insert_include_for( const ImplicitWarnigs & warning, const std::string & file_name, std::string & content, bool & already_included );
+
+	void add_default( const std::string & symbol, const std::string & header_file );
 };
+
 
 
 

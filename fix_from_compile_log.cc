@@ -21,7 +21,9 @@
 #include <set>
 #include "uninitialized_variable_handler.h"
 #include "format_string_handler.h"
+#include "format_string_handler_gcc48.h"
 #include "implicit_handler.h"
+#include "implicit_handler2.h"
 
 using namespace Tools;
 
@@ -81,10 +83,12 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 
 	if( handle_format_strings ) {
 		handlers.push_back( new FormatStringHandler() );
+		handlers.push_back( new FormatStringHandlerGcc48() );
 	}
 
 	if( handle_implicit ) {
 			handlers.push_back( new ImplicitHandler(path) );
+			handlers.push_back( new ImplicitHandler2(path) );
 	}
 }
 
