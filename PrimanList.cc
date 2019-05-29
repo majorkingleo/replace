@@ -290,6 +290,10 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 	{
 		pos = file.find(action_type, pos);
 
+		if( pos == std::string::npos ) {
+			break;
+		}
+
 		if( is_in_string(file,pos) ) {
 			pos += action_type.length();
 			continue;

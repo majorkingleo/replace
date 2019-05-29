@@ -12,3 +12,4 @@
 ./test_implicit.sh
 ./test_assign.sh
 ./test_sprintf.sh
+./test_space.sh

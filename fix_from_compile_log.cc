@@ -24,6 +24,7 @@
 #include "format_string_handler_gcc48.h"
 #include "implicit_handler.h"
 #include "implicit_handler2.h"
+#include "space_between_literal_handler.h"
 
 using namespace Tools;
 
@@ -63,7 +64,8 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  bool remove_unused_variables_,
 									  bool initialize_variables_,
 									  bool handle_format_strings,
-									  bool handle_implicit_)
+									  bool handle_implicit_,
+									  bool handle_space_between_literal )
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
@@ -89,6 +91,10 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 	if( handle_implicit ) {
 			handlers.push_back( new ImplicitHandler(path) );
 			handlers.push_back( new ImplicitHandler2(path) );
+	}
+
+	if( handle_space_between_literal ) {
+			handlers.push_back( new SpaceBetweenLiteralHandler() );
 	}
 }
 

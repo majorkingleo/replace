@@ -30,6 +30,7 @@
 #include "fix_sprintf.h"
 #include "fix_StrForm.h"
 
+
 using namespace Tools;
 
 std::string patch_file( const std::string & file, std::string search, std::string repl )
@@ -270,8 +271,6 @@ int main( int argc, char **argv )
      oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
 
 
-
-
      Arg::OptionChain oc_fix_warnings_from_compile_log;
      arg.addChainR(&oc_fix_warnings_from_compile_log);
      oc_fix_warnings_from_compile_log.setMinMatch(2);
@@ -310,6 +309,13 @@ int main( int argc, char **argv )
      o_implicit.setDescription("autoinclude implicit declared functions");
      o_implicit.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_implicit);
+
+
+     Arg::FlagOption o_space_between_literal("literal");
+     o_space_between_literal.setDescription("fix \"warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]\"");
+     o_space_between_literal.setRequired(false);
+     oc_fix_warnings_from_compile_log.addOptionR(&o_space_between_literal);
+
 
 
      Arg::OptionChain oc_sprintf;
@@ -408,7 +414,8 @@ int main( int argc, char **argv )
 				  o_remove_unused_variables.isSet(),
 				  o_initialize_variables.isSet(),
 				  o_format_string.isSet(),
-				  o_implicit.isSet());
+				  o_implicit.isSet(),
+				  o_space_between_literal.isSet());
 
 		  fix_from_log.run();
 

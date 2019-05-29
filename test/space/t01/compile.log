@@ -1,0 +1,35 @@
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -D__WAMAS__ -DTOOLS_VERSION=38 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2015/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -fte./tourpl.cc:135:8: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+        "update mam set prestatus="STR_MASTAT_FREIGABE
+        ^
+./tourpl.cc:136:8: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+        " where rectyp="STR_RECTYP_MAK
+        ^
+./tourpl.cc:138:8: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+        " and maetyp="STR_MAETYP_PK,
+        ^
+./tourpl.cc:430:12: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+            "WHERE mam.rectyp="STR_RECTYP_TOUR
+            ^
+./tourpl.cc:431:12: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+            " AND (mam.status="STR_MASTAT_NEU
+            ^
+./tourpl.cc:432:12: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+            "  OR mam.status="STR_MASTAT_FREIGABE
+            ^
+./tourpl.cc:436:12: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+            " AND mak.bwart="STR_BWART_AKU
+            ^
+./tourpl.cc:1237:24: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+      if (TExecSql(mask,"SELECT %MAM from mam where mam.status<>"STR_MASTAT_FERTIG
+                        ^
+./tourpl.cc:1238:10: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+          " and mam.status<>"STR_MASTAT_NI
+          ^             
+./tourpl.cc:1239:10: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+          " and mam.rectyp="STR_RECTYP_TOUR
+          ^
+./tourpl.cc: In function 'int refresh_Trees(MskDialog, int)':
+./tourpl.cc:509:97: warning: '0' flag used with '%s' gnu_printf format [-Wformat=]
+         sprintf(buffer1,"%s %0.*s%s",mam[i].mamParentId,10-strlen(buffer),"             ",buffer);
+                                                                                                 ^
+

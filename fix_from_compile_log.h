@@ -73,7 +73,8 @@ public:
 				       bool remove_unused_variables,
 				       bool initialize_variables_,
 				       bool handle_format_strings,
-				       bool handle_implicit);
+				       bool handle_implicit,
+					   bool handle_space_between_literal );
 
 	void run();
 	void doit();
