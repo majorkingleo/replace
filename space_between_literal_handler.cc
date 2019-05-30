@@ -214,11 +214,13 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 		if( !string_started ) {
 			string_started = true;
 			res << line.substr( last_pos, pos1 - last_pos + 1);
+			last_pos = pos1+1;
 		} else {
 			// jetzt einen space einbauen
 			res << line.substr( last_pos, pos1 - last_pos + 1)
 				<< ' ';
 			last_pos = pos1+1;
+			string_started = false;
 		}
 
 		pos1++;

@@ -1,0 +1,11 @@
+gmake[3]: Entering directory '/big/project/BERGLANDMILCH/llr/src/dynkort/dynkortterm'
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -D__WAMAS__ -DTOOLS_VERSION=38 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/toolsbox-2015/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -I. -I../../Linux/include -I/tools/dist/toolsbox-2015/usr/share/owil/include -DSAPonUNIX -D__SATALE_LIB__ -I/include -I/tools/dist/toolsbox-2015/usr/share/tools/include -DTRFC_VERSION=45 -DSAP_VERSION=46 -std=gnu++11   -O2  -D_COMPILING_dynkortterm_=1 -o Linux/me_dynkort_target.o -c ./me_dynkort_target.cc
+./me_dynkort_target.cc:35:32: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+        WboxNinputEfAtomSData,  "\""TCN_FES_FeldId"\"",
+                                ^
+./me_dynkort_target.cc:37:32: warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]
+        WboxNinputEfAtomSData,  "\""TN_FES"\"",
+                                ^
+Loading ../../Linux/lib/libdynkortterm.a ...
+r - Linux/me_dynkort_target.o
+

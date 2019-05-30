@@ -30,7 +30,7 @@ std::string RemoveVersidCh::make_header_template() const
 			"/**\n"
 			"* @file\n"
 			"* @todo describe file content\n"
-			"* @author Copyright (c) %s Salomon Automation GmbH\n"
+			"* @author Copyright (c) %s SSI Schaefer IT Solutions\n"
 			"*/", tm->tm_year + 1900 );
 }
 
