@@ -17,3 +17,4 @@ fi
 ./test_assign.sh
 ./test_sprintf.sh
 ./test_space.sh
+./test_prm.sh

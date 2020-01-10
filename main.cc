@@ -29,6 +29,7 @@
 #include "add_wdgassign.h"
 #include "fix_sprintf.h"
 #include "fix_StrForm.h"
+#include "fix_prmget.h"
 
 
 using namespace Tools;
@@ -159,6 +160,11 @@ int main( int argc, char **argv )
   o_debug.setDescription("print debugging messages");
   o_debug.setRequired(false);
   arg.addOptionR( &o_debug );
+
+  Arg::FlagOption o_diff("diff");
+  o_diff.setDescription("show diff");
+  o_diff.setRequired(false);
+  arg.addOptionR( &o_diff );
 
   // REPLACE CHAIN
 
@@ -340,6 +346,17 @@ int main( int argc, char **argv )
       o_strform.setRequired(true);
       oc_strform.addOptionR(&o_strform);
 
+      Arg::OptionChain oc_prmget;
+      arg.addChainR(&oc_prmget);
+      oc_prmget.setMinMatch(1);
+      oc_prmget.setContinueOnFail(true);
+      oc_prmget.setContinueOnMatch(true);
+
+      Arg::FlagOption o_prmget("prmget");
+      o_prmget.setDescription("fix PrmGetXParameter int <=> long issue in .c and .cc files");
+      o_prmget.setRequired(true);
+      oc_prmget.addOptionR(&o_prmget);
+
 
   const unsigned int console_width = 80;
 
@@ -391,6 +408,7 @@ int main( int argc, char **argv )
 	  !o_assign.isSet() &&
 	  !o_sprintf.isSet() &&
 	  !o_strform.isSet() &&
+	  !o_prmget.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -513,6 +531,12 @@ int main( int argc, char **argv )
 	  handlers.push_back( new RemoveGenericCast("LmskGetVar") );
   }
 
+  if( o_prmget.getState() ) {
+	  handlers.push_back( new FixPrmGet() );
+	  handlers.push_back( new FixPrmGet( "PrmGet2Parameter", 5 ) );
+	  handlers.push_back( new FixPrmGet( "PrmGet3Parameter", 6 ) );
+  }
+
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )
 	{
 	  std::string file;
@@ -562,7 +586,7 @@ int main( int argc, char **argv )
 		  {
 			  std::cout << "patching file " << it->getPath() << std::endl;
 
-			  if( show_diff ) {
+			  if( show_diff || o_diff.getState() ) {
 				  std::cout << diff_lines( file, file_erg ) << std::endl;
 			  }
 		  }
