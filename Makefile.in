@@ -4,17 +4,21 @@ DIST=$(PACKAGE)-$(VERSION)
 
 all: $(EXE)
 
+cpputils/cpputilsshared/cpputilsformat/libcpputilsformat.a:
+	cd cpputils/cpputilsshared/cpputilsformat && gmake
+
 cpputils/cpputilsshared/libcpputilsshared.a:
 	cd cpputils/cpputilsshared && gmake
 
 tools/libtools.a:
 	cd tools && gmake
 
-$(EXE): $(OFILES) cpputils/cpputilsshared/libcpputilsshared.a tools/libtools.a
-	$(CXX) -o $(EXE) $(CXXFLAGS) $(OFILES) -lcpputilsshared -ltools $(LDFLAGS)
+$(EXE): $(OFILES) cpputils/cpputilsshared/libcpputilsshared.a tools/libtools.a cpputils/cpputilsshared/cpputilsformat/libcpputilsformat.a
+	$(CXX) -o $(EXE) $(CXXFLAGS) $(OFILES) -lcpputilsshared -lcpputilsformat -ltools $(LDFLAGS)
 
 clean_tools:
 	 cd cpputils/cpputilsshared && gmake clean
+	 cd cpputils/cpputilsshared/cpputilsformat && gmake clean
 	 cd tools && gmake clean
 
 

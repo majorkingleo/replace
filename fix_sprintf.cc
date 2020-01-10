@@ -8,6 +8,7 @@
 #include "fix_sprintf.h"
 #include <format.h>
 #include "utils.h"
+#include "string_utils.h"
 #include "debug.h"
 #include <sstream>
 

@@ -5,8 +5,8 @@
 
 
 #include <string>
-#include "tools/range.h"
-#include "tools/pairs.h"
+#include "pairs.h"
+#include "range.h"
 #include "ref.h"
 
 class ArgEnumType {

@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "getline.h"
 #include "utils.h"
+#include "string_utils.h"
 #include "find_files.h"
 #include "cppdir.h"
 #include "xml.h"

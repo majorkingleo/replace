@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "getline.h"
 #include "utils.h"
+#include "string_utils.h"
 
 using namespace Tools;
 

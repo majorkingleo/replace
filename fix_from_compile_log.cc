@@ -11,6 +11,7 @@
 #include <xml.h>
 #include <cpp_utils.h>
 #include <errno.h>
+#include "string_utils.h"
 #include "unused_variable_handler.h"
 #include <iterator.h>
 #include <cppdir.h>

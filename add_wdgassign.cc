@@ -10,6 +10,7 @@
 #include <format.h>
 #include "debug.h"
 #include <cppdir.h>
+#include <string_utils.h>
 
 using namespace Tools;
 
