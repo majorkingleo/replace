@@ -535,6 +535,12 @@ int main( int argc, char **argv )
 	  handlers.push_back( new FixPrmGet() );
 	  handlers.push_back( new FixPrmGet( "PrmGet2Parameter", 5 ) );
 	  handlers.push_back( new FixPrmGet( "PrmGet3Parameter", 6 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get1Parameter", 4 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get2Parameter", 5 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get3Parameter", 6 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get1ParameterWp", 3 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get2ParameterWp", 4 ) );
+	  handlers.push_back( new FixPrmGet( "ParamSIf_Get3ParameterWp", 5 ) );
   }
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )

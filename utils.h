@@ -148,15 +148,17 @@ template <class T> std::string get_whole_line( const T &s, std::string::size_typ
 	if( pos == std::string::npos )
 		return std::string();
 
-	for( ; pos > 0; pos-- )
-		if( s[pos] == '\n' )
+	long ppos = pos;
+
+	for( ; ppos > 0; ppos-- )
+		if( s[ppos] == '\n' )
 		{
-			pos++;
+			ppos++;
 			break;
 		}
 
-    std::string::size_type p = s.find( '\n', pos );
-    return s.substr( pos, p - pos );
+    std::string::size_type p = s.find( '\n', ppos );
+    return s.substr( ppos, p - ppos );
 }
 
 std::string::size_type skip_spaces( const std::string & s, std::string::size_type pos, bool reverse = false );

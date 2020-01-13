@@ -73,7 +73,7 @@ std::string FixPrmGet::patch_file( const std::string & file )
 		std::string var_name = strip( func.args[LONG_ARG_NUM-1] );
 		var_name = strip_leading( var_name, "&" );
 
-		std::string::size_type decl_pos;
+		std::string::size_type decl_pos = 0;
 		std::string decl;
 
 		find_decl( res, pos, var_name, decl, decl_pos );
@@ -152,12 +152,14 @@ void FixPrmGet::replace_line_from_start_of_line( std::string & buffer, std::stri
 	if( pos == std::string::npos )
 		return;
 
-	for( ; pos > 0; pos-- )
-		if( buffer[pos] == '\n' )
+	long ppos = pos;
+
+	for( ; ppos > 0; ppos-- )
+		if( buffer[ppos] == '\n' )
 		{
-			pos++;
+			ppos++;
 			break;
 		}
 
-	UnusedVariableHandler::replace_line( buffer, pos, new_line );
+	UnusedVariableHandler::replace_line( buffer, ppos, new_line );
 }
