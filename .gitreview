@@ -1,0 +1,8 @@
+[gerrit]
+scheme=ssh
+host=w4.prj.sources.wamas.com
+port=2501
+project=replace.git
+defaultbranch=master
+defaultrebase=0
+
