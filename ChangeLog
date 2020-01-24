@@ -1,0 +1,406 @@
+commit 83466b9b8b2a398f98fa49c76de7edf8c99effcb
+Author: Martin Oberzalek <martin.oberzalek@ssi-schaefer.com>
+Date:   Mon Jan 13 12:52:01 2020 +0100
+
+    Add PrmGet checker for WAMAS-4
+    
+    Change-Id: I37f8bc7bbc3287c132ee4eff0efd89dce91aa492
+
+commit 749d319e761b057c59922ad7d9ab0595f7497680
+Author: Martin Oberzalek <martin.oberzalek@ssi-schaefer.com>
+Date:   Fri Jan 10 14:02:55 2020 +0100
+
+    -prmget Eingebaut
+    
+    Change-Id: I7bd074fe65654fa54815318d0591c09f3e9dfbae
+
+commit f9b42d130ac80140996aa61580d9a410fbebe2cc
+Author: Martin Oberzalek <martin.oberzalek@ssi-schaefer.com>
+Date:   Fri Jan 10 09:22:41 2020 +0100
+
+    Anpassungen fuer verneuftiges env
+    
+    Change-Id: I4c1c60d9573b2a8e68f8c380e33da8bb989405b7
+
+commit 699a5c290e926f87ca8cec086c807705432a9937
+Author: Martin Oberzalek <martin.oberzalek@ssi-schaefer.com>
+Date:   Fri Jan 10 09:16:33 2020 +0100
+
+    Umstellung auf git, tools und cpputils auf die neueste Version gebracht.
+    
+    Und zum Repo hinzugefuegt.
+    
+    Change-Id: I2982f6d6be86ade298c15bb7c49f9b454b205797
+
+commit 5bb12925bb25048190cc8ec45c49f3643b92e36f
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu May 30 19:00:53 2019 +0000
+
+    Weiterentwicklung -literal switch
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@337453 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 5237e37618e5dc1d60e82eec4a57d78de2da86cc
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed May 29 21:23:58 2019 +0000
+
+    Erste Version von automatischen literal fix
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@337451 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 06e55f8d70ea5c111aee42725fee3103b9c63c7b
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Apr 9 05:49:35 2019 +0000
+
+    Added StrForm() conversion
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@336537 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 9cd02ad083711a47ac6f164697fe67fb12d11d92
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Apr 14 07:38:20 2015 +0000
+
+    MOBERZA Bugfix in sprintf check. Da wurde versucht zu gut zu
+    optimieren. Dadurch kann sich das Verhalten Aendern (zb wenn %% eingesetzt werden)
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@285363 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 3cf57b682abf5eab40ca4c21abd03042be1da3df
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Mar 25 08:42:27 2015 +0000
+
+    apc files sind wie c files (für den MIG)
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@283496 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 10a5e42dde27ff3f993f91f8a75d976546d0ee01
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Mar 18 16:26:14 2015 +0000
+
+    MOBERZA Verbesserungen
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@283013 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 8d75608259bc82df635f8efaa53c78aa6ead8167
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Mar 18 11:43:35 2015 +0000
+
+    MOBERZA -sprintf eingebaut. Ersetzt automatisch alle sprintf durch StrCpy und format
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@282931 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit d8b29c5f36d6d52e1b634ded9b9559b582f56955
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Dec 2 08:30:49 2014 +0000
+
+    SCCS kann nun auch von -remove-versid entfernt werden
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@274938 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit b4d527b93c6341f9d4cdca1813bd23a0e5ce2b38
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Jul 4 14:56:44 2014 +0000
+
+    option -wamas_assign_menu hinzugefügt. Wurde für Festo gebraucht.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@262868 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit f533e44a4da08bc60d8e01f41ff0170e4ca9d708
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Jun 18 10:16:36 2014 +0000
+
+    Bugfix bessere Hilfe eingebaut
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@261981 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit c92c239f7195073854fb5243a99493a6362fd356
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Apr 29 06:45:59 2014 +0000
+
+    Anpassing an gcc 4.8.1
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@258307 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 7ceb931629d3cf80366e530ab2d7953643785d62
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Feb 19 18:18:04 2014 +0000
+
+    implicit ist nun ausgereifter
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252729 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit cda2bae50a5a8ceed7d55d4eb611a37871a2fcbe
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Feb 18 23:50:37 2014 +0000
+
+    Mit implicit begonnen.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252539 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 8b03773a563be4f6375a5b95e10a5d5f7f85c719
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Feb 18 19:35:19 2014 +0000
+
+    Anpassung für Double handling.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252534 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit f22d2f6bf1309a5cedbe14482bb16f48e19d66d6
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Feb 18 19:27:16 2014 +0000
+
+    Format String handler hinzugefuegt.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252532 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 3853593579345b0b9811828387d8b80501d5597b
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Feb 17 17:22:34 2014 +0000
+
+    format string handler
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252441 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 7fa0f1c8ca7840fda1e369395ea9c61a8347a00c
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Feb 17 16:21:05 2014 +0000
+
+    Binary entfernt
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252439 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 473c61e0df7094ee7fb3ff7ab31758f9d116aba7
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Feb 17 16:20:29 2014 +0000
+
+    uninitialisierte Variablen initialisieren.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252438 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit a22166cc859fe2c7e30a5b9a87256d9ed317a1e1
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Feb 17 15:37:49 2014 +0000
+
+    Bugfixes
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252430 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit e98aa592c0fa45effff71d64013ee87620ae2c37
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Feb 14 15:07:43 2014 +0000
+
+    added -unused-variables mode
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@252337 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 959ac8792cab8412d97f3292d93841a6abad92a4
+Author: wamas <wamas@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Sep 17 15:25:46 2013 +0000
+
+    Falsche MlM ersetzungen behoben.
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@242072 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 062ee88f1e3e392421248186fb0de6185cf7fe74
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Jun 21 12:42:59 2013 +0000
+
+    Geneirc Pointer Remove hinzugefuegt
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@237150 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 786dee9cabf21ad579ec236e44216c21c20b6aa2
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Jun 4 11:53:27 2013 +0000
+
+    Bugfix
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@236164 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 53bd950f7e7ee6154f8cdd88cb80dc8a41684dd2
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Jun 4 11:14:48 2013 +0000
+
+    VaMultipleMalloc Check hinzugefuegt
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@236161 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit db9b6631eb01f518ca483ee372b7847ab14f8343
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu May 23 12:01:51 2013 +0000
+
+    binary entfernt
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@235705 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit bc99dc955df4c3212109b96b218bcf43d57193fb
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Jan 28 10:41:59 2013 +0000
+
+    Bei Fehlern trotzdem weitermachen
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@228380 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 765b068c6ce4d7ed677cda04546d4152125a841e
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Aug 13 19:08:55 2012 +0000
+
+    Bugfix beim findes des priman callbacks.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@217351 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 27fae1325a88d1b0b70ff7dee451416c0e4713e1
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu Aug 9 13:29:56 2012 +0000
+
+    gemeldeter Fehler von Hörbi: Es werden nicht alle MlM Funktionen in dem File gefunden.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@217274 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 964c6b62a12042e4d92222baa1920d4e6206f8b6
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu Jun 21 12:02:10 2012 +0000
+
+    Das Fokusverhalten der Owil hat sich verändert, mit der Option -restoreshell kann nurn automatisiert die Liste in
+    den Vordergrund gebracht werden.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@214613 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 872b4bd13e7552c38f17f472fa91c641db855092
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Jun 5 12:52:05 2012 +0000
+
+    Ignore LsMessage(MlM())
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@213383 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit b193bf2c12c0d287cfafd3eeb23fb525250d3ebb
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Jun 5 09:41:40 2012 +0000
+
+    -mlm fixes hinzugefügt.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@213355 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit e15d05380a878fc2c741c6786753ca32c8e6735a
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Apr 27 10:31:16 2012 +0000
+
+    Kleiner Bugfix Debug info entfernt
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@211309 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit de06b734d8cabf3f73fa3bde34d38ed270eb6f0c
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Tue Apr 24 08:32:28 2012 +0000
+
+    Bugfix, damit -owcallback nicht mehrmals aufgerufen werden muß.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@211106 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit efdc3661c615d82951f0b0a426632841cc970452
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu Apr 19 12:06:23 2012 +0000
+
+    Es kann auch Dateien geben in denen nur ein OwCallback 3 vorkommt,
+    daher auch nach diesen suchen.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@210894 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 6f152da1f6d5726170938aa1fe0dc88b64a18195
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Thu Apr 19 09:16:26 2012 +0000
+
+    OwCallback1 Korrektur hinzugefügt
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@210880 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit a7b4516d1207d55bc2bb587f6c6d300894675b37
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Apr 16 08:58:35 2012 +0000
+
+    test
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@210462 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit e011bbb088558489955ecf69211c9038f5779e08
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Apr 16 08:57:43 2012 +0000
+
+    Test2
+    
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@210461 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 587b4b00454327db6a2a23030a69ea6c7333c2ce
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Apr 13 04:45:21 2012 +0000
+
+    Bugfix, wenn das erste #include schon in der ersten Zeile einer Datei auftaucht.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@210396 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit be479b448f079ff00e4f4915f764fb731b8b3954
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Mar 19 14:01:21 2012 +0000
+
+    Bugfix beim primanlist
+    das include nicht innerhalb von #ifdef WIN32  anwenden
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@208871 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 2732d59748c892cc124dd3aad970b35956c67a91
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Mon Mar 19 13:51:22 2012 +0000
+
+    Bugfix beim Parsen der Parameter.
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@208869 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 003173ca988fd6ac781547ba0d1f0b84db5aa4e5
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Feb 29 17:13:50 2012 +0000
+
+    Bugfixes
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@207868 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit 060e96cc9f18175ac4d421977fb92c05d984be73
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Wed Feb 29 17:13:02 2012 +0000
+
+    Bugfixes
+    
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@207867 d24d9060-6635-0410-9d39-bca6bc0e3a28
+
+commit f07b56f027f2515d7efff4d3e00c6bc85fd9643a
+Author: moberza <moberza@d24d9060-6635-0410-9d39-bca6bc0e3a28>
+Date:   Fri Feb 24 11:22:48 2012 +0000
+
+    git-svn-id: https://salxsource01.salomon.at/CSS/PortingUtils/Tools/replace/trunk/replace@207626 d24d9060-6635-0410-9d39-bca6bc0e3a28
