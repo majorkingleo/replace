@@ -1,12 +1,8 @@
 AC_INIT(replace, 0.28)
-AM_INIT_AUTOMAKE([-Wall])
+AM_INIT_AUTOMAKE([subdir-objects -Wall])
 AC_PROG_CC
 AC_CONFIG_FILES([
 Makefile
-tools/Makefile
-cpputils/Makefile
-cpputils/cpputilsshared/Makefile
-cpputils/cpputilsshared/cpputilsformat/Makefile
 ])
 AC_PROG_RANLIB
 AM_PROG_AR
