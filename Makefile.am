@@ -35,7 +35,8 @@ replace_SOURCES=\
 		space_between_literal_handler.cc\
 		uninitialized_variable_handler.cc\
 		unused_variable_handler.cc\
-		utils.cc 
+		utils.cc \
+		fix_c_headers.cc
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \

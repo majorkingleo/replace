@@ -30,7 +30,7 @@
 #include "fix_sprintf.h"
 #include "fix_StrForm.h"
 #include "fix_prmget.h"
-
+#include "fix_c_headers.h"
 
 using namespace Tools;
 
@@ -276,7 +276,6 @@ int main( int argc, char **argv )
      o_remove_generic_cast.setRequired(true);
      oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
 
-
      Arg::OptionChain oc_fix_warnings_from_compile_log;
      arg.addChainR(&oc_fix_warnings_from_compile_log);
      oc_fix_warnings_from_compile_log.setMinMatch(2);
@@ -358,6 +357,21 @@ int main( int argc, char **argv )
       oc_prmget.addOptionR(&o_prmget);
 
 
+
+
+      Arg::OptionChain oc_fix_c_header_file;
+      arg.addChainR(&oc_fix_c_header_file);
+      oc_fix_c_header_file.setMinMatch(1);
+      oc_fix_c_header_file.setContinueOnFail(true);
+      oc_fix_c_header_file.setContinueOnMatch(true);
+
+      Arg::FlagOption o_fix_c_header_file("fix-c-header");
+      o_fix_c_header_file.setDescription("add extern \"C\" to C header files.");
+      o_fix_c_header_file.setRequired(true);
+      oc_fix_c_header_file.addOptionR(&o_fix_c_header_file);
+
+
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -409,6 +423,7 @@ int main( int argc, char **argv )
 	  !o_sprintf.isSet() &&
 	  !o_strform.isSet() &&
 	  !o_prmget.isSet() &&
+	  !o_fix_c_header_file.isSet() &&
 	  !o_owcallback.isSet())
   {
 	  usage(argv[0]);
@@ -468,6 +483,12 @@ int main( int argc, char **argv )
 
 
 	  show_diff = true;
+  }
+
+  if( o_fix_c_header_file.isSet() )
+  {
+	  FixCHeaders fix;
+	  return fix.main( o_path.getValues()->at(0) );
   }
 
   if( !find_files( o_path.getValues()->at(0), files ) )
