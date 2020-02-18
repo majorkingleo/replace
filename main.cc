@@ -97,6 +97,35 @@ struct EnumMode
 
 typedef Tools::EnumRange<EnumMode> EMODE;
 
+class Co : public ColoredOutput
+{
+public:
+	std::string good( const std::string & message )
+	{
+		return color_output( ColoredOutput::GREEN, message );
+	}
+
+	std::string bad( const std::string & message )
+	{
+		return color_output( ColoredOutput::BRIGHT_RED, message );
+	}
+};
+
+void usage2()
+{
+	Co co;
+
+	std::cout << "\n"
+			  << " Replace switches that are colored in " << co.good("green") << " can be used project wide.\n"
+			  << " They are safe to use, you will get a compile time error if something bad happens.\n"
+			  << "\n"
+			  << " Replace switches that are colored in " << co.bad("red red red RED") << " can result in " << co.bad( "dangerous" ) << "\n"
+			  << " behaviour. They can affect busness logic and should ony be used in subdirectories.\n"
+			  << " Every changed line of code should be checked " << co.bad("twice!!")
+			  << "\n"
+			  << std::endl;
+}
+
 int main( int argc, char **argv )
 {
 
@@ -105,7 +134,7 @@ int main( int argc, char **argv )
   return 1;
 #endif
 
-  ColoredOutput colored_output;
+  Co co;
 
   try {
 
@@ -189,7 +218,7 @@ int main( int argc, char **argv )
    oc_versid.setContinueOnMatch(true);
 
    Arg::FlagOption o_versid_remove("remove-versid");
-   o_versid_remove.setDescription("remove versid infos");
+   o_versid_remove.setDescription(co.good("remove versid infos"));
    o_versid_remove.setRequired(true);
    oc_versid.addOptionR( &o_versid_remove );
 
@@ -205,7 +234,7 @@ int main( int argc, char **argv )
    oc_primanlist.setContinueOnMatch(true);
 
    Arg::FlagOption o_primanlist("primanlist");
-   o_primanlist.setDescription("add primanlist callbacks to Salomon lists");
+   o_primanlist.setDescription(co.good("add primanlist callbacks to Salomon lists"));
    o_primanlist.setRequired(true);
    oc_primanlist.addOptionR(&o_primanlist);
 
@@ -216,7 +245,7 @@ int main( int argc, char **argv )
    oc_restoreshell.setContinueOnMatch(true);
 
    Arg::FlagOption o_restoreshell("restoreshell");
-   o_restoreshell.setDescription("add restore GuiNrestoreShell shell and GuiNmakeActiveShell to lists");
+   o_restoreshell.setDescription(co.good("add restore GuiNrestoreShell shell and GuiNmakeActiveShell to lists"));
    o_restoreshell.setRequired(true);
    oc_restoreshell.addOptionR(&o_restoreshell);
 
@@ -227,7 +256,7 @@ int main( int argc, char **argv )
    oc_owcallback.setContinueOnMatch(true);
 
     Arg::FlagOption o_owcallback("owcallback");
-    o_owcallback.setDescription("correct missing OwCallback1");
+    o_owcallback.setDescription(co.good("correct missing OwCallback1"));
     o_owcallback.setRequired(true);
     oc_owcallback.addOptionR(&o_owcallback);
 
@@ -238,7 +267,7 @@ int main( int argc, char **argv )
     oc_mlm.setContinueOnMatch(true);
 
      Arg::FlagOption o_mlm("mlm");
-     o_mlm.setDescription("correct MlM(%d) calls to MlMsg(%d)");
+     o_mlm.setDescription(co.good("correct MlM(%d) calls to MlMsg(%d)"));
      o_mlm.setRequired(true);
      oc_mlm.addOptionR(&o_mlm);
 
@@ -250,7 +279,7 @@ int main( int argc, char **argv )
      oc_assign.setContinueOnMatch(true);
 
      Arg::FlagOption o_assign("wamas_assign_menu");
-     o_assign.setDescription("add WamasWdgAssignMenu() after ApShellModalCreate()");
+     o_assign.setDescription(co.good("add WamasWdgAssignMenu() after ApShellModalCreate()"));
      o_assign.setRequired(true);
      oc_assign.addOptionR(&o_assign);
 
@@ -261,7 +290,7 @@ int main( int argc, char **argv )
      oc_correct_va_multiple_malloc.setContinueOnMatch(true);
 
      Arg::FlagOption o_correct_va_multiple_malloc("vamulmalloc");
-     o_correct_va_multiple_malloc.setDescription("correct (void**) casts in VaMultipleMalloc to reduce warnings");
+     o_correct_va_multiple_malloc.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings"));
      o_correct_va_multiple_malloc.setRequired(true);
      oc_correct_va_multiple_malloc.addOptionR(&o_correct_va_multiple_malloc);
 
@@ -272,7 +301,7 @@ int main( int argc, char **argv )
      oc_remove_generic_cast.setContinueOnMatch(true);
 
      Arg::FlagOption o_remove_generic_cast("genericcast");
-     o_remove_generic_cast.setDescription("correct (MskTgeneric *) casts in MskVaAssign to reduce warnings");
+     o_remove_generic_cast.setDescription(co.good("correct (MskTgeneric *) casts in MskVaAssign to reduce warnings"));
      o_remove_generic_cast.setRequired(true);
      oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
 
@@ -295,29 +324,29 @@ int main( int argc, char **argv )
      oc_fix_warnings_from_compile_log.addOptionR(&o_comment_out);
 
      Arg::FlagOption o_remove_unused_variables("unused-variable");
-     o_remove_unused_variables.setDescription("remove unused variables (can be combined with --comment-out)");
+     o_remove_unused_variables.setDescription(co.bad("remove unused variables (can be combined with --comment-out)"));
      o_remove_unused_variables.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_remove_unused_variables);
 
 
      Arg::FlagOption o_initialize_variables("initialize-variable");
-     o_initialize_variables.setDescription("assign zero to uninitialized variables. Fix compiler warning: 'warning: ‘mam’ may be used uninitialized in this function'");
+     o_initialize_variables.setDescription(co.bad("assign zero to uninitialized variables. Fix compiler warning: 'warning: ‘mam’ may be used uninitialized in this function'"));
      o_initialize_variables.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_initialize_variables);
 
      Arg::FlagOption o_format_string("format-string");
-     o_format_string.setDescription("autofix format string warnings");
+     o_format_string.setDescription(co.bad("autofix format string warnings"));
      o_format_string.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_format_string);
 
      Arg::FlagOption o_implicit("implicit");
-     o_implicit.setDescription("autoinclude implicit declared functions");
+     o_implicit.setDescription(co.good("autoinclude implicit declared functions"));
      o_implicit.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_implicit);
 
 
      Arg::FlagOption o_space_between_literal("literal");
-     o_space_between_literal.setDescription("fix \"warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]\"");
+     o_space_between_literal.setDescription(co.bad("fix \"warning: invalid suffix on literal; C++11 requires a space between literal and identifier [-Wliteral-suffix]\""));
      o_space_between_literal.setRequired(false);
      oc_fix_warnings_from_compile_log.addOptionR(&o_space_between_literal);
 
@@ -330,7 +359,7 @@ int main( int argc, char **argv )
      oc_sprintf.setContinueOnMatch(true);
 
       Arg::FlagOption o_sprintf("sprintf");
-      o_sprintf.setDescription("replace sprintf() with StrCpy( dest, format(...)) in .cc files");
+      o_sprintf.setDescription(co.bad("replace sprintf() with StrCpy( dest, format(...)) in .cc files"));
       o_sprintf.setRequired(true);
       oc_sprintf.addOptionR(&o_sprintf);
 
@@ -341,7 +370,7 @@ int main( int argc, char **argv )
       oc_strform.setContinueOnMatch(true);
 
       Arg::FlagOption o_strform("strform");
-      o_strform.setDescription("replace StrForm() with TO_CHAR(format( dest, ...)) in .cc files");
+      o_strform.setDescription(co.bad("replace StrForm() with TO_CHAR(format( dest, ...)) in .cc files"));
       o_strform.setRequired(true);
       oc_strform.addOptionR(&o_strform);
 
@@ -352,7 +381,7 @@ int main( int argc, char **argv )
       oc_prmget.setContinueOnMatch(true);
 
       Arg::FlagOption o_prmget("prmget");
-      o_prmget.setDescription("fix PrmGetXParameter int <=> long issue in .c and .cc files");
+      o_prmget.setDescription(co.bad("fix PrmGetXParameter int <=> long issue in .c and .cc files"));
       o_prmget.setRequired(true);
       oc_prmget.addOptionR(&o_prmget);
 
@@ -366,7 +395,7 @@ int main( int argc, char **argv )
       oc_fix_c_header_file.setContinueOnMatch(true);
 
       Arg::FlagOption o_fix_c_header_file("fix-c-header");
-      o_fix_c_header_file.setDescription("add extern \"C\" to C header files.");
+      o_fix_c_header_file.setDescription(co.good("add extern \"C\" to C header files."));
       o_fix_c_header_file.setRequired(true);
       oc_fix_c_header_file.addOptionR(&o_fix_c_header_file);
 
@@ -383,6 +412,7 @@ int main( int argc, char **argv )
       } else {
     	  usage(argv[0]);
     	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
+    	  usage2();
     	  return 1;
       }
     }
@@ -391,6 +421,7 @@ int main( int argc, char **argv )
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
+	  usage2();
 	  return 0;
   }
 
@@ -405,7 +436,7 @@ int main( int argc, char **argv )
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
 
 	  std::cout << "\n\n"
-			  	<< colored_output.color_output( ColoredOutput::BRIGHT_RED, "PATH is missing")
+			  	<< co.color_output( ColoredOutput::BRIGHT_RED, "PATH is missing")
 			  	<< "\n";
 
 	  return 13;
