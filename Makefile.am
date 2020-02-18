@@ -41,7 +41,8 @@ replace_SOURCES=\
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \
 	-I$(top_srcdir)/cpputils/cpputilsshared/cpputilsformat \
-	-DNOWAMAS
+	-DNOWAMAS \
+	-std=c++11
 
 noinst_LIBRARIES=tools/libtools.a \
 	cpputils/cpputilsshared/libcpputilsshared.a \
