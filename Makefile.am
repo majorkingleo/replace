@@ -13,6 +13,7 @@ replace_SOURCES=\
 		fix_mlm.cc\
 		fix_prmget.cc\
 		fix_sprintf.cc\
+		fix_scoped_c_str.cc\
 		fix_StrForm.cc\
 		format_string_handler.cc\
 		format_string_handler_gcc48.cc\

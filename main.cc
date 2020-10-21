@@ -29,6 +29,7 @@
 #include "add_wdgassign.h"
 #include "fix_sprintf.h"
 #include "fix_StrForm.h"
+#include "fix_scoped_c_str.h"
 #include "fix_prmget.h"
 #include "fix_c_headers.h"
 
@@ -374,6 +375,17 @@ int main( int argc, char **argv )
       o_strform.setRequired(true);
       oc_strform.addOptionR(&o_strform);
 
+      Arg::OptionChain oc_scoped_cstr;
+      arg.addChainR(&oc_scoped_cstr);
+      oc_scoped_cstr.setMinMatch(1);
+      oc_scoped_cstr.setContinueOnFail(true);
+      oc_scoped_cstr.setContinueOnMatch(true);
+
+      Arg::FlagOption o_scoped_cstr("scoped_cstr");
+      o_scoped_cstr.setDescription(co.bad("replace scoped_cstr::form with wamas::platform::string::form( dest, ...).c_str() in .cc files"));
+      o_scoped_cstr.setRequired(true);
+      oc_scoped_cstr.addOptionR(&o_scoped_cstr);
+
       Arg::OptionChain oc_prmget;
       arg.addChainR(&oc_prmget);
       oc_prmget.setMinMatch(1);
@@ -453,6 +465,7 @@ int main( int argc, char **argv )
 	  !o_assign.isSet() &&
 	  !o_sprintf.isSet() &&
 	  !o_strform.isSet() &&
+	  !o_scoped_cstr.isSet() &&
 	  !o_prmget.isSet() &&
 	  !o_fix_c_header_file.isSet() &&
 	  !o_owcallback.isSet())
@@ -559,6 +572,9 @@ int main( int argc, char **argv )
 	  handlers.push_back( new FixSprintf() );
   }
 
+  if( o_scoped_cstr.getState() ) {
+	  handlers.push_back( new FixScopedCStr() );
+  }
 
   if( o_strform.getState() ) {
 	  handlers.push_back( new FixStrForm() );

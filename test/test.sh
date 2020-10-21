@@ -18,3 +18,4 @@ fi
 ./test_sprintf.sh
 ./test_space.sh
 ./test_prm.sh
+./test_scoped_cstr.sh
