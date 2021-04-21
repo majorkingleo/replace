@@ -32,6 +32,7 @@
 #include "fix_scoped_c_str.h"
 #include "fix_prmget.h"
 #include "fix_c_headers.h"
+#include "add_cast.h"
 
 using namespace Tools;
 
@@ -305,6 +306,17 @@ int main( int argc, char **argv )
      o_remove_generic_cast.setDescription(co.good("correct (MskTgeneric *) casts in MskVaAssign to reduce warnings"));
      o_remove_generic_cast.setRequired(true);
      oc_remove_generic_cast.addOptionR(&o_remove_generic_cast);
+     
+	 Arg::OptionChain oc_addcast;
+     arg.addChainR(&oc_addcast);
+     oc_addcast.setMinMatch(1);
+     oc_addcast.setContinueOnFail(true);
+     oc_addcast.setContinueOnMatch(true);
+
+     Arg::FlagOption o_addcast("addcast");
+     o_addcast.setDescription(co.bad("adds cast to ArrWalkXxx, ArrGetXxx, malloc and realloc calls that are required after moving .c to .cc File"));
+     o_addcast.setRequired(true);
+     oc_addcast.addOptionR(&o_addcast);
 
      Arg::OptionChain oc_fix_warnings_from_compile_log;
      arg.addChainR(&oc_fix_warnings_from_compile_log);
@@ -461,6 +473,7 @@ int main( int argc, char **argv )
 	  !o_restoreshell.isSet() &&
 	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_remove_generic_cast.isSet() &&
+	  !o_addcast.isSet() &&
 	  !o_compile_log.isSet() &&
 	  !o_assign.isSet() &&
 	  !o_sprintf.isSet() &&
@@ -598,7 +611,13 @@ int main( int argc, char **argv )
 	  handlers.push_back( new RemoveGenericCast("MskQueryRl") );
 	  handlers.push_back( new RemoveGenericCast("LmskGetVar") );
   }
-
+  if (o_addcast.getState() ) {
+	  handlers.push_back( new AddCast() );
+	  handlers.push_back( new AddCast("ArrWalkNext") );
+	  handlers.push_back( new AddCast("ArrGetEle") );
+	  handlers.push_back( new AddCast("malloc") );
+	  handlers.push_back( new AddCast("realloc") );
+  }
   if( o_prmget.getState() ) {
 	  handlers.push_back( new FixPrmGet() );
 	  handlers.push_back( new FixPrmGet( "PrmGet2Parameter", 5 ) );

@@ -19,3 +19,4 @@ fi
 ./test_space.sh
 ./test_prm.sh
 ./test_scoped_cstr.sh
+./test_addcast.sh

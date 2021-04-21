@@ -1,0 +1,331 @@
+/*****************************************************************************
++* PROJECT:   ORTRANDER
++* PACKAGE:   SERVICE
++* FILE:      servc_info.c
++* CONTENTS:  Hintergrundprozesse als Dienste starten
++* COPYRIGHT NOTICE:
++*         (c) Copyright 2000 by
++*                 Salomon Automationstechnik Ges.m.b.H
++*                 Friesachstrasse 15
++*                 A-8114 Friesach bei Graz
++*                 Tel.: ++43 3127 200-0
++*                 Fax.: ++43 3127 200-22
++*
++****************************************************************************/
+
+/* ===========================================================================
+ * INCLUDES
+ * =========================================================================*/
+
+/* ------- System-Headers ------------------------------------------------- */
+
+#include <stdio.h>
+
+/* ------- Owil-Headers --------------------------------------------------- */
+
+/* ------- Tools-Headers -------------------------------------------------- */
+
+#include <array.h>
+
+/* ------- Local-Headers -------------------------------------------------- */
+
+#include "service.h"
+
+#ifdef WIN32
+
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+ /* ------- Enums --------------------------------------------------------- */
+
+ /* ------- Structures ---------------------------------------------------- */
+
+/* ===========================================================================
+ * LOCAL (STATIC) Variables and Function-Prototypes
+ * =========================================================================*/
+
+ /* ------- Variables ----------------------------------------------------- */
+
+ /* ------- Function-Prototypes ------------------------------------------- */
+
+/* ===========================================================================
+ * GLOBAL VARIABLES
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL (STATIC) Functions
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+
+/* ===========================================================================
+ * GLOBAL (PUBLIC) Functions
+ * =========================================================================*/
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      free's the QUERY_SERVICE_CONFIG-data allocated by GetServiceConfig()
+-*      and stores the NULL-Ptr back in >phCfg<
+-* RETURNS
+-*      none
+-*--------------------------------------------------------------------------*/
+void ServiceDestroyServiceConfig(LPQUERY_SERVICE_CONFIG *phCfg)
+{
+	if (phCfg == NULL) {
+		return;
+	}
+	if (*phCfg != NULL) {
+		free(*phCfg);
+		*phCfg = NULL;
+	}
+	return;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      allocates and queries the QUERY_SERVICE_CONFIG data of the service
+-*      and stores the allocated ptr in >phDest<
+-* RETURNS
+-*      -1 on failure
+-*       1 on success
+-*--------------------------------------------------------------------------*/
+int ServiceGetServiceConfig(SC_HANDLE hService, LPQUERY_SERVICE_CONFIG *phDest)
+{
+	int						iRv = 0, iSubRv;
+	char					*pcErrTxt = NULL;
+	QUERY_SERVICE_CONFIG	tCfg;
+	LPQUERY_SERVICE_CONFIG	ptCfg = NULL;
+	DWORD					nSize;
+
+	do {	/* dummy loop */
+		iRv = -1;
+
+		if (phDest == NULL) {
+			break;
+		}
+
+		iSubRv = QueryServiceConfig(hService, &tCfg, 0, &nSize);
+		if (iSubRv == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+			ptCfg = malloc(nSize);
+			if (ptCfg == NULL) {
+				perror("calloc");
+				break;
+			}
+			iSubRv = QueryServiceConfig(hService, ptCfg, nSize, &nSize);
+		}
+		if (iSubRv == 0) {
+			ServiceGetLastErrorText(&pcErrTxt);
+			ServiceLog("can't QueryServiceConfig: %s", pcErrTxt);
+			printf("can't QueryServiceConfig: %s\n", pcErrTxt);
+			break;
+		}
+
+		*phDest = ptCfg;
+
+		iRv = 1;
+	} while(0);	/* end dummy loop */
+
+	if (iRv <= 0 && ptCfg != NULL) {
+		ServiceDestroyServiceConfig(&ptCfg);
+	}
+
+	ServiceDestroyErrorText(&pcErrTxt);
+
+	return iRv;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      prints out some information about the service
+-* RETURNS
+-*      -1 on failure
+-*       1 on success
+-*--------------------------------------------------------------------------*/
+static int ServiceCmdInfoTask(ServiceTtaskPtr hTask)
+{
+	int						iRv = 0;
+	char					*pcErrTxt = NULL;
+	char					*pcName, *pcTitle, *pcHost;
+	char					*pcDep;
+	SC_HANDLE				hService = NULL;
+	SC_HANDLE				hSCManager = NULL;
+	LPQUERY_SERVICE_CONFIG	hServiceCfg = NULL;
+
+    do {	/* dummy loop */
+		iRv = -1;
+
+		pcName = (char*)ServiceGet(hTask, ServiceNtaskName);
+		pcTitle = (char*)ServiceGet(hTask, ServiceNtaskName);
+		pcHost = (char*)ServiceGet(hTask, ServiceNtaskHost);
+
+		hSCManager = OpenSCManager(
+			pcHost,     /* machine (NULL == local)    */
+			NULL,       /* database (NULL == default) */
+			0           /* access required            */
+		);
+		if (hSCManager == NULL) {
+			ServiceGetLastErrorText(&pcErrTxt);
+			ServiceLog("OpenSCManager failed: %s", pcErrTxt);
+			printf("OpenSCManager failed: %s\n", pcErrTxt);
+			break;
+		}
+
+        hService = OpenService(hSCManager, pcName,
+        	SERVICE_QUERY_CONFIG);
+
+        if (hService == NULL) {
+			if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST) {
+				if (ServiceGet(hTask, ServiceNtaskRemoveIfStop) == NULL
+				 && ServiceGet(hTask, ServiceNtaskInstall) != NULL
+				) {
+					ServiceLog("Configuration of service %s: not installed",
+						pcTitle);
+					printf("Configuration of service %s: not installed\n",
+						pcTitle);
+				}
+				iRv = 0;
+				break;
+			}
+			ServiceGetLastErrorText(&pcErrTxt);
+            ServiceLog("Info %s: OpenService %s failed, %s",
+            	pcTitle, pcName, pcErrTxt);
+            printf("Info %s: OpenService %s failed, %s\n",
+            	pcTitle, pcName, pcErrTxt);
+			break;
+        }
+
+		if (ServiceGetServiceConfig(hService, &hServiceCfg) <= 0) {
+			break;
+		}
+
+		printf("\nConfiguration of service %s, titled %s is\n",
+			pcName, hServiceCfg->lpDisplayName
+				? hServiceCfg->lpDisplayName : "<null>");
+
+		printf(" BinaryPathName: %s\n", hServiceCfg->lpBinaryPathName
+			? hServiceCfg->lpBinaryPathName : "<null>");
+
+		printf(" Dependencies:   ");
+		if (pcDep == NULL) {
+			pcDep = "<null>\0";
+		}
+		for(pcDep = hServiceCfg->lpDependencies
+		 ;	pcDep != NULL && *pcDep != '\0'
+		 ;	pcDep++
+		) {
+			if (pcDep > hServiceCfg->lpDependencies) {
+				printf(",");
+			}
+			printf("%s", pcDep);
+			pcDep += strlen(pcDep);
+		}
+		printf("\n");
+
+		printf(" AccountName:    %-30s", hServiceCfg->lpServiceStartName
+			? hServiceCfg->lpServiceStartName : "<null>");
+
+		printf(" StartType:    ");
+		switch(hServiceCfg->dwStartType) {
+		case SERVICE_BOOT_START:   printf("BOOT     "); break;
+		case SERVICE_SYSTEM_START: printf("SYSTEM   "); break;
+		case SERVICE_AUTO_START:   printf("AUTO     "); break;
+		case SERVICE_DEMAND_START: printf("DEMAND   "); break;
+		case SERVICE_DISABLED:     printf("DISABLED "); break;
+		default:                   printf("<unknown>"); break;
+		}
+		printf(" (%2d)\n", hServiceCfg->dwStartType);
+
+		printf(" ServiceType:    ");
+		switch(hServiceCfg->dwServiceType) {
+		case SERVICE_WIN32_OWN_PROCESS:   printf("WIN32_OWN_PROCESS  "); break;
+		case SERVICE_WIN32_SHARE_PROCESS: printf("WIN32_SHARE_PROCESS"); break;
+		case SERVICE_KERNEL_DRIVER:       printf("KERNEL_DRIVER      "); break;
+		case SERVICE_FILE_SYSTEM_DRIVER:  printf("FILE_SYSTEM_DRIVER "); break;
+		case SERVICE_INTERACTIVE_PROCESS: printf("INTERACTIVE_PROCESS"); break;
+		default:                          printf("<unknown>          "); break;
+		}
+		printf(" (%2d)", hServiceCfg->dwServiceType);
+
+		printf("       ErrorControl: ");
+		switch(hServiceCfg->dwErrorControl) {
+		case SERVICE_ERROR_IGNORE:   printf("IGNORE   "); break;
+		case SERVICE_ERROR_NORMAL:   printf("NORMAL   "); break;
+		case SERVICE_ERROR_SEVERE:   printf("SEVERE   "); break;
+		case SERVICE_ERROR_CRITICAL: printf("CRITICAL "); break;
+		default:                     printf("<unknown>"); break;
+		}
+		printf(" (%2d)\n", hServiceCfg->dwErrorControl);
+
+#if 0
+		printf(" LoadOrderGroup: %-30s", hServiceCfg->lpLoadOrderGroup
+			? hServiceCfg->lpLoadOrderGroup : "<null>");
+
+		printf(" TagId:        %d\n", hServiceCfg->dwTagId);
+#endif
+
+    	iRv = 1;
+    } while(0);	/* end dummy loop */
+
+	if (hServiceCfg != NULL) {
+		ServiceDestroyServiceConfig(&hServiceCfg);
+	}
+
+	if (hService != NULL) {
+		CloseServiceHandle(hService);
+	}
+
+	if (hSCManager != NULL) {
+        CloseServiceHandle(hSCManager);
+	}
+
+	ServiceDestroyErrorText(&pcErrTxt);
+
+	return iRv;
+}
+
+int ServiceCmdInfo(ServiceTtaskPtr hTask, int argc, char * const argv[])
+{
+	int				iRv = 0;
+	ArrayPtr		hTaskArr;
+	ServiceTtaskPtr	*phTask;
+
+	do {	/* dummy loop */
+		iRv = -1;
+
+		if (hTask != NULL) {
+			iRv = ServiceCmdInfoTask(hTask);
+			break;
+		}
+
+		hTaskArr = ServiceGet(NULL, ServiceNtaskArray);
+
+		for(phTask = ArrWalkStart(hTaskArr)
+		 ;	phTask != NULL
+		 ;	phTask = ArrWalkNext(hTaskArr)
+		) {
+			ServiceCmdInfoTask(*phTask);
+		}
+
+		iRv = 1;
+	} while(0);	/* end dummy loop */
+
+	return iRv;
+}
+
+#endif /* WIN32 */
