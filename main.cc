@@ -33,6 +33,7 @@
 #include "fix_prmget.h"
 #include "fix_c_headers.h"
 #include "add_cast.h"
+#include "fix_conversion_null.h"
 
 using namespace Tools;
 
@@ -410,8 +411,6 @@ int main( int argc, char **argv )
       oc_prmget.addOptionR(&o_prmget);
 
 
-
-
       Arg::OptionChain oc_fix_c_header_file;
       arg.addChainR(&oc_fix_c_header_file);
       oc_fix_c_header_file.setMinMatch(1);
@@ -422,6 +421,19 @@ int main( int argc, char **argv )
       o_fix_c_header_file.setDescription(co.good("add extern \"C\" to C header files."));
       o_fix_c_header_file.setRequired(true);
       oc_fix_c_header_file.addOptionR(&o_fix_c_header_file);
+
+
+	  Arg::OptionChain oc_convnull;
+      arg.addChainR(&oc_convnull);
+      oc_convnull.setMinMatch(1);
+      oc_convnull.setContinueOnFail(true);
+      oc_convnull.setContinueOnMatch(true);
+
+      Arg::FlagOption o_convnull("convnull");
+      o_convnull.setDescription(co.bad("fix ArrCreate/ArrSort calls with NULL as last parameter (-Wconversion-null warning) in .c and .cc files"));
+      o_convnull.setRequired(true);
+      oc_convnull.addOptionR(&o_convnull);
+
 
 
 
@@ -481,7 +493,8 @@ int main( int argc, char **argv )
 	  !o_scoped_cstr.isSet() &&
 	  !o_prmget.isSet() &&
 	  !o_fix_c_header_file.isSet() &&
-	  !o_owcallback.isSet())
+	  !o_owcallback.isSet() &&
+	  !o_convnull.isSet())
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
@@ -628,6 +641,11 @@ int main( int argc, char **argv )
 	  handlers.push_back( new FixPrmGet( "ParamSIf_Get1ParameterWp", 3 ) );
 	  handlers.push_back( new FixPrmGet( "ParamSIf_Get2ParameterWp", 4 ) );
 	  handlers.push_back( new FixPrmGet( "ParamSIf_Get3ParameterWp", 5 ) );
+  }
+
+  if (o_convnull.getState() ) {
+	  handlers.push_back ( new FixConversionNull() );
+	  handlers.push_back ( new FixConversionNull("ArrSort", 3) );
   }
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )

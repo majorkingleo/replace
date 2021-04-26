@@ -47,3 +47,6 @@ echo === test_scoped_cstr ===
 
 echo === test_addcast ===
 ./test_addcast.sh
+
+echo === test_convnull ===
+./test_convnull.sh

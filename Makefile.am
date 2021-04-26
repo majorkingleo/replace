@@ -38,7 +38,8 @@ replace_SOURCES=\
 		unused_variable_handler.cc\
 		utils.cc \
 		fix_c_headers.cc \
-		add_cast.cc
+		add_cast.cc \
+		fix_conversion_null.cc
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \
