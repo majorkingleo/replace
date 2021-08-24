@@ -65,6 +65,7 @@ std::string FixSprintf::patch_file( const std::string & file )
 
 
 		bool changed_something = false;
+		bool create_error_message = false;
 
 		if( func.args.size() == 2 )
 		{
@@ -76,6 +77,10 @@ std::string FixSprintf::patch_file( const std::string & file )
 			func.name = "StrCpyDestLen";
 
 			changed_something = true;
+
+			if( func.args.at(1).find( "%" ) != std::string::npos ) {
+				create_error_message = true;
+			}
 		}
 #if 0
 		else if( func.args.size() == 3 &&
@@ -118,13 +123,26 @@ std::string FixSprintf::patch_file( const std::string & file )
 			{
 				std::string a = func.args[1].substr( STRFORM.size() + 1 );
 				func.args[1] = "format" + a;
+				create_error_message = false;
 			}
 
 			std::string first_part_of_file = res.substr(0,pos);
 
 			std::stringstream str;
+			std::string indent;
 
-			str << func.name << "(";
+			if( create_error_message ) {
+				str << "\n#error \"replace: % deteced in format string. Please check if the behavior is still correct.\"\n";
+
+				std::string::size_type pos_line_break = first_part_of_file.rfind('\n');
+
+				if( pos_line_break != std::string::npos ) {
+					indent = first_part_of_file.substr( pos_line_break );
+					first_part_of_file = first_part_of_file.substr( 0, pos_line_break );
+				}
+			}
+
+			str << indent << func.name << "(";
 
 			for( unsigned i = 0; i < func.args.size(); i++ )
 			{

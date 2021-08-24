@@ -1,0 +1,7 @@
+
+#error "replace: % deteced in format string. Please check if the behavior is still correct."
+
+	StrCpyDestLen(acLabZiel,  "%%TPA" );
+
+	StrCpyDestLen(acLabZiel, format( "%s",  MlMsg("Ziel") ) );
+
