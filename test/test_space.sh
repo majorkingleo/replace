@@ -6,10 +6,13 @@ for i in space/* ; do
 		continue;
 	fi
 	
-	#echo "testing $i"
+	echo "testing $i"
 	
 	if test -f "$i"/*.c ; then
 		FILE="$i"/*.c
+	fi
+	if test -f "$i"/*.cc ; then
+		FILE="$i"/*.cc
 	fi
 	if test -f "$i"/*.pdl ; then
 		FILE="$i"/*.pdl
@@ -27,11 +30,13 @@ for i in space/* ; do
 		FILE="$i"/*.rc
 	fi	
 	
+	echo file $FILE call dirname
 	DIR=`dirname $FILE`
 	DIR_LEN=${#DIR}	
 	FILENAME=${FILE:$DIR_LEN+1}	
-	
-	rm -f work/*
+
+	rm -rf work
+	mkdir work
 	cp $FILE work	
 	cp $i/*.log work	
 	../replace work -compile-log work/*.log -unused-variable -doit 2>&1 > /dev/null

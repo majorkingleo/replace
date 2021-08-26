@@ -31,7 +31,8 @@ for i in unused_var/* ; do
 	DIR_LEN=${#DIR}	
 	FILENAME=${FILE:$DIR_LEN+1}	
 	
-	rm -f work/*
+	rm -rf work
+	mkdir work
 	cp $FILE work	
 	cp $i/*.log work	
 	../replace work -compile-log work/*.log -unused-variable -doit 2>&1 > /dev/null

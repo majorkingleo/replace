@@ -16,7 +16,8 @@ for i in genericpointer/* ; do
 	DIR_LEN=${#DIR}	
 	FILENAME=${FILE:$DIR_LEN+1}	
 	
-	rm -f work/*
+	rm -rf work
+	mkdir work
 	cp -f $FILE work	
 	../replace work -genericcast -doit 2>&1 > /dev/null
 	res=`diff work/${FILENAME} ${FILE}.erg`

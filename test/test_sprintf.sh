@@ -31,7 +31,8 @@ for i in sprintf/* ; do
 	DIR_LEN=${#DIR}	
 	FILENAME=${FILE:$DIR_LEN+1}	
 	
-	rm -f work/*
+	rm -rf work
+	mkdir work
 	cp $FILE work	
 	../replace work -sprintf -doit 2>&1 > /dev/null
 	res=`diff work/${FILENAME} ${FILE}.erg`
