@@ -11,6 +11,9 @@ for i in format-string/* ; do
 	if test -f "$i"/*.c ; then
 		FILE="$i"/*.c
 	fi
+	if test -f "$i"/*.cc ; then
+		FILE="$i"/*.cc
+	fi
 	if test -f "$i"/*.pdl ; then
 		FILE="$i"/*.pdl
 	fi
