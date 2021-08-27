@@ -30,7 +30,9 @@
 
 #define _ME_BZSET_C
 #include "me_bzset.h"
+#include "hist_util.h"
 #include "errmsg.h"
+#include "efcbm.h"
 #undef _ME_BZSET_C
 
 
