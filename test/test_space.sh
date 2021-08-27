@@ -30,7 +30,6 @@ for i in space/* ; do
 		FILE="$i"/*.rc
 	fi	
 	
-	echo file $FILE call dirname
 	DIR=`dirname $FILE`
 	DIR_LEN=${#DIR}	
 	FILENAME=${FILE:$DIR_LEN+1}	
@@ -39,7 +38,7 @@ for i in space/* ; do
 	mkdir work
 	cp $FILE work	
 	cp $i/*.log work	
-	../replace work -compile-log work/*.log -unused-variable -doit 2>&1 > /dev/null
+	../replace work -compile-log work/*.log -literal -doit 2>&1 > /dev/null
 	res=`diff work/${FILENAME} ${FILE}.erg`
 	
      if ! test -z "$res" ; then
