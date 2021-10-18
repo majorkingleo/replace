@@ -1,0 +1,539 @@
+/**
+* @file
+* @todo describe file content
+* @author Copyright (c) 2021 SSI Schaefer IT Solutions
+*/
+#include <stdio.h>
+
+/* ------- Owil-Headers --------------------------------------------------- */
+#include <owil.h>
+
+/* ------- Tools-Headers -------------------------------------------------- */
+#include "menufct.h"
+#include "efcbm.h"
+#include "logtool.h"
+#include "t_util.h"
+#include "ml.h"
+#include "ml_util.h"
+#include "owrcloader.h"
+#include "wamasbox.h"
+#include <dbsqlstd.h>
+/* ------- Local-Headers -------------------------------------------------- */
+#include "fes.h"
+#include "global.h"
+
+#define _ME_VZSIMP_C
+#include "me_imp.h"
+#undef _ME_VZSIMP_C
+
+
+#define DEBUG
+#undef	DEBUG
+
+
+/* ===========================================================================
+ * LOCAL DEFINES AND MACROS
+ * =========================================================================*/
+#define RC_NAME_WORK 	"imp_work"
+
+/* ===========================================================================
+ * LOCAL TYPEDEFS (ENUMS, STRUCTURES, ...)
+ * =========================================================================*/
+
+ /* ------- Enums --------------------------------------------------------- */
+
+ /* ------- Structures ---------------------------------------------------- */
+typedef struct _COUNTER {
+	int 	iMax;
+	int 	nI;
+	int		iRate;
+} COUNTER;
+
+typedef struct _MY_CTX {
+	int 			iWhat;
+	COUNTER			tCounter;
+	GLOB_DATA_IMP	tGlobData;
+	GrContext   	hGrc;
+	ListBuffer		hLb;
+} MY_CTX;
+
+/* ===========================================================================
+ * LOCAL (STATIC) Variables and Function-Prototypes
+ * =========================================================================*/
+ /* ------- Function-Prototypes ------------------------------------------- */
+static int SaveData(MskDialog hMaskRl);
+
+ /* ------- Variables ----------------------------------------------------- */
+
+/* ===========================================================================
+ * GLOBAL VARIABLES
+ * =========================================================================*/
+
+/* ===========================================================================
+ * LOCAL (STATIC) Functions
+ * =========================================================================*/
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-*      Callback fuer Cacel Button
+-* RETURNS
+-*      EFCBM_CONTINUE
+-*--------------------------------------------------------------------------*/
+static int CbCancel(MskDialog hMaskRl, MskStatic hEf,
+                     MskElement hEfRl, int iReason, void *pvCbc, void *xxx)
+{
+    /*
+    -* Standard Callback fuer den Close Button einer Maske aufrufen
+    -*/
+	switch(iReason) {
+		case FCB_XF:
+			MskCbClose(hMaskRl, hEf, hEfRl, iReason, pvCbc);
+			break;
+		default:
+			break;
+	}
+    return EFCBM_CONTINUE;
+}   
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+static void PushCancel(MskDialog hMaskRl) {
+
+    MskTcbcXf       hCbcXf;
+    MskElement      hEl;
+
+    memset(&hCbcXf,0,sizeof(MskTcbcXf));
+    hCbcXf.bid  = 0;
+
+    hEl=MskQueryCreateRl(hMaskRl,MskGetElement("Cancel_F"),KEY_DEF);
+
+    if (hEl) {
+        MskCallbackExec(hMaskRl,MskGetElement("Cancel_F"),hEl,FCB_XF,&hCbcXf);
+    }
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+static int cb_counter(MskDialog hMaskRl, MskTgeneric *ef,
+                                MskTgenericRl *rl, int reason, void *cbc)
+{
+    float 		w;
+    float 		ww, wh;
+    int 		tw, th;
+	static int 	iFehler = 0;
+	int 		iRv;
+	int 		nI;
+    char        actext[64];
+    GrContext   grc;
+	MY_CTX 		*ptMc;
+    MskTcbcCs 	*cbc_cs = (MskTcbcCs *)cbc;
+
+    switch (reason) {
+    case FCB_RF:
+        break;
+
+    case FCB_CA:
+        grc = cbc_cs->rc->grc;
+        switch (cbc_cs->xreason) {
+        case XCB_CREDRAW:           /* Redraw */
+            switch (cbc_cs->rc->redraw->reason) {
+            case REDRAW_GENERAL:    /* Full Redraw */
+            default:
+	
+				ptMc = (MY_CTX *)MskRlMaskGet(hMaskRl, MskNmaskCalldata);
+
+
+                if (ptMc->tCounter.iMax > 0 && ptMc->tCounter.nI != 0) {
+                    ptMc->tCounter.iRate = 
+						100 * ptMc->tCounter.nI / ptMc->tCounter.iMax ;
+                } else {
+                    ptMc->tCounter.iRate = 0;
+					w = 0;
+					GrContextSet(grc, GrcNforeground, 
+									(Value)GrColorLock(C_BLACK));
+					GrFillRectangle(grc, w,0, ww-w,wh);
+					GrColorUnlock((Color)C_BLACK);
+				}
+
+                ww = (int)MskRlGet(rl, MskNcanvasWorldW);
+                wh = (int)MskRlGet(rl, MskNcanvasWorldH);
+
+				w = (ww / ptMc->tCounter.iMax) * ptMc->tCounter.nI;
+
+                GrContextSet(grc, GrcNforeground, (Value)GrColorLock(C_BLUE));
+                GrFillRectangle(grc, 0,0, w,wh);
+
+                GrContextSet(grc, GrcNforeground, (Value)GrColorLock(C_BLACK));
+                GrFillRectangle(grc, w,0, ww-w,wh);
+
+                if (ptMc->tCounter.iMax > 0) {
+                    sprintf(actext, "%d von %d  (%d %%)",
+						ptMc->tCounter.nI,
+						ptMc->tCounter.iMax,
+						ptMc->tCounter.iRate);
+                }
+
+				GrContextSet(grc, GrcNtextColor, (Value)GrColorLock(C_WHITE));
+
+                GrGetStringSizeCurrentFont(grc, actext,strlen(actext),
+                                                (Value *)&tw, (Value *)&th);
+
+                GrDrawText(grc, (ww-tw)/2, (wh-th)/2, actext,strlen(actext));
+		
+				GrColorUnlock((Color)C_WHITE);
+				GrColorUnlock((Color)C_BLACK);
+				GrColorUnlock((Color)C_BLUE);
+
+				if(ptMc->tCounter.nI != ptMc->tCounter.iMax) {
+
+					iRv = SaveData(hMaskRl);
+
+					if(iRv == -1) {
+						nI = ptMc->tCounter.nI;
+						ptMc->tCounter.nI = ptMc->tCounter.iMax;
+						TSqlRollback(hMaskRl);
+						WamasBox(SHELL_OF(hMaskRl),
+							WboxNboxType,   WBOX_ALERT,
+							WboxNbutton,    WboxbNok,
+							WboxNmwmTitle,  MlM("Import"),
+							WboxNtext,      StrForm(MlMsg("Zeile: %d\n"
+													"Datenbankfehler: %s"), 
+													nI+1,
+													TSqlErrTxt(hMaskRl)),
+							NULL);
+						MskRlSet(rl, MskNcanvasTimerOff, TRUE);
+						PushCancel(hMaskRl);
+						break;
+					}
+
+					if(iRv == 0) {
+						nI = ptMc->tCounter.nI;
+						ptMc->tCounter.nI = ptMc->tCounter.iMax;
+						TSqlRollback(hMaskRl);
+						WamasBox(SHELL_OF(hMaskRl),
+							WboxNboxType,   WBOX_ALERT,
+							WboxNbutton,    WboxbNok,
+							WboxNmwmTitle,  MlM("Import"),
+							WboxNtext,  StrForm(
+									MlMsg("CSV-Datenfehler: Zeile %d\n"
+									"Fehlerhaftes Attribut!"), nI+1),
+						NULL);
+
+						MskRlSet(rl, MskNcanvasTimerOff, TRUE);
+						PushCancel(hMaskRl);
+						break;
+					}
+
+					if(iRv == 1 && ptMc->tCounter.nI == ptMc->tCounter.iMax) {
+						TSqlCommit(hMaskRl);
+						C->tChangeTime[CHT_FES].zChangeTime = time((time_t*)0);
+						WamasBox(SHELL_OF(hMaskRl),
+							WboxNboxType,   WBOX_INFO,
+							WboxNbutton,    WboxbNok,
+							WboxNmwmTitle,  MlM("Import"),
+							WboxNtext,    MlM("Import erfolgreich durchgefuhrt!"),
+							NULL);
+						MskRlSet(rl, MskNcanvasTimerOff, TRUE);
+						PushCancel(hMaskRl);
+						break;
+					}
+				}
+
+                break;
+            }
+            break;
+        }
+        break;
+
+    case FCB_DF:
+        break;
+	default:
+		break;
+    }
+
+	return EFCBM_CONTINUE;
+}
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-* 		-1 	Db-Fehler	(Rollback)
+-* 		 0 	allg. Fehler
+-* 		 1  alles Ok	(Commit)
+-*--------------------------------------------------------------------------*/
+static int SaveData(MskDialog hMaskRl) {
+	
+	MY_CTX		*ptMc;
+	LB_DATA_VZS 	tData;
+	ListElement	hLe;
+	static 		int 	nI = 0;
+	int 		iRv;
+	FES			tFes;
+	FES			tFesSav;
+	char		acPosition[3];
+	char 		acBereich[3];
+	char 		acBzEle[5];
+	char 		*pcAttr;
+	MskTgeneric	*pEf;
+	MskElement	pEl;
+	int 		iValue;
+	OWidget		w;
+
+	ptMc = (MY_CTX *) MskRlMaskGet (hMaskRl, MskNmaskCalldata);
+
+	memset(&tData, 0, sizeof(tData));
+	memset(&tFes,  0, sizeof(tFes));
+
+	hLe 	= ListBufferGetElement(ptMc->hLb,ptMc->tCounter.nI);
+	tData 	= *(LB_DATA_VZS*)hLe->data;
+
+	/*
+	 * Datenbankstruktur zusammenbasteln
+	 */
+
+	strcpy(&tFes.fesFeldId[0], 		&tData.tFes.fesFeldId[0]);
+	strcpy(&tFes.fesLagId[0], 		&tData.acLagId[0]);
+	strcpy(&tFes.fesFet.FetId[0], 	&tData.acFet[0]);
+
+	tFes.fesNodeKz = 1;
+
+	if(	tData.iBereich != 0 && 
+		tData.iPosition != 0) {		
+
+		tFes.fesVpos.Bereich = tData.iBereich;
+		tFes.fesVpos.VzsPos  = tData.iPosition;
+	} else {
+		/* Abhaengig davon, wo sich der Trennstrich befindet */
+
+		memset(&acBereich[0], 0, sizeof(acBereich));
+		memset(&acPosition[0], 0, sizeof(acPosition));
+		if(tData.tFes.fesFeldId[4] == '-'){
+			acBereich[0] 	= tData.tFes.fesFeldId[5];	
+			acBereich[1] 	= tData.tFes.fesFeldId[6];	
+			acPosition[0] 	= tData.tFes.fesFeldId[7];	
+			acPosition[1] 	= tData.tFes.fesFeldId[8];	
+		}else
+		if(tData.tFes.fesFeldId[3] == '-'){
+			acBereich[0] 	= tData.tFes.fesFeldId[4];	
+			acBereich[1] 	= tData.tFes.fesFeldId[5];	
+			acPosition[0] 	= tData.tFes.fesFeldId[6];	
+			acPosition[1] 	= tData.tFes.fesFeldId[7];	
+		}
+		acBereich[2] 	= '\0';
+		acPosition[2] 	= '\0';
+		tFes.fesVpos.Bereich = atol(acBereich);
+		tFes.fesVpos.VzsPos  = atol(acPosition);
+	}
+
+/*
+	if(tData.tFes.fesBzElem != 0) {
+		tFes.fesBzElem = tData.tFes.fesBzElem;
+	} else {
+		sprintf(acBzEle,"%02d%02d", tFes.fesVpos.Bereich, 
+								tFes.fesVpos.VzsPos);
+		tFes.fesBzElem = atol(acBzEle);
+	}
+*/
+
+	if(IsEmptyStrg(&tData.acAttr[0]) == 0) {
+		pcAttr = strtok(&tData.acAttr[0], ",");
+		for(;IsEmptyStrg(pcAttr) == 0 && pcAttr != NULL; ) {
+			iValue = 0;
+			iValue = l2sGetValueByName((LO2STR*)&l2s_FATTR1, pcAttr);
+			if(iValue != 0 && iValue <= 0x80000000) {
+				tFes.fesFattr1 = tFes.fesFattr1 | iValue;
+				pcAttr = strtok(NULL, ",");
+			} else {
+				return 0;
+				break;
+			}
+		}
+	}
+
+	tFes.fesFattr1 = tFes.fesFattr1 | FA1_NO;
+/*	tFes.fesLaden = JANEIN_J;*/
+	tFes.fesBlockNr = tData.iBlockNr; 
+
+	if (tData.rbgr != 0 &&
+		tData.rbgs != 0 &&
+		tData.rbge != 0 ) {
+
+		tFes.fesRbgPos.r = tData.rbgr;
+		tFes.fesRbgPos.s = tData.rbgs;
+		tFes.fesRbgPos.e = tData.rbge;
+		tFes.fesRbgPos.f = tData.rbgf;
+	}	
+
+	tFes.fesGangNr = tData.iGangNr;
+
+	if(ptMc->iWhat == IMP_IMP) {
+
+		memset(&tFesSav, 0, sizeof(FES));
+		memcpy(&tFesSav, &tFes, sizeof(FES));
+
+		iRv = TExecStdSql(hMaskRl, StdNselectUpdNo, TN_FES, &tFesSav);
+
+		/*
+	     * Daten die sich ändern dürfen Übernehmen -> damit die 
+	 	 * Trigger nicht ansprechen
+		 */
+
+		strcpy(&tFesSav.fesLagId[0], &tFes.fesLagId[0]);
+		tFesSav.fesFattr1 			= tFes.fesFattr1;
+		tFesSav.fesVpos.Bereich 	= tFes.fesVpos.Bereich;
+		tFesSav.fesVpos.VzsPos 		= tFes.fesVpos.VzsPos;
+/*		tFesSav.fesBzElem			= tFes.fesBzElem;*/
+		tFesSav.fesBlockNr			= tData.iBlockNr;
+		tFesSav.fesFattr1 			= tFes.fesFattr1 | FA1_NO;
+/*		tFesSav.fesLaden 			= JANEIN_J;*/
+		tFesSav.fesRbgPos.r 		= tFes.fesRbgPos.r;
+		tFesSav.fesRbgPos.s 		= tFes.fesRbgPos.s;
+		tFesSav.fesRbgPos.e 		= tFes.fesRbgPos.e;
+		tFesSav.fesRbgPos.f 		= tFes.fesRbgPos.f;
+		tFesSav.fesGangNr 			= tFes.fesGangNr;
+
+		if(TSqlError(hMaskRl) == SqlNotFound) {
+			iRv = TExecStdSql(hMaskRl, StdNinsert, TN_FES, &tFesSav);
+
+			if(iRv != 1) {
+				return -1;
+			}
+			ptMc->tCounter.nI++;
+			return 1;
+		}
+
+		if(iRv != 1) {
+			return -1;
+		}
+
+		iRv = TExecStdSql(hMaskRl, StdNupdate, TN_FES, &tFesSav);
+
+		if(iRv != 1) {
+			return -1;
+		}
+
+		ptMc->tCounter.nI++;
+		return 1;
+	}
+
+	ptMc->tCounter.nI++;
+	return 1;
+}
+
+static DdTableRec table_callback[] = {
+  {"CbCancel",    (Value)CbCancel},
+  {NULL}
+};
+
+/*----------------------------------------------------------------------------
+-* SYNOPSIS
+-*      $$ (automatically replaced with function prototype by autodoc-tool)
+-* DESCRIPTION
+-* RETURNS
+-*--------------------------------------------------------------------------*/
+static int CbMaskWork(MskDialog hMaskRl, int reason)
+{
+    MY_CTX  	*ptMc;
+	int 		iRv;
+
+    switch (reason) {
+    case MSK_PF:
+        WdgGuiSet (GuiNactiveShell, (Value)SHELL_OF(hMaskRl));
+        break;
+
+    case MSK_CM:
+        ptMc = (MY_CTX *)MskRlMaskGet(hMaskRl,MskNmaskCalldata);
+
+        if( !ptMc->hLb) {
+            return MSK_OK_NOUPDATE;
+        }
+
+        MskVaAssign(hMaskRl, MskGetElement("ef_imp_counter"),
+                    MskNkey,      (Value) KEY_DEF,
+					MskNcallback, (Value) cb_counter,
+					MskNupdate,   (Value) TRUE,
+                    NULL);
+
+		EfcbmInstByName(hMaskRl, "Cancel_F", KEY_DEF, CbCancel, NULL);
+
+        break;
+    case MSK_RA:
+        ptMc = (MY_CTX *)MskRlMaskGet(hMaskRl,MskNmaskCalldata);
+		ptMc->tCounter.nI = 0;
+		break;
+    case MSK_DM:
+        ptMc = (MY_CTX *)MskRlMaskGet(hMaskRl,MskNmaskCalldata);
+
+        TSqlRollback(hMaskRl);
+
+        if(ptMc != NULL) {
+            free(ptMc);
+            ptMc = (MY_CTX *)NULL;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return (1);
+}
+
+/* ===========================================================================
+ * GLOBAL (PUBLIC) Functions
+ * =========================================================================*/
+int OpenImpMask(OWidget hParent, ListBuffer hLb, 
+				int iAnz, GLOB_DATA_IMP *ptData, int iWhat) {
+
+    MY_CTX     *ptMc;
+    MskDialog   hMaskRl=NULL;
+    OWidget     m_sh=NULL;
+    int         rv;
+
+    hMaskRl = MskOpenMask(NULL, RC_NAME_WORK);
+
+	ApGuiSet(ApNregisterMskCallback,(Value)table_callback);
+
+    if (hMaskRl == NULL) {
+        return RETURN_ERROR;
+    }
+
+    if ((m_sh = SHELL_OF(hMaskRl)) == NULL) {
+        ptMc = (MY_CTX *)malloc(sizeof(MY_CTX));
+        if (ptMc == NULL) {
+            MskDestroy (hMaskRl);
+            perror("malloc");
+            return (-1);
+        }
+
+        memset(ptMc, 0, sizeof(MY_CTX));
+
+		ptMc->hLb 			= hLb;
+		ptMc->tCounter.iMax = iAnz;
+		ptMc->iWhat 		= iWhat;
+		memcpy(&ptMc->tGlobData, ptData, sizeof(GLOB_DATA_IMP));
+
+        MskRlMaskSet(hMaskRl, MskNmaskNoTopPlate,(Value)1);
+        MskRlMaskSet(hMaskRl, MskNmaskCallback,  (Value)CbMaskWork);
+        MskRlMaskSet(hMaskRl, MskNmaskCalldata, (Value)ptMc);
+
+        m_sh=ApShellModelessCreate(hParent, AP_CENTER, AP_CENTER);
+    }
+
+    MskCreateDialog(m_sh, hMaskRl, MlM("Importieren"),
+                NULL, HSL_NI, SMB_All);
+
+    return 0;
+
+}

@@ -1,0 +1,3 @@
+int main() {
+	maskSetMessage(mask, 'E', MlMsg("Bitte Auslagerauftragsnummer angeben!"));
+}

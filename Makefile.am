@@ -39,7 +39,9 @@ replace_SOURCES=\
 		utils.cc \
 		fix_c_headers.cc \
 		add_cast.cc \
-		fix_conversion_null.cc
+		fix_conversion_null.cc \
+		add_mlm.cc \
+		add_mlm_wbox.cc 
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \

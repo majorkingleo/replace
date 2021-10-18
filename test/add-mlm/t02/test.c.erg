@@ -1,0 +1,12 @@
+int main() {
+
+           rv = WamasBox(SHELL_OF(mask),
+                          WboxNboxType,   WBOX_WARN,
+                          WboxNbuttonText,MlM("Ja"),
+                          WboxNbuttonRv,  IS_Ok,
+                          WboxNbutton,    WboxbNcancel,
+                          WboxNescButton, WboxbNcancel,
+                          WboxNmwmTitle,  MlM("Datenexport"),
+                          WboxNtext,              MlM("    Vorgang abbrechen?    "),
+                          NULL);
+}
