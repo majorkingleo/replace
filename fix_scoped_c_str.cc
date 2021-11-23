@@ -65,7 +65,7 @@ std::string FixScopedCStr::patch_file( const std::string & file )
 		//    wamas::platform:string::form( acBuf, "%s %d", xxx, yyy ).c_str()
 
 
-		func.name = "wamas::platform:string::form";
+		func.name = "wamas::platform::string::form";
 		// *func.args.rbegin() += ".c_str()";
 
 		std::string first_part_of_file = res.substr(0,pos);
