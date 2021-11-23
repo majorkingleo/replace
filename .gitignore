@@ -1,1 +1,8 @@
 replace
+replace
+*.exe
+*.gz
+
+.cproject
+.settings
+.project

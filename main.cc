@@ -34,6 +34,8 @@
 #include "fix_c_headers.h"
 #include "add_cast.h"
 #include "fix_conversion_null.h"
+#include "add_mlm.h"
+#include "add_mlm_wbox.h"
 
 using namespace Tools;
 
@@ -58,6 +60,11 @@ void usage( const std::string & prog )
 			<< prog
 			<< " . -replace \"sdbm/\" \"foobar\" -doit # this finds all includes with sdbm in path\n"
 			<< "                                       # and removes them with foobar\n";
+  std::cerr << "  eg: "
+			<< prog
+			<< " . -add-mlm -function-name maskSetMessage -function-arg 3 -function-call MlMsg\n"
+			<< "            # will replace maskSetMessage(mask, 'E', \"Bitte Auslagerauftragsnummer angeben!\");\n"
+			<< "            # with         maskSetMessage(mask, 'E', MlMsg(\"Bitte Auslagerauftragsnummer angeben!\"));\n";
 
   std::cerr << "usage: "
   			<< prog << " PATH -remove-versid [-doit]\n";
@@ -435,7 +442,50 @@ int main( int argc, char **argv )
       oc_convnull.addOptionR(&o_convnull);
 
 
+      // Add MlM chain
+      Arg::OptionChain oc_add_mlm;
+      arg.addChainR(&oc_add_mlm);
+      oc_add_mlm.setMinMatch(3);
+      oc_add_mlm.setContinueOnFail(true);
+      oc_add_mlm.setContinueOnMatch(true);
 
+      Arg::FlagOption o_add_mlm("add-mlm");
+      o_add_mlm.setDescription(co.good("add MlM(), or MlMsg() to specific function args"));
+      o_add_mlm.setRequired(true);
+      oc_add_mlm.addOptionR(&o_add_mlm);
+
+      Arg::StringOption o_add_mlm_function_name("function-name");
+      o_add_mlm_function_name.setDescription(co.good("-add-mlm -function-name maskSetMessage"));
+      o_add_mlm_function_name.setRequired(true);
+      o_add_mlm_function_name.setMinValues(1);
+      o_add_mlm_function_name.setMaxValues(1);
+      oc_add_mlm.addOptionR(&o_add_mlm_function_name);
+
+      Arg::StringOption o_add_mlm_function_arg("function-arg");
+      o_add_mlm_function_arg.setDescription(co.good("-add-mlm -function-name maskSetMessage -function-arg 3"));
+      o_add_mlm_function_arg.setRequired(true);
+      o_add_mlm_function_arg.setMinValues(1);
+      o_add_mlm_function_arg.setMaxValues(1);
+      oc_add_mlm.addOptionR(&o_add_mlm_function_arg);
+
+      Arg::StringOption o_add_mlm_function_call("function-call");
+      o_add_mlm_function_call.setDescription(co.good("-add-mlm -function-name maskSetMessage -function-arg 3 -function-call MlM"));
+      o_add_mlm_function_call.setRequired(true);
+      o_add_mlm_function_call.setMinValues(1);
+      o_add_mlm_function_call.setMaxValues(1);
+      oc_add_mlm.addOptionR(&o_add_mlm_function_call);
+
+      // Add MlM WamaBox chain
+      Arg::OptionChain oc_add_mlm_wbox;
+      arg.addChainR(&oc_add_mlm_wbox);
+      oc_add_mlm_wbox.setMinMatch(1);
+      oc_add_mlm_wbox.setContinueOnFail(true);
+      oc_add_mlm_wbox.setContinueOnMatch(true);
+
+      Arg::FlagOption o_add_mlm_wbox("add-mlm-wamas-box");
+      o_add_mlm_wbox.setDescription(co.good("add MlM(), or MlMsg() to WamasBoxes Args"));
+      o_add_mlm_wbox.setRequired(true);
+      oc_add_mlm_wbox.addOptionR(&o_add_mlm_wbox);
 
   const unsigned int console_width = 80;
 
@@ -494,7 +544,9 @@ int main( int argc, char **argv )
 	  !o_prmget.isSet() &&
 	  !o_fix_c_header_file.isSet() &&
 	  !o_owcallback.isSet() &&
-	  !o_convnull.isSet())
+	  !o_convnull.isSet() &&
+	  !o_add_mlm.isSet() &&
+	  !o_add_mlm_wbox.isSet())
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
@@ -646,6 +698,22 @@ int main( int argc, char **argv )
   if (o_convnull.getState() ) {
 	  handlers.push_back ( new FixConversionNull() );
 	  handlers.push_back ( new FixConversionNull("ArrSort", 3) );
+  }
+
+  if( o_add_mlm.getState() ) {
+	  std::string function_name = o_add_mlm_function_name.getValues()->at(0);
+	  unsigned function_arg = s2x<unsigned>(o_add_mlm_function_arg.getValues()->at(0));
+	  std::string function_call = o_add_mlm_function_call.getValues()->at(0);
+
+	  handlers.push_back( new AddMlM( function_name, function_arg, function_call ));
+  }
+
+  if( o_add_mlm_wbox.getState() ) {
+	  handlers.push_back( new AddMlMWBox());
+	  handlers.push_back( new AddMlMWBox("WamasBoxAlert"));
+	  handlers.push_back( new AddMlMWBox("WamasBoxCommit"));
+	  handlers.push_back( new AddMlMWBox("WamasBoxInfo"));
+	  handlers.push_back( new AddMlMWBox("WamasBoxInput"));
   }
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )

@@ -50,3 +50,6 @@ echo === test_addcast ===
 
 echo === test_convnull ===
 ./test_convnull.sh
+
+echo === test_add_mlm ===
+./test_add_mlm.sh

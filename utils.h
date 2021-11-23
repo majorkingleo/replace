@@ -176,4 +176,9 @@ bool get_function( const std::string &s,
                    std::string::size_type &start,
                    std::string::size_type &end, Function *func,  bool strip_args = true );
 
+std::string function_to_string( const std::string & s,
+								const Function & func,
+								std::string::size_type start,
+								std::string::size_type end );
+
 #endif

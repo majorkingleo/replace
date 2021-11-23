@@ -652,4 +652,32 @@ bool get_function( const std::string &s,
     return true;
 }
 
+std::string function_to_string( const std::string & res,
+								const Function & func,
+								std::string::size_type start,
+								std::string::size_type end )
+{
+	std::string first_part_of_file = res.substr(0,start);
+
+	std::stringstream str;
+
+	str << func.name << "(";
+
+	for( unsigned i = 0; i < func.args.size(); i++ )
+	{
+		if( i > 0 ) {
+			str << ",";
+		}
+
+		str << func.args[i];
+	}
+
+	str << ")";
+
+	DEBUG( str.str() );
+
+	std::string second_part_of_file = res.substr(end);
+
+	return first_part_of_file + str.str() + second_part_of_file;
+}
 
