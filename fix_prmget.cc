@@ -25,6 +25,8 @@ FixPrmGet::FixPrmGet( const std::string & FUNCTION_NAME_,
 	keywords.push_back( FUNCTION_NAME );
 }
 
+
+
 std::string FixPrmGet::patch_file( const std::string & file )
 {
 	if( should_skip_file( file ))
@@ -44,8 +46,9 @@ std::string FixPrmGet::patch_file( const std::string & file )
 
 		pos = res.find( FUNCTION_NAME, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::string::npos ) {
 			return res;
+		}
 
 		DEBUG( format( "%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
@@ -83,18 +86,63 @@ std::string FixPrmGet::patch_file( const std::string & file )
 			continue;
 		}
 
-		DEBUG( format( "'%s' decl: '%s' line: %d", var_name, decl, get_linenum(res,decl_pos)) );
+		DEBUG( format( "'%s' decl: '%s' line: %d pos: %d char: 0x%X (%c)",
+						var_name, decl, get_linenum(res,decl_pos), decl_pos, (int)res[decl_pos], res[decl_pos] ));
 
 		std::string line = get_whole_line( res, decl_pos );
+
+		DEBUG( format( "line with decl: %s", line ) );
 
 		if( line.find( "int" ) == std::string::npos ) {
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
-		DEBUG( format( "found invalid use of PrmGet at line: %d", get_linenum(res,pos-1)) );
+		DEBUG( format( "found invalid use of %s at line: %d", FUNCTION_NAME, get_linenum(res,pos-1)) );
 
-		std::string new_line = substitude( line, "int", "long" );
+		// wenn es sich um die Funktionsdefinition handelt, dann vorsichtig
+
+		bool already_replaced = false;
+		std::string new_line;
+
+		std::string::size_type pfunc = line.find( "(");
+		if( pfunc != std::string::npos ) {
+			DEBUG( "detected function" );
+
+			std::string::size_type pp = skip_spaces( line, pfunc, true );
+
+			if( pp != std::string::npos ) {
+				pp = rfind_first_of(line, " \t\n;,", pp );
+
+				if( pp != std::string::npos ) {
+
+					std::string::size_type start;
+					std::string::size_type end;
+					Function func;
+
+					if( get_function( line, pp, start, end, &func, false ) ) {
+						for( std::string & arg : func.args ) {
+							if( arg.find( var_name ) ) {
+								arg = substitude( arg, "int", "long" );
+								already_replaced = true;
+								break;
+							}
+						}
+
+						if( already_replaced ) {
+							new_line = function_to_string( line, func, pp, end+1 );
+							DEBUG( format( "new: %s", new_line ) );
+						}
+					}
+				}
+			}
+
+		}
+
+		if( !already_replaced ) {
+			new_line = substitude( line, "int", "long" );
+		}
+
 		std::string new_var_name;
 
 		bool rename_var = false;
@@ -106,6 +154,8 @@ std::string FixPrmGet::patch_file( const std::string & file )
 		}
 
 		replace_line_from_start_of_line( res, decl_pos, new_line );
+		DEBUG( format( "old: %s", line ) );
+		DEBUG( format( "new: %s", new_line ) );
 
 		// Variable im ganzen File umbenennen, vermutlich ist das eh die richtige Taktik
 		// und wenn das nicht klappt, dann muss die Methode etwas verfeinert werden
@@ -152,14 +202,13 @@ void FixPrmGet::replace_line_from_start_of_line( std::string & buffer, std::stri
 	if( pos == std::string::npos )
 		return;
 
-	long ppos = pos;
+	std::string::size_type ppos = buffer.rfind( '\n', pos );
 
-	for( ; ppos > 0; ppos-- )
-		if( buffer[ppos] == '\n' )
-		{
-			ppos++;
-			break;
-		}
+	if( ppos == std::string::npos ) {
+		ppos = 0;
+	} else {
+		ppos++;
+	}
 
 	UnusedVariableHandler::replace_line( buffer, ppos, new_line );
 }

@@ -66,6 +66,12 @@ void usage( const std::string & prog )
 			<< "            # will replace maskSetMessage(mask, 'E', \"Bitte Auslagerauftragsnummer angeben!\");\n"
 			<< "            # with         maskSetMessage(mask, 'E', MlMsg(\"Bitte Auslagerauftragsnummer angeben!\"));\n";
 
+  std::cerr << "  eg: "
+ 			<< prog
+ 			<< " . -fix-long -function-name KpIdx2Str -function-arg 1\n"
+ 			<< "            # will search for &KpIdx in pc = KpIdx2Str(&KpIdx, NULL);\n"
+ 			<< "            # and if it is an int it will be replaced into a long\n";
+
   std::cerr << "usage: "
   			<< prog << " PATH -remove-versid [-doit]\n";
 }
@@ -487,6 +493,35 @@ int main( int argc, char **argv )
       o_add_mlm_wbox.setRequired(true);
       oc_add_mlm_wbox.addOptionR(&o_add_mlm_wbox);
 
+
+
+      // Add fix-long chain
+      Arg::OptionChain oc_fix_long;
+      arg.addChainR(&oc_fix_long);
+      oc_fix_long.setMinMatch(2);
+      oc_fix_long.setContinueOnFail(true);
+      oc_fix_long.setContinueOnMatch(true);
+
+      Arg::FlagOption o_fix_long("fix-long");
+      o_fix_long.setDescription(co.good("replace an int var by to a long var"));
+      o_fix_long.setRequired(true);
+      oc_fix_long.addOptionR(&o_fix_long);
+
+      Arg::StringOption o_fix_long_function_name("function-name");
+      o_fix_long_function_name.setDescription(co.good("-fix-long -function-name KpIdx2Str"));
+      o_fix_long_function_name.setRequired(true);
+      o_fix_long_function_name.setMinValues(1);
+      o_fix_long_function_name.setMaxValues(1);
+      oc_fix_long.addOptionR(&o_fix_long_function_name);
+
+      Arg::StringOption o_fix_long_function_arg("function-arg");
+      o_fix_long_function_arg.setDescription(co.good("-fix-long -function-name KpIdx2Str -function-arg 1"));
+      o_fix_long_function_arg.setRequired(true);
+      o_fix_long_function_arg.setMinValues(1);
+      o_fix_long_function_arg.setMaxValues(1);
+      oc_fix_long.addOptionR(&o_fix_long_function_arg);
+
+
   const unsigned int console_width = 80;
 
   if( !arg.parse() || argc <= 1 )
@@ -546,7 +581,8 @@ int main( int argc, char **argv )
 	  !o_owcallback.isSet() &&
 	  !o_convnull.isSet() &&
 	  !o_add_mlm.isSet() &&
-	  !o_add_mlm_wbox.isSet())
+	  !o_add_mlm_wbox.isSet() &&
+	  !o_fix_long.isSet())
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
@@ -714,6 +750,13 @@ int main( int argc, char **argv )
 	  handlers.push_back( new AddMlMWBox("WamasBoxCommit"));
 	  handlers.push_back( new AddMlMWBox("WamasBoxInfo"));
 	  handlers.push_back( new AddMlMWBox("WamasBoxInput"));
+  }
+
+  if( o_fix_long.getState() ) {
+	  std::string function_name = o_fix_long_function_name.getValues()->at(0);
+	  unsigned function_arg = s2x<unsigned>(o_fix_long_function_arg.getValues()->at(0));
+
+	  handlers.push_back( new FixPrmGet( function_name, function_arg ));
   }
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )

@@ -143,23 +143,7 @@ std::vector<std::string> sequence_point_split( const std::string & s );
 
 std::string::size_type find_function_decl( const std::string & s, std::string::size_type pos, Function & f );
 
-template <class T> std::string get_whole_line( const T &s, std::string::size_type pos )
-{
-	if( pos == std::string::npos )
-		return std::string();
-
-	long ppos = pos;
-
-	for( ; ppos > 0; ppos-- )
-		if( s[ppos] == '\n' )
-		{
-			ppos++;
-			break;
-		}
-
-    std::string::size_type p = s.find( '\n', ppos );
-    return s.substr( ppos, p - ppos );
-}
+std::string get_whole_line( const std::string & s, std::string::size_type pos );
 
 std::string::size_type skip_spaces( const std::string & s, std::string::size_type pos, bool reverse = false );
 
@@ -180,5 +164,7 @@ std::string function_to_string( const std::string & s,
 								const Function & func,
 								std::string::size_type start,
 								std::string::size_type end );
+
+std::string::size_type rfind_first_of( const std::string & s, const std::string & delims, std::string::size_type start = std::string::npos );
 
 #endif

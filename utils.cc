@@ -8,6 +8,7 @@
 #include "cppdir.h"
 #include "xml.h"
 #include "debug.h"
+#include <algorithm>
 
 using namespace Tools;
 
@@ -681,3 +682,45 @@ std::string function_to_string( const std::string & res,
 	return first_part_of_file + str.str() + second_part_of_file;
 }
 
+std::string get_whole_line( const std::string & s, std::string::size_type pos )
+{
+	if( pos == std::string::npos ) {
+		return std::string();
+	}
+
+	std::string::size_type ppos = s.rfind( '\n', pos );
+
+	if( ppos == std::string::npos ) {
+		ppos = 0;
+	} else {
+		ppos++;
+	}
+
+    std::string::size_type p = s.find( '\n', ppos );
+    std::string ret = s.substr( ppos, p - ppos );
+
+    // std::cout << "ppos: " << ppos << " p: " << p << " >" << ret << "< " << std::endl;
+
+    return ret;
+}
+
+
+std::string::size_type rfind_first_of( const std::string & s, const std::string & delims, std::string::size_type start )
+{
+	std::string copy( s );
+	std::reverse(copy.begin(), copy.end());
+
+	std::string::size_type start_pos = 0;
+
+	if( start != std::string::npos ) {
+		start_pos = s.size() - start;
+	}
+
+	std::string::size_type pos = copy.find_first_of( delims, start_pos );
+
+	if( pos == std::string::npos ) {
+		return std::string::npos;
+	}
+
+	return copy.size() - pos;
+}

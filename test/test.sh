@@ -53,3 +53,7 @@ echo === test_convnull ===
 
 echo === test_add_mlm ===
 ./test_add_mlm.sh
+
+echo === test_fix_long ===
+./test_fix_long.sh
+
