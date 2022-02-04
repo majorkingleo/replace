@@ -277,8 +277,8 @@ namespace Tools {
       int get_int( unsigned int n ) { return n; }
       int get_int( short n ) { return n; }
       int get_int( unsigned short n ) { return n; }
-      int get_int( long long n ) { return n; }
-      int get_int( unsigned long long n  ) { return n; }
+      int get_int( long long n ) { return (int)n; }
+      int get_int( unsigned long long n  ) { return (int)n; }
       int get_int( long n ) { return n; }
       int get_int( unsigned long n ) { return n; }
 

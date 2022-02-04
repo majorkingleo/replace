@@ -37,9 +37,8 @@ public:
 	: EClass(),
 	  value( value_ )
 	{
-	    if( value <= EClass::FIRST__ || value >= EClass::LAST__ ) {
-			throw( Error( "EnumRange: Out of range!" ) );
-		}
+	    if( value <= EClass::FIRST__ || value >= EClass::LAST__ )
+		throw( Error( "EnumRange: Out of range!" ) );
 	}    
 
     EnumRange(  const EnumRange<EClass>& er ) 

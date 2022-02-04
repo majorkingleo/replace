@@ -40,7 +40,29 @@ public:
 	WamasExceptionBase (char const *file, const int line, char const *fac, char const *msg,
 			const long errorCode);
 	*/
-	WamasExceptionBase (char const *file, const int line, char const *fac, char const *msg);
+	WamasExceptionBase (char const *file, const int line, char const *fac, char const *msg)
+      : what_(),
+        where_(),
+        errorCode_(0)
+    {
+	  init( file, line, fac, msg );
+    }
+
+	WamasExceptionBase ( char const *file, const int line, const std::string & fac, const std::string & msg )
+      : what_(),
+        where_(),
+        errorCode_(0)
+    {
+      init( file, line, fac, msg );
+    }
+
+	WamasExceptionBase ( char const *file, const int line, const std::string & fac, char const *msg )
+      : what_(),
+        where_(),
+        errorCode_(0)
+	{
+	  init( file, line, fac, msg );
+	}
 
 	virtual ~WamasExceptionBase() throw () {}
 
@@ -57,6 +79,8 @@ protected:
 	std::string what_; ///< Exception message
 	std::string where_; ///< Exception location
 	long errorCode_; ///< Exception error code
+
+	void init( char const *file, const int line, const std::string & fac, const std::string & msg );
 };
 
 
@@ -84,6 +108,17 @@ public:
 	 * @param[in] msg Log message (may be NULL)
 	 */
 	WamasException (char const *file, const int line, std::string const &fac, char const *msg);
+
+    /**
+     * Construct an exception.
+     * Upon construction, the passed message msg is written into a logfile, specified by fac.
+     * @param[in] file Sourcefilename, typically passed __FILE__
+     * @param[in] line Line ins Sourcefilename, typically passed __LINE__
+     * @param[in] fac Log facility (may be NULL)
+     * @param[in] msg Log message (may be NULL)
+     */
+    WamasException (char const *file, const int line, std::string const &fac, const std::string & msg);
+
 	/**
 	 * Construct an exception.
 	 * Upon construction, the passed message msg is written into a logfile, specified by fac.
@@ -221,6 +256,20 @@ public:
 			throw wamas::wms::WamasException(__FILE__, __LINE__, fac, msg, rv);	\
 		}
 */
+
+/**
+ * WAMASSERT for technical exception with no MLM text
+ */
+#define WAMASSERT_TECH(expr,fac,msg)                                            \
+        if (!(expr)) {                                                          \
+            _LoggingSIf_LogSetLocation (__FILE__, __LINE__);                    \
+            LoggingSIf_LogPrintf(fac, LOGGING_SIF_ALERT, "%s", msg);                    \
+            char *errshow=OpmsgSIf_ErrGetErrMsg(GeneralTerrInternal);           \
+            throw wamas::wms::WamasException (__FILE__, __LINE__, fac, errshow); \
+        }
+
+
+
 /**
  * Macro to throw a WamasExceptionAlreadyHandled.
  * Use this macro when you don't want any further error handling (AlertBox, SendError...) but

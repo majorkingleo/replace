@@ -7,11 +7,13 @@
 
 #include <logtool.h>
 
-#ifdef LogPrintf
-#undef LogPrintf
+#if TOOLS_VERSION - 0 < 40
+# ifdef LogPrintf
+#  undef LogPrintf
+# endif
 #endif
 
-#else
+#else // NOWAMAS
 
 enum {
   LT_DEBUG,
@@ -23,9 +25,12 @@ enum {
 int _LogSetLocation( const char *file, int line );
 int _LogPrintf( const char *fac, int level, const char *str , const char *str2 );
 
-#endif
+#endif // NOWAMAS
 
-#define LogPrintf _LogSetLocation(__FILE__,__LINE__)?0:_CPPLogPrintf
+// don't redefine LogPrintf, since version in TB2020 is already this implementation
+#if TOOLS_VERSION - 0 < 40
+# define LogPrintf _LogSetLocation(__FILE__,__LINE__)?0:_CPPLogPrintf
+#endif
 
 #if __cplusplus < 201103
 

@@ -20,9 +20,9 @@
  * =========================================================================*/
 
 #ifdef __cplusplus
-
-#include <string>
-#include <vector>
+# include <string>
+# include <vector>
+# include <cpp_util.h>
 #endif
 
 #ifdef __cplusplus

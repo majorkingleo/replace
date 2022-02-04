@@ -12,6 +12,7 @@
 #include <sstring.h>
 #include <wamasexception.h>
 #include <WamasSqlContext.h>
+#include <format.h>
 
 namespace wamas {
 namespace wms {
@@ -66,12 +67,12 @@ void WamasSqlReadListSimple (const void *tid, const char *fac, const char *clnam
 
 	int rv = 0;
 	const int blocksize = 100;
-	std::string	stmt(scoped_cstr::form("SELECT %%%s from %s", clname,clname));
+	std::string	stmt(Tools::format("SELECT %%%s from %s", clname,clname));
 	if (IsEmptyStrg (where) == 0) {
-		stmt += (const char*)scoped_cstr::form(" WHERE %s", where);
+		stmt += Tools::format(" WHERE %s", where);
 	}
 	if (IsEmptyStrg (orderby) == 0) {
-		stmt += (const char*)scoped_cstr::form(" ORDER BY %s", orderby);
+		stmt += Tools::format(" ORDER BY %s", orderby);
 	}
 	do {
 		thetype	block[blocksize];

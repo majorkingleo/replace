@@ -11,6 +11,8 @@
 #include <algorithm>
 #include "jvector.h"
 #include "report_exception.h"
+#include "sql_exception.h"
+#include "cpp_util_min_max.h"
 
 #ifndef NOWAMAS
 # include <dbsql.h>
@@ -202,43 +204,65 @@ template <class A> void do_not_use_a_pointer( const A & a, const A *b )
 */
 template <class A, class B> void StrCpy( A & a, const B & b )
 {  
-#if (defined WIN32 || defined _WIN32) && !defined __GNUC__
-  size_t len = min( sizeof(A), sizeof(B) );
-#else
-  size_t len = std::min( sizeof(A), sizeof(B) );
-#endif /* WIN32 || _WIN32 */
+  size_t len = Tools::CppUtilMin( sizeof(A), sizeof(B) );
 
   do_not_use_a_pointer(a,&a);
   do_not_use_a_pointer(b,&b);
   
+/* It's ok, not to warn here */
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
   strncpy( a, b, len );
+
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic pop
+#endif
 
   a[len-1]='\0'; 
 }
 
 template <class A> void StrCpy( A & a, const std::string & b )
 {
-#if (defined WIN32 || defined _WIN32) && ! defined __GNUC__
-  size_t len = min( sizeof(A), b.size() + 1 );
-#else
-  size_t len = std::min( sizeof(A), b.size() + 1 );
-#endif /* WIN32 || _WIN32 */
+  size_t len = Tools::CppUtilMin( sizeof(A), b.size() + 1 );
 
   do_not_use_a_pointer(a,&a);
-  
+
+  /* It's ok, not to warn here */
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
   strncpy( a, b.c_str(), len );
 
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic pop
+#endif
+  
   a[len-1]='\0'; 
 }
 
 /* Copys onle the avaliable bytes that are matching into the destination */
 template <class A> void StrCpyDestLen( A & a, const std::string & b )
 {
-  size_t len = std::min( sizeof(A), b.size() + 1 );
+  size_t len = Tools::CppUtilMin( sizeof(A), b.size() + 1 );
 
   do_not_use_a_pointer(a,&a);
   
+  /* It's ok, not to warn here */
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
   strncpy( a, b.c_str(), len );
+
+#if ( defined __GNUC__ && __GNUC__ >= 8 )
+# pragma GCC diagnostic pop
+#endif
 
   a[len-1]='\0'; 
 }
@@ -250,6 +274,15 @@ template <class A> void StrCpyDestLenAllowNull( A & a, const char *str )
 	
 	StrCpyDestLen( a, str );
 }
+
+template <class A,class B> void StrAppend( A & dest, const B & c_str )
+{
+  std::string str_a = dest;
+  str_a += c_str;
+
+  StrCpy( dest, str_a );
+}
+
 
 #ifndef NOWAMAS
 // FetchTable ist hier, um moeglichst ohne Workaround dieses Bug der da Beschrieben ist
@@ -346,6 +379,9 @@ public:
 
 template <class Table> class FetchTable : public JVector<Table>, public FetchTableBase
 {
+ public:
+	typedef typename JVector<Table>::size_type size_type;
+
  protected:
   std::string table_name;
 
@@ -358,7 +394,7 @@ template <class Table> class FetchTable : public JVector<Table>, public FetchTab
 	FetchTableBase( table ),
 	table_name(table.table_name)
 	{
-		insert( table.begin(), table.end() );
+	  JVector<Table>::insert( JVector<Table>::end(), table.begin(), table.end() );
 	}
 
   FetchTable & operator=( const FetchTable<Table> & table )
@@ -419,12 +455,15 @@ template <class Table> class FetchTable : public JVector<Table>, public FetchTab
     }
 
  public:
-    Table & operator[]( unsigned int i ) { return JVector<Table>::operator[](i); }
+    Table & operator[]( size_type i ) { return JVector<Table>::operator[](i); }
 };
 
 
 template <class TableA, class TableB> class FetchTablePair : public JVector<std::pair<TableA,TableB> >, public FetchTableBase
 {
+ public:
+  typedef typename JVector<std::pair<TableA,TableB> >::size_type size_type;
+
  protected:
   std::string table1_name;
   std::string table2_name;
@@ -439,16 +478,18 @@ template <class TableA, class TableB> class FetchTablePair : public JVector<std:
 	table1_name(table.table1_name),
 	table2_name(table.table2_name)
 	{
-		insert( table.begin(), table.end() );
+	  	  JVector<std::pair<TableA,TableB> >::insert( JVector<std::pair<TableA,TableB> >::end(),table.begin(), table.end() );
 	}
 
   FetchTablePair & operator=( const FetchTablePair<TableA, TableB> & table )
 	{
 	  FetchTableBase::operator=( table );
 	  
-	  insert( table.begin(), table.end() );	
+	  JVector<std::pair<TableA,TableB> >::insert( JVector<std::pair<TableA,TableB> >::end(), table.begin(), table.end() );
 	  table1_name = table.table1_name;
 	  table2_name = table.table2_name;
+
+	  return *this;
 	}
 
  public:
@@ -511,7 +552,7 @@ template <class TableA, class TableB> class FetchTablePair : public JVector<std:
     }
 
  public:
-    std::pair<TableA,TableB> & operator[]( unsigned int i ) { return JVector<std::pair<TableA,TableB> >::operator[](i); }
+    std::pair<TableA,TableB> & operator[]( size_type i ) { return JVector<std::pair<TableA,TableB> >::operator[](i); }
     
 };
 

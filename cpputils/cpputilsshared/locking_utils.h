@@ -5,6 +5,8 @@
 #include <tsleep.h>
 #include <dbsqlstd.h>
 #include <sqltable.h>
+#include <mlmsg.h>
+#include <cpp_util.h>
 
 /*
  * locking_utils.h
@@ -13,9 +15,6 @@
  *      Author: mmattl
  */
 
-#include <cpp_util.h>
-
-
 #ifdef FIX_BUG_20809
 #  define WORKAROUND_BUG_20809_TExecSql _TExecSql
 #  define WORKAROUND_BUG_20809_TExecStdSql _TExecStdSql
@@ -23,6 +22,7 @@
 #  define WORKAROUND_BUG_20809_TExecSql TExecSql
 #  define WORKAROUND_BUG_20809_TExecStdSql TExecStdSql
 #endif
+
 
 /*
  *
@@ -58,20 +58,18 @@
  *
  */
 
-namespace Tools {
-
 template <class Table> class LockSingleRecord {
 
 private:
 
-	void 		*pvTid;			// TID
+	const void 	*pvTid;			// TID
 	std::string	fac;			// Log-Facility
 	std::string	tableName;		// TableName, e.g. TN_TEK
 	Table		&table;			// reference to struct
 	std::string	whereStmt;		// optional: whereCnd and columns to lock
 	short		attempts;		// optional: max. attempts
 	long		timeout;		// optional: wait time between attemps (in ms.)
-
+	bool        all_cols;       // optional: all columns known by the database
 
 
 	LockSingleRecord & operator=( const LockSingleRecord<Table> & data ) {
@@ -84,8 +82,14 @@ private:
 
 	void exec () {
 
-		const std::string lockWithColsStmt = format ("select %%%s from %s %s",
-				tableName, tableName, whereStmt);
+		std::string lockWithColsStmt;
+
+
+		if( all_cols ) {
+		    lockWithColsStmt = Tools::format ("select %%%s, %s.* from %s %s",tableName, tableName, tableName, whereStmt);
+		} else {
+		    lockWithColsStmt = Tools::format ("select %%%s from %s %s",tableName, tableName, whereStmt);
+		}
 
 		int	 	dbrv = -1;
 		bool 	success = false;
@@ -100,7 +104,7 @@ private:
 
 				// No memset (!)
 
-				dbrv = WORKAROUND_BUG_20809_TExecStdSql (pvTid, StdNselectUpdNo, TO_CHAR(tableName), &table);
+				dbrv = WORKAROUND_BUG_20809_TExecStdSql (const_cast<void*>(pvTid), StdNselectUpdNo, TO_CHAR(tableName), &table);
 
 			} else {
 
@@ -108,7 +112,7 @@ private:
 
 				memset (&table, 0, structSize);
 
-				dbrv = WORKAROUND_BUG_20809_TExecSql (pvTid,
+				dbrv = WORKAROUND_BUG_20809_TExecSql (const_cast<void*>(pvTid),
 						TO_CHAR(lockWithColsStmt),
 						SELSTRUCT (TO_CHAR(tableName), table),
 						NULL);
@@ -116,13 +120,13 @@ private:
 
 			if (dbrv <= 0) {
 
-				if (TSqlError (pvTid) == SqlNotFound) {
+				if (TSqlError (const_cast<void*>(pvTid)) == SqlNotFound) {
 					throw REPORT_EXCEPTION (MlMsg("Kein Eintrag gefunden"));
-				} else if (TSqlError (pvTid) == SqlLocked) {
+				} else if (TSqlError (const_cast<void*>(pvTid)) == SqlLocked) {
 					tsleep (timeout);
 					continue;
 				} else {
-					throw SQL_EXCEPTION (pvTid);
+					throw SQL_EXCEPTION (const_cast<void*>(pvTid));
 				}
 
 			} else {
@@ -134,7 +138,7 @@ private:
 		}
 
 		if (success == false) {
-			throw REPORT_EXCEPTION (format (MlMsg ("Failed to lock records of table %s after %d attempts"),
+			throw REPORT_EXCEPTION (Tools::format (MlMsg ("Failed to lock records of table %s after %d attempts"),
 					tableName, attempts));
 		}
 	}
@@ -142,20 +146,23 @@ private:
 
 public:
 
-	LockSingleRecord <Table> (void *pvTid, const std::string fac,
+	LockSingleRecord <Table> (const void *pvTid, const std::string fac,
 			const std::string tableName, Table &table, const std::string whereStmt = "",
-			const short attempts = 5, const long timeout = 200 ) :
+			const short attempts = 5, const long timeout = 200,
+			bool all_columns = false ) :
 
 			pvTid(pvTid), fac(fac), tableName(tableName), table(table),
 			whereStmt(whereStmt),
 			attempts(attempts),
-			timeout(timeout) {
+			timeout(timeout),
+			all_cols( all_columns ){
 
 		exec ();
 
 	}
 
 };
+
 
 /*
  *
@@ -178,7 +185,7 @@ template <class Table> class InsertSingleRecord {
 
 private:
 
-	void 		*pvTid;			// TID
+	const void 	*pvTid;			// TID
 	std::string	fac;			// Log-Facility
 	std::string	tableName;		// TableName, e.g. TN_TEK
 	Table		&table;			// reference to struct
@@ -187,11 +194,11 @@ private:
 
 
 
-	InsertSingleRecord & operator=( const LockSingleRecord<Table> & data ) {
+	InsertSingleRecord & operator=( const InsertSingleRecord<Table> & data ) {
 		return *this;
 	}
 
-	InsertSingleRecord <Table> (const LockSingleRecord<Table> & data) {
+	InsertSingleRecord <Table> (const  InsertSingleRecord<Table> & data) {
 
 	}
 
@@ -205,16 +212,16 @@ private:
 					"Trying to insert (table %s), attempt #%d",
 					tableName, idx+1);
 
-			dbrv = WORKAROUND_BUG_20809_TExecStdSql (pvTid, StdNinsert, TO_CHAR(tableName), &table);
+			dbrv = WORKAROUND_BUG_20809_TExecStdSql (const_cast<void*>(pvTid), StdNinsert, TO_CHAR(tableName), &table);
 
 
 			if (dbrv <= 0) {
 
-				if (TSqlError (pvTid) == SqlLocked) {
+				if (TSqlError (const_cast<void*>(pvTid)) == SqlLocked) {
 					tsleep (timeout);
 					continue;
 				} else {
-					throw SQL_EXCEPTION (pvTid);
+					throw SQL_EXCEPTION (const_cast<void*>(pvTid));
 				}
 
 			} else {
@@ -226,7 +233,7 @@ private:
 		}
 
 		if (success == false) {
-			throw REPORT_EXCEPTION (format (MlMsg ("Failed to insert into table %s after %d attempts"),
+			throw REPORT_EXCEPTION (Tools::format (MlMsg ("Failed to insert into table %s after %d attempts"),
 					tableName, attempts));
 		}
 	}
@@ -234,7 +241,7 @@ private:
 
 public:
 
-	InsertSingleRecord <Table> (void *pvTid, const std::string & fac,
+	InsertSingleRecord <Table> (const void *pvTid, const std::string & fac,
 			const std::string & tableName, Table &table,
 			const short attempts = 5, const long timeout = 200 ) :
 
@@ -247,8 +254,5 @@ public:
 	}
 
 };
-
-} // namespace tools;
-
 
 #endif /* LOCKING_UTILS_H_ */

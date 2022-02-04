@@ -7,7 +7,7 @@
 #ifndef _wamas_CPPUTILS_H
 #define _wamas_CPPUTILS_H
 
-#include <cpputil.h>
+#include <cpp_util.h>
 
 #ifdef __cplusplus
  extern "C" {

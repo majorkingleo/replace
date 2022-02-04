@@ -116,7 +116,8 @@ void WamasSqlUpdateListSimple(const void* tid, const std::string &fac, const std
 	int i=0;
     for(thetypeit it=inlist.begin();it!=inlist.end();it++, i++) {
 //! *msi    	int rv=FrmwrkSIf_SetHist(fac.c_str(), FrmwrkTSetHistTyp_Update, tname.c_str(), &inlist[i]);
-    	int rv=SetHist(tname.c_str(), &inlist[i], HIST_UPDATE, GetUserOrTaskName());
+        // on TBOX 3.5.0 SetHist first arg is a char*
+    	int rv=SetHist(const_cast<char*>(tname.c_str()), &inlist[i], HIST_UPDATE, GetUserOrTaskName());
     	WAMASSERT (rv >= 0, fac.c_str(), NULL);
     }
 	WamasSqlEditListSimple(tid, fac, tname, inlist, StdNupdate);

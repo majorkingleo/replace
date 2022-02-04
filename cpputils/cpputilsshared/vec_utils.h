@@ -18,12 +18,6 @@ template <class A, class B, class C> void addAll( std::vector<A> & a, const std:
 	a.push_back( funktor(*it) );
 }
 
-template <class A> void addAll( std::vector<A> & a, const std::vector<const A*> & b )
-{
-  for( typename std::vector<A*>::const_iterator it = b.begin(); it != b.end(); it++ )
-	a.push_back( *(*it) );
-}
-
 template <class A> void addAll( std::vector<const A*> & a, const std::vector<A> & b )
 {
   for( typename std::vector<A>::const_iterator it = b.begin(); it != b.end(); it++ )

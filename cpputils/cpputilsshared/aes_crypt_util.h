@@ -1,6 +1,8 @@
 #ifndef AES_CRYPT_UTIL_H_
 #define AES_CRYPT_UTIL_H_
 
+#include <base/buser.h> 
+
 #if (defined OWIL_VERSION && OWIL_VERSION >= 72)
 
 /*
@@ -11,6 +13,7 @@
  */
 
 #ifdef __cplusplus
+#include <string>
 
 /**
  * A simple wrapper class for Owil's crypto engine

@@ -164,6 +164,88 @@ template <class T> std::string createInStatement( const T & list )
   return "(" + res + ")";
 }
 
+/**
+ * template <class T> std::string IterableToFormattedString (
+ *		const T & list,
+ *		const std::string &sep = ", ",
+ *		const std::string &lineSep = "\n",
+ *		unsigned int lineEle = 5,
+ *		unsigned int maxEle = 10,
+ *		const std::string &strFurtherEle = " (...)")
+ *
+ * Creates a formatted string for the given iterable container
+ *
+ * PARAMS:
+ * 	const T & list
+ * 		the collection containing the elements
+ * 	const std::string &eleSep
+ * 		the element separator, defaults to ", "
+ * 	const std::string &lineSep
+ * 		the line separator, defaults to "\n"
+ * 	unsigned int lineEle
+ * 		elements in one line, defaults to 5
+ * 	unsigned int maxEle
+ * 		number of elements that shall be listed, defaults to 10
+ * 	const std::string &strFurtherEle
+ * 		string that is added if there are more than max. elements,
+ * 		defaults to "(...)"
+ *
+ * RETURNS:
+ *  The formatted string
+ *
+ * EXAMPLES:
+ * 1.
+ *		IterableToFormattedString<set<long> >(sWrongStatusKsNr, "; ", "\n", 3);
+ *		=> generates OUTPUT:
+ *		81167; 87345; 87346
+ *		87347; 87348; 87404
+ * 		87424; 87425; 87464
+ * 		87527; 87604; 87624 (...)
+ * 2.
+ * 		IterableToFormattedString<set<long> >(sWrongStatusKsNr);
+ * 		=> generates OUTPUT:
+ *		81167, 87345, 87346, 87347, 87348
+ *		87404, 87424, 87425, 87464, 87527
+ *		87604, 87624 (...)
+ *
+ */
+template <class T> std::string IterableToFormattedString (
+		const T & list,
+		const std::string &eleSep = ", ",
+		const std::string &lineSep = "\n",
+		unsigned int lineEle = 5,
+		unsigned int maxEle = 10,
+		const std::string &strFurtherEle = " (...)") {
+
+	std::string res;
+
+	if (list.empty()) {
+		return res;
+	}
+
+	unsigned int cnt = 0;
+	for (typename T::const_iterator it = list.begin(); it != list.end(); it++) {
+
+		if (!res.empty()) {
+			res += eleSep;
+			if (cnt % lineEle == 0) {
+				res += lineSep;
+			}
+		}
+		res += x2s(*it);
+		cnt++;
+
+		if (cnt >= maxEle) {
+			res += strFurtherEle;
+			break;
+		}
+
+	}
+	return res;
+}
+
+
+
 std::string fill_leading( std::string s, const std::string fill_sign, unsigned int len );
 std::string fill_trailing( std::string s, const std::string fill_sign, unsigned int len );
 

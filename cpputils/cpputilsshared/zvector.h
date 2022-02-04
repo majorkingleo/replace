@@ -14,13 +14,16 @@ namespace Tools {
 template <class T> class zvector : public JVector<T>
 {
 public:
-  zvector( unsigned init_size )
+	typedef typename JVector<T>::size_type size_type;
+
+public:
+  zvector( size_type init_size )
 	: JVector<T>( init_size )
   {
 	memset( &operator[](0), 0, sizeof(T) * init_size );
   }
 
-  T & operator[]( unsigned int i ) { return JVector<T>::operator[](i); }
+  T & operator[]( size_type i ) { return JVector<T>::operator[](i); }
 
   zvector<T> & operator=( const JVector<T> & other ) { JVector<T>::set_vector( other.get_vector() ); return *this; }
 };

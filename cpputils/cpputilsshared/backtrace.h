@@ -126,13 +126,14 @@ public:
 };
 
 #ifndef NDEBUG
+
 #define BT \
-  BackTraceHelper bt( format( "%s:%d:%s", __FILE__, __LINE__, __PRETTY_FUNCTION__ ) )
+  Tools::BackTraceHelper bt( Tools::format( "%s:%d:%s", __FILE__, __LINE__, __FUNCTION__ ) )
 #else
 #define BT
 #endif
 
-}
+} // namespace
 
 #endif
 

@@ -2,10 +2,7 @@
 #define TOOLS_iterator_h
 
 /*
- * $Log: iterator.h,v $
- * Revision 1.2  2010/02/22 12:44:40  wamas
- * MOBERZA Warmlageroptimierung
- *
+ * $Log$
  * Revision 1.1  2008/09/23 13:01:39  wamas
  * moved xml.h and c and iterator to cpputils
  *

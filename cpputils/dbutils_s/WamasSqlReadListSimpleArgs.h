@@ -13,6 +13,7 @@
 #include <wamasexception.h>
 #include <WamasSqlContext.h>
 #include <WamasSqlExecArgs.h>
+#include <string_utils.h>
 
 namespace wamas {
 namespace wms {
@@ -48,10 +49,20 @@ namespace wms {
  * @endcode
  */
 
+#if __cplusplus - 0 <= 1 // jurassicly old gnu gcc 3.x (for lutz)
+  // gcc 3.x cannot use va_arg lists starting with a c++ object,
+  // so order by has to be a const char* pointer	
+  typedef char* WamasSqlReadListSimpleArgs_OrderByType ;
+#else
+  typedef std::string WamasSqlReadListSimpleArgs_OrderByType ;
+#endif
+  
 template <typename thetype>
 void WamasSqlReadListSimpleArgs (const void *tid, const char *fac,
         const std::string& clname, std::vector<thetype>& outlist,
-        const std::string& where = "", const std::string& orderby="", ...)
+        const std::string& where = "",
+		// MSVC doesn't allow using a reference here (-> va_start)
+		const WamasSqlReadListSimpleArgs_OrderByType orderby="", ...)
 {
     WAMASSERT (fac != NULL, fac, "fac is NULL");
     WAMASSERT (!clname.empty(), fac, "clname is NULL");
@@ -60,16 +71,18 @@ void WamasSqlReadListSimpleArgs (const void *tid, const char *fac,
     WAMASSERT (tabledesc != NULL, fac, "SqlTableDesc not found");
     WAMASSERT (tabledesc->strucSize == sizeof(thetype), fac, "struct size mismatch");
 
-    WAMASSQLEXECARGS(hSqlExecArgs, tid, fac);
+    WAMASSQLEXECARGS(hSqlExecArgs, const_cast<void *>(tid), fac);
 
     int rv = 0;
     const int blocksize = 100;
-	std::string	stmt(scoped_cstr::form("SELECT %%%s from %s", clname.c_str(),clname.c_str()));
+	std::string	stmt = "SELECT %" + clname + " from " + clname;
 	if (!IsEmptyStrg (where.c_str())) {
-		stmt += (const char*)scoped_cstr::form(" WHERE %s", where.c_str());
+		stmt += " WHERE " + where;
 	}
-	if (!IsEmptyStrg (orderby.c_str())) {
-		stmt += (const char*)scoped_cstr::form(" ORDER BY %s", orderby.c_str());
+
+    // this can handle std::string and char* // riequired for gcc 3.x compatibility
+	if (!Tools::is_empty_string(orderby)) {
+		stmt += " ORDER BY " + std::string(orderby); // order by can by a char*
 	}
 	
     thetype block[blocksize];
@@ -93,8 +106,8 @@ void WamasSqlReadListSimpleArgs (const void *tid, const char *fac,
         memset(block, 0, sizeof(block));
 
         rv = rv==0 ?
-                TExecSqlArgsV(tid, NULL, stmt.c_str(), hSqlExecArgs):
-                TExecSqlArgsV(tid, NULL, NULL, hSqlExecArgs);
+          TExecSqlArgsV(const_cast<void *>(tid), NULL, stmt.c_str(), hSqlExecArgs):
+          TExecSqlArgsV(const_cast<void *>(tid), NULL, NULL, hSqlExecArgs);
 
          WAMASSERT_DB (rv > 0 || TSqlError(tid) == SqlNotFound, tid, fac);
 

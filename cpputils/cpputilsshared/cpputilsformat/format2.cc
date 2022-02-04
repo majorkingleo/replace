@@ -68,9 +68,9 @@ namespace Tools {
       if( i > num_of_args )
         throw BaseException( "out of arg range" );
 
-      std::string ss = args[i]->doFormat(cf);
+      std::string s = args[i]->doFormat(cf);
 
-      return ss;
+      return s;
     }
 
     void Format2::parse()
@@ -307,6 +307,7 @@ namespace Tools {
                 break;
 
               case 'X': cf.setupper = true;
+				/* Fallthrough */				
               case 'x':
                 cf.numerical_representation = true;
                 cf.base = CFormat::HEX;
@@ -324,6 +325,7 @@ namespace Tools {
 
               case 'E':
                 cf.setupper = true;
+				/* Fallthrough */				
 
               case 'e':
                 if( cf.special )

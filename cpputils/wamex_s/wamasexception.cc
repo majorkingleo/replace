@@ -9,26 +9,29 @@
 #include <dbsql.h>
 #include <logtool2.h>
 #include <dbsqlstd.h>
+#include <cpp_util.h>
 
 namespace wamas {
 namespace wms {
 
 
-WamasExceptionBase::WamasExceptionBase (char const *file, const int line, char const *fac, char const *msg)
+void WamasExceptionBase::init (char const *file, const int line, const std::string & fac, const std::string & msg)
 {
+  if( what_.empty() ) {
 	what_ = MLM("Unbekannter Fehler");
-	// const char *errTxtWithoutMlm=NULL;
+  }
 
-	where_ = Tools::format("%s:%d", file, line);
+  what_ = msg;
 
-	std::string facility = "undef";
-	if (fac && fac[0]) {
-		facility = fac;
-	}
+  where_ = Tools::format("%s:%d", file, line);
 
-	_LogSetLocation (file, line);
-	_LogPrintf (facility.c_str(), LT_ALERT, "EXCEPTION: %s", msg);
-	
+  std::string facility = "undef";
+  if ( !fac.empty() ) {
+      facility = fac;
+  }
+
+  _LogSetLocation (file, line);
+  _LogPrintf (facility.c_str(), LT_ALERT, "EXCEPTION: %s", msg.c_str());
 }
 
 const char*  WamasExceptionBase::what() const throw()
@@ -59,6 +62,14 @@ WamasException::WamasException (char const *file, const int line, std::string co
 //	_OpmsgSIf_SetLocation (file,line);
 //	_OpmsgSIf_ErrPush(GeneralTerrException, msg);
 }
+
+WamasException::WamasException (char const *file, const int line, std::string const &fac, const std::string & msg)
+ : WamasExceptionBase (file, line, fac.c_str(), msg)
+{
+//  _OpmsgSIf_SetLocation (file,line);
+//  _OpmsgSIf_ErrPush(GeneralTerrException, msg);
+}
+
 /*
 WamasException::WamasException (char const *file, const int line, char const *fac, char const *msg)
  : WamasExceptionBase (file,line,fac, msg)

@@ -318,14 +318,16 @@ bool Leo::Ini::is_section( const std::string& str )
 {
   std::string::size_type size = str.size();
 
-  if( size <= 2 )
+  if( size <= 2 ) {
     return false;
+  }
 
-    if( str[0] == '[' && str[size-1] == ']' )
-    {
-      if( !strip(str.substr( 1, size - 2 )).empty() )
-	return true;
-    }
+  if( str[0] == '[' && str[size-1] == ']' )
+  {
+  	if( !strip(str.substr( 1, size - 2 )).empty() ) {
+		return true;
+	}
+  }
   return false;
 }
 
@@ -438,7 +440,10 @@ bool Leo::Ini::is_good_element( Element& e )
     case Element::TYPE::KEY:
       e.key = strip( e.key );
       e.section = strip( e.section );
-      if( e.key.empty() || e.section.empty() ) return false;
+      if( e.key.empty() || e.section.empty() ){
+		 return false;
+	  }
+	  /* Fallthrough */
 
     case Element::TYPE::SECTION:
       e.section = strip( e.section );
@@ -625,18 +630,14 @@ void Leo::Ini::flush()
       if( next_comment_at == -1 && next_element_at == -1 )
 	break;
 
-      int next = 0;
-
       if( ((next_comment_at < next_element_at) || next_element_at == -1 ) && next_comment_at != -1 )
 	{
-	  next = next_comment_at;
 	  line = *cit;
 	  
 	  cit++;
 	}
       else if( next_element_at != -1 )
 	{
-	  next = next_element_at;	  
 	  line = mit->line;
 	  
 	  if( mit->type == Element::TYPE::SECTION )

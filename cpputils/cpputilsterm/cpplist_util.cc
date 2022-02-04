@@ -197,7 +197,7 @@ bool StandardList::displayLineInfo( elThandle *hEh, OWidget hW )
               WamasBox(hW,
                   WboxNboxType,WBOX_INFO,
                   WboxNbutton,    WboxbNok,
-                  WboxNmwmTitle,  "Listen Info",
+                  WboxNmwmTitle,  MlM("Listen Info"),
                   WboxNtext,      TO_CHAR( format("Anzahl Zeilen %d", info->li_no_lins) ),
                   NULL );
               return false;

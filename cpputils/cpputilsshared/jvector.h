@@ -15,12 +15,13 @@ template <class T> class JVector
 	typedef typename std::vector<T>::const_iterator const_iterator;
 	typedef typename std::vector<T>::const_reverse_iterator const_reverse_iterator;
 	typedef typename std::vector<T>::reverse_iterator reverse_iterator;
+	typedef typename std::vector<T>::size_type size_type;
 
 	JVector()
 	  : vector()
 	  {}	
 
-	JVector( unsigned initial_size )
+	JVector( size_type initial_size )
 	  : vector( initial_size )
 	  {}
 
@@ -34,19 +35,19 @@ template <class T> class JVector
 
 	void add( const T & t ) { vector.push_back( t ); }
 
-	T & get( int idx ) { return vector.at(idx); }
+	T & get( size_type idx ) { return vector.at(idx); }
 
-	const T & get( int idx ) const { return vector.at(idx); }
+	const T & get( size_type idx ) const { return vector.at(idx); }
 
 	bool IsEmpty() const { return vector.empty(); }	
 
-	T & operator[]( int idx ) { return vector[idx]; }
+	T & operator[]( size_type idx ) { return vector[idx]; }
 
-	const T & operator[]( int idx ) const { return vector[idx]; }
+	const T & operator[]( size_type idx ) const { return vector[idx]; }
 
-	T & at( int idx ) { return vector.at(idx); }
+	T & at( size_type idx ) { return vector.at(idx); }
 
-	const T & at( int idx ) const { return vector.at(idx); }
+	const T & at( size_type idx ) const { return vector.at(idx); }
 
 	JVector<T> & operator=( const std::vector<T> & other ) { vector = other; return *this; }
 
@@ -57,10 +58,10 @@ template <class T> class JVector
 
 	bool empty() const { return IsEmpty(); }
 
-	unsigned long size() const { return vector.size(); }
+	size_type size() const { return vector.size(); }
 
-	void resize( unsigned long size_ ) { vector.resize(size_); }
-	void reserve( unsigned long size_ ) { vector.reserve(size_); }
+	void resize( size_type size_ ) { vector.resize(size_); }
+	void reserve( size_type size_ ) { vector.reserve(size_); }
 
 	reverse_iterator rbegin() { return vector.rbegin(); }
 	const_reverse_iterator rbegin() const { return vector.rbegin(); } 
