@@ -41,7 +41,9 @@ replace_SOURCES=\
 		add_cast.cc \
 		fix_conversion_null.cc \
 		add_mlm.cc \
-		add_mlm_wbox.cc 
+		add_mlm_wbox.cc \
+		DetectLocale.cc \
+		DetectLocale.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \
@@ -76,7 +78,13 @@ cpputils_cpputilsshared_libcpputilsshared_a_SOURCES= \
 		cpputils/cpputilsshared/logtool2.cc \
 		cpputils/cpputilsshared/string_utils.cc \
 		cpputils/cpputilsshared/vec_utils.cc \
-		cpputils/cpputilsshared/xml.cc
+		cpputils/cpputilsshared/xml.cc \
+		cpputils/cpputilsshared/utf8.h \
+		cpputils/cpputilsshared/utf8/core.h \
+		cpputils/cpputilsshared/utf8/checked.h \
+		cpputils/cpputilsshared/utf8/unchecked.h \
+		cpputils/cpputilsshared/utf8/cpp11.h \
+		cpputils/cpputilsshared/utf8/cpp17.h
 
 
 cpputils_cpputilsshared_cpputilsformat_libcpputilsformat_a_SOURCES= \
