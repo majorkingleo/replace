@@ -36,6 +36,7 @@
 #include "fix_conversion_null.h"
 #include "add_mlm.h"
 #include "add_mlm_wbox.h"
+#include "DetectLocale.h"
 
 using namespace Tools;
 
