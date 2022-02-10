@@ -43,7 +43,9 @@ replace_SOURCES=\
 		add_mlm.cc \
 		add_mlm_wbox.cc \
 		DetectLocale.cc \
-		DetectLocale.h
+		DetectLocale.h \
+		read_file.h \
+		read_file.cc
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \
@@ -84,7 +86,9 @@ cpputils_cpputilsshared_libcpputilsshared_a_SOURCES= \
 		cpputils/cpputilsshared/utf8/checked.h \
 		cpputils/cpputilsshared/utf8/unchecked.h \
 		cpputils/cpputilsshared/utf8/cpp11.h \
-		cpputils/cpputilsshared/utf8/cpp17.h
+		cpputils/cpputilsshared/utf8/cpp17.h \
+		cpputils/cpputilsshared/utf8_util.h \
+		cpputils/cpputilsshared/utf8_util.cc
 
 
 cpputils_cpputilsshared_cpputilsformat_libcpputilsformat_a_SOURCES= \

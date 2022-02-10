@@ -37,6 +37,7 @@
 #include "add_mlm.h"
 #include "add_mlm_wbox.h"
 #include "DetectLocale.h"
+#include "read_file.h"
 
 using namespace Tools;
 
@@ -768,9 +769,19 @@ int main( int argc, char **argv )
 
 	  if( !XML::read_file( it->getPath(), file ) )
 		{
-		  std::cerr << "cannot open file: " << file << std::endl;
+		  std::cerr << "cannot open file: " << it->getPath() << std::endl;
 		  continue;
 		}
+
+	  /*
+	  std::wstring wfile;
+
+	  if( !READ_FILE.read_file( it->getPath(), wfile ) )
+		{
+		  std::cerr << "cannot open or convert file: " << it->getPath() << " Error: " <<  READ_FILE.getError() <<  std::endl;
+		  continue;
+		}
+		*/
 
 	  DEBUG( format( "working on file %s",  it->getPath() ) );
 
