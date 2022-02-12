@@ -52,3 +52,26 @@ std::string diff_lines( const std::string & orig, std::string & modded )
 
   return res;
 }
+
+std::wstring diff_lines( const std::wstring & orig, std::wstring & modded )
+{
+  std::vector<std::wstring> sl_orig, sl_modded;
+
+  sl_orig = split_simple( orig, L"\n" );
+  sl_modded = split_simple( modded, L"\n" );
+
+  std::wstring res;
+
+  for( unsigned i = 0; i < sl_orig.size() && i < sl_modded.size(); i++ )
+	{
+	  if( sl_orig[i] != sl_modded[i] )
+		{
+		  if( !res.empty() )
+			res += '\n';
+
+		  res += L"\t" + strip( sl_orig[i] ) + L" => " + strip( sl_modded[i] );
+		}
+	}
+
+  return res;
+}
