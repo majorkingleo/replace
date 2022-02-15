@@ -1578,7 +1578,7 @@ static void cbbt_prodFertig(MskDialog mask, MskStatic ef, MskElement el, int rea
 						 */
 
 						if (ToBoxCommit(SHELL_OF(mask),0,
-							StrForm("Auftragsposition %d, ArtNr %s,\nwirklich fertigsetzen?",
+							StrForm("Auftragsposition %ld, ArtNr %s,\nwirklich fertigsetzen?",
 									mapbuf.mapMaPos,mapbuf.mapBUnit.unitArtNr))!=IS_Yes) {
 							TSqlRollback(mask);
 							continue;
