@@ -593,7 +593,7 @@ int CbScan_TeBearb (MskDialog hMaskRl, unsigned char *pcData)
 			WamasBox (SHELL_OF(hMaskRl),
 			WboxNboxType,   WBOX_INFO,
 			WboxNbutton,    WboxbNok,
-			WboxNtext,      wamas::platform:string::form(MlMsg(
+			WboxNtext,      wamas::platform::string::form(MlMsg(
 				"Transporteinheit '%s' nicht vorhanden."),  ptTek->tekTeId).c_str(),
 			NULL);
 		}
@@ -1509,7 +1509,7 @@ static int beforeDeleteOrOk_TeBearb(MskDialog hMaskRl, char const *pcFac,
         OPMSG_CFR(TpobaseSIf_GetTpaByTeId);
         if (iRv == 1) {
             TSqlRollback (hMaskRl);
-            std::string msg(wamas::platform:string::form("%s\n%s", 
+            std::string msg(wamas::platform::string::form("%s\n%s", 
                     MlMsg ("TE löschen nicht möglich, Transportauftrag existiert."), 
                     MlMsg ("Transportauftrag stornieren?")));
             iRv = WamasBox (SHELL_OF (hMaskRl),
@@ -6243,7 +6243,7 @@ static int UniTableCbTEK (UNITABLEINFO *ptUti)
 					WamasBox (SHELL_OF(hMaskRl),
 					WboxNboxType,   WBOX_INFO,
 					WboxNbutton,    WboxbNok,
-					WboxNtext,      wamas::platform:string::form(MlMsg(
+					WboxNtext,      wamas::platform::string::form(MlMsg(
 						"Transporteinheit '%s' nicht vorhanden."),  buffer).c_str(),
 					NULL);
 				}
