@@ -250,7 +250,7 @@ void FixFromCompileLog::doit()
 
 			ReadFile read_file;
 
-			out << read_file.convert( "UTF-8", fit->encoding, Utf8Util::wStringToUtf8(fit->content) );
+			out << read_file.convert( Utf8Util::wStringToUtf8(fit->content), "UTF-8", fit->encoding );
 
 			out.close();
 		}
