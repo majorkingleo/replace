@@ -59,17 +59,17 @@ int test_wformat( int argc, char **argv )
 		TESTW( wformat( L"%.*f", 5, 15.15 ),               sprintf( buffer, "%.*f", 5, 15.15 ) );
 		TESTW( wformat( L"%.3s", "HALLO" ),                sprintf( buffer, "%.3s", "HALLO" ) );
 		TESTW( wformat( L"pi = %.5f", 4 * atan(1.0)),      sprintf( buffer, "pi = %.5f", 4 * atan(1.0)) );
-		TESTW( wformat(  L"%*d-%*d-%*d", 1, 3, 2, 4, 5, 6), sprintf( buffer, "%*d-%*d-%*d", 1, 3, 2, 4, 5, 6) );
-		TESTW( wformat(  L"[%#8.3x]", 0x42 ),               sprintf( buffer, "[%#8.3x]", 0x42 ) );
-		TESTW( wformat(  L"[%#08x]", 0x42 ),                sprintf( buffer, "[%#08x]", 0x42 ) );
-		TESTW( wformat(  L"[%#8.3o]", 0x42 ),               sprintf( buffer, "[%#8.3o]", 0x42 ) );
-		TESTW( wformat(  L"[%#08o]", 0x42 ),                sprintf( buffer, "[%#08o]", 0x42 ) );
-		TESTW( wformat(  L"[%-#08x]", 0x42 ),               sprintf( buffer, "[%-#08x]", 0x42 ) );
-		TESTW( wformat(  L"[%-#08o]", 0x42 ),               sprintf( buffer, "[%-#08o]", 0x42 ) );
+		TESTW( wformat( L"%*d-%*d-%*d", 1, 3, 2, 4, 5, 6), sprintf( buffer, "%*d-%*d-%*d", 1, 3, 2, 4, 5, 6) );
+		TESTW( wformat( L"[%#8.3x]", 0x42 ),               sprintf( buffer, "[%#8.3x]", 0x42 ) );
+		TESTW( wformat( L"[%#08x]", 0x42 ),                sprintf( buffer, "[%#08x]", 0x42 ) );
+		TESTW( wformat( L"[%#8.3o]", 0x42 ),               sprintf( buffer, "[%#8.3o]", 0x42 ) );
+		TESTW( wformat( L"[%#08o]", 0x42 ),                sprintf( buffer, "[%#08o]", 0x42 ) );
+		TESTW( wformat( L"[%-#08x]", 0x42 ),               sprintf( buffer, "[%-#08x]", 0x42 ) );
+		TESTW( wformat( L"[%-#08o]", 0x42 ),               sprintf( buffer, "[%-#08o]", 0x42 ) );
 
-		TESTW( wformat(  L"%2$s %1$s", "A", "B" ),          sprintf( buffer, "%2$s %1$s", "A", "B" ) );
-		TESTW( wformat(  L"[%]", "A" ),                     sprintf( buffer, "[%]", "A" ) );
-		TESTW( wformat(  L"%", "A" ),                       sprintf( buffer, "%", "A" ) );
+		TESTW( wformat( L"%2$s %1$s", "A", "B" ),          sprintf( buffer, "%2$s %1$s", "A", "B" ) );
+		TESTW( wformat( L"[%]", "A" ),                     sprintf( buffer, "[%]", "A" ) );
+		TESTW( wformat( L"%", "A" ),                       sprintf( buffer, "%", "A" ) );
 
 		TESTW( wformat( L"%03d", (unsigned char)35 ),      sprintf( buffer, "%03d", (unsigned char)35 ) );
 		TESTW( wformat( L"%03d", (char)35 ),               sprintf( buffer, "%03d", (char)35 ) );
@@ -81,6 +81,7 @@ int test_wformat( int argc, char **argv )
 		TESTW( wformat( L"%c", (unsigned long)35 ),        sprintf( buffer, "%c", (unsigned long)35 ) );
 		TESTW( wformat( L"%c", (short)35 ),                sprintf( buffer, "%c", (short)35 ) );
 		TESTW( wformat( L"%c", (unsigned short)35 ),       sprintf( buffer, "%c", (unsigned short)35 ) );
+		TESTW( wformat( L"Schaß %d", 35 ), 				   sprintf( buffer, "Schaß %d", 35 ) );
 
 		std::cout << "\n\n";
 
@@ -127,6 +128,7 @@ int test_wformat( int argc, char **argv )
 		TEST( format( "%c", (unsigned long)35 ),        sprintf( buffer, "%c", (unsigned long)35 ) );
 		TEST( format( "%c", (short)35 ),                sprintf( buffer, "%c", (short)35 ) );
 		TEST( format( "%c", (unsigned short)35 ),       sprintf( buffer, "%c", (unsigned short)35 ) );
+		TEST( format( "Schaß %d", 35 ), 				sprintf( buffer, "Schaß %d", 35 ) );
 
 		std::cout << std::endl;
 
