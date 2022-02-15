@@ -45,7 +45,9 @@ replace_SOURCES=\
 		DetectLocale.cc \
 		DetectLocale.h \
 		read_file.h \
-		read_file.cc
+		read_file.cc \
+		test_wformat.cc \
+		test_wformat.h 
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \

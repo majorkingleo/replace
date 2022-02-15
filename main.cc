@@ -39,6 +39,7 @@
 #include "DetectLocale.h"
 #include "read_file.h"
 #include "utf8_util.h"
+#include "test_wformat.h"
 
 using namespace Tools;
 
@@ -191,6 +192,11 @@ int main( int argc, char **argv )
   o_version.setDescription( "Show replace version number" );
   oc_info.addOptionR( &o_version );
 
+
+  Arg::FlagOption o_test_wformat( "tw" );
+  o_test_wformat.addName( "test_wformat" );
+  o_test_wformat.setDescription( "test wformat() function" );
+  oc_info.addOptionR( &o_test_wformat );
 
   Arg::OptionChain oc_path;
   arg.addChainR(&oc_path);
@@ -535,6 +541,11 @@ int main( int argc, char **argv )
 
   if( !arg.parse() || argc <= 1 )
     {
+	  if( o_test_wformat.getState() )
+	  {
+		  return test_wformat(argc,argv);
+	  }
+
       if( o_version.getState() )
       {
     	  std::cout << format("%s version %s\n", argv[0], VERSION);
@@ -554,6 +565,7 @@ int main( int argc, char **argv )
 	  usage2();
 	  return 0;
   }
+
 
   if( o_debug.getState() )
   {
