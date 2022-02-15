@@ -35,7 +35,7 @@ public:
 		{}
 
 
-		virtual bool should_i_patch_this_function( const Function & func );
+		bool should_i_patch_this_function( const Function & func ) override;
 	};
 
 protected:

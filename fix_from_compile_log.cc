@@ -168,6 +168,8 @@ void FixFromCompileLog::read_compile_log()
 		throw REPORT_EXCEPTION( format("cannot open file %s for reading", compile_log, strerror(errno)) );
 	}
 
+	DEBUG( format( "%s encoding: %s", compile_log, read_file.getFileEncoding()) );
+
 	std::vector<std::wstring> lines = split_simple( content, L"\n");
 
 	for( Iterator<HANDLER_LIST::iterator> it = handlers.begin(); it != handlers.end(); it++ )

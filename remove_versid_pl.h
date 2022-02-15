@@ -15,7 +15,7 @@ class RemoveVersidPl : public RemoveVersidPdl
 public:
 	RemoveVersidPl();
 
-	std::wstring remove_versid(  const std::wstring & file );
+	std::wstring remove_versid(  const std::wstring & file ) override;
 
 	bool want_file( const FILE_TYPE & file_type ) override;
 

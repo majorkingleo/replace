@@ -16,9 +16,9 @@ class FormatStringHandlerGcc48 : public FormatStringHandler
 public:
 	FormatStringHandlerGcc48();
 
-	virtual bool is_interested_in_line( const std::string & line );
+	bool is_interested_in_line( const std::wstring & line ) override;
 
-	virtual void strip_target_type( FormatWarnigs & location );
+	void strip_target_type( FormatWarnigs & location ) override;
 };
 
 

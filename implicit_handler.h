@@ -52,13 +52,13 @@ protected:
 public:
 	ImplicitHandler( const std::string & srcdir );
 
-	virtual void read_compile_log_line( const std::wstring & line );
+	void read_compile_log_line( const std::wstring & line ) override;
 
-	virtual bool want_file( const FixFromCompileLog::File & file );
+	bool want_file( const FixFromCompileLog::File & file ) override;
 
-	virtual void fix_file( FixFromCompileLog::File & file );
+	void fix_file( FixFromCompileLog::File & file ) override;
 
-	virtual void report_unfixed_compile_logs();
+	void report_unfixed_compile_logs() override;
 
 	virtual void fix_warning( ImplicitWarnigs & warning, std::wstring & content );
 

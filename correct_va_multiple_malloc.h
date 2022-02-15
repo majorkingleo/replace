@@ -20,9 +20,9 @@ public:
 	CorrectVaMultipleMalloc();
 
 
-	virtual std::wstring patch_file( const std::wstring & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 };
 
 
