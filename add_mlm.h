@@ -26,10 +26,10 @@ public:
 	class PatchThisFunctionIfArgXequals : public ShouldIPatchThisFunction
 	{
 		const unsigned ARG_NUM;
-		const std::string VAR_NAME;
+		const std::wstring VAR_NAME;
 
 	public:
-		PatchThisFunctionIfArgXequals( unsigned arg_num_, const std::string & var_name_ )
+		PatchThisFunctionIfArgXequals( unsigned arg_num_, const std::wstring & var_name_ )
 		: ARG_NUM( arg_num_ ),
 		  VAR_NAME( var_name_ )
 		{}
@@ -39,15 +39,15 @@ public:
 	};
 
 protected:
-	const std::string FUNCTION_NAME;
+	const std::wstring FUNCTION_NAME;
 	const unsigned    FUNCTION_ARG_NUM;
-	const std::string FUNCTION_CALL;
+	const std::wstring FUNCTION_CALL;
 	std::vector<ShouldIPatchThisFunction*> vChecker;
 
 public:
-	AddMlM(const std::string & FUNCTION_NAME_,
+	AddMlM(const std::wstring & FUNCTION_NAME_,
 		   const unsigned      FUNCTION_ARG_NUM_,
-		   const std::string & FUNCTION_CALL_ );
+		   const std::wstring & FUNCTION_CALL_ );
 
 	~AddMlM();
 
@@ -58,9 +58,9 @@ public:
 		vChecker.push_back( checker );
 	}
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 };
 
 

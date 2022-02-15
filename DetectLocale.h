@@ -32,8 +32,14 @@ public:
 
 	std::wstring inputString2wString( const std::string & str );
 	std::string wString2output( const std::wstring & str );
+
+	// converts a w string to output format, for debugging purposes
+	static std::string w2out( const std::wstring & out );
+
+	// converts an ascii, or utf8 string from imput or file io to wstring
+	static std::wstring in2w( const std::string & in );
 };
 
-
+extern DetectLocale DETECT_LOCALE;
 
 #endif /* DETECTLOCALE_H_ */

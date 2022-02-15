@@ -8,7 +8,7 @@ class RemoveVersid : public HandleFile
 public:
 	RemoveVersid();
 
-	virtual std::string remove_versid( const std::string & file ) { return std::string(); }
+	virtual std::wstring remove_versid( const std::wstring & file ) { return std::wstring(); }
 };
 
 #endif

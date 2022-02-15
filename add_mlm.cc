@@ -24,7 +24,7 @@ bool AddMlM::PatchThisFunctionIfArgXequals::should_i_patch_this_function( const 
 		return false;
 	}
 
-	DEBUG( format( "checking function: %s arg:%d = '%s' required '%s'", func.name, ARG_NUM,  func.args[ARG_NUM], VAR_NAME ) );
+	DEBUG( wformat( L"checking function: %s arg:%d = '%s' required '%s'", func.name, ARG_NUM,  func.args[ARG_NUM], VAR_NAME ) );
 
 	if( func.args[ARG_NUM] == VAR_NAME ) {
 		return true;
@@ -33,9 +33,9 @@ bool AddMlM::PatchThisFunctionIfArgXequals::should_i_patch_this_function( const 
 	return false;
 }
 
-AddMlM::AddMlM( const std::string & FUNCTION_NAME_,
+AddMlM::AddMlM( const std::wstring & FUNCTION_NAME_,
 				const unsigned FUNCTION_ARG_NUM_,
-				const std::string & FUNCTION_CALL_ )
+				const std::wstring & FUNCTION_CALL_ )
 	: FUNCTION_NAME( FUNCTION_NAME_ ),
 	  FUNCTION_ARG_NUM( FUNCTION_ARG_NUM_ ),
 	  FUNCTION_CALL( FUNCTION_CALL_ ),
@@ -52,14 +52,14 @@ AddMlM::~AddMlM()
 	}
 }
 
-std::string AddMlM::patch_file( const std::string & file )
+std::wstring AddMlM::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring res( file );
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	do
 	{
@@ -71,16 +71,16 @@ std::string AddMlM::patch_file( const std::string & file )
 
 		pos = res.find( FUNCTION_NAME, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(format("unable to load %s function", FUNCTION_NAME) );
+			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -90,7 +90,7 @@ std::string AddMlM::patch_file( const std::string & file )
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( format("function name is '%s'", func.name) );
+			DEBUG( wformat(L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -121,23 +121,23 @@ std::string AddMlM::patch_file( const std::string & file )
 
 
 
-		std::string var_name = strip( func.args[FUNCTION_ARG_NUM-1] );
+		std::wstring var_name = strip( func.args[FUNCTION_ARG_NUM-1] );
 
 		bool changed_something = false;
 
 		// it is a C string
-		if( var_name.find( "\"" ) == 0 ) {
+		if( var_name.find( L"\"" ) == 0 ) {
 
 
-			std::string & s_arg = func.args[FUNCTION_ARG_NUM-1];
+			std::wstring & s_arg = func.args[FUNCTION_ARG_NUM-1];
 
-			std::string::size_type start = s_arg.find("\"");
-			std::string::size_type end = s_arg.rfind("\"");
+			std::wstring::size_type start = s_arg.find(L"\"");
+			std::wstring::size_type end = s_arg.rfind(L"\"");
 
-			std::string leading_spaces = s_arg.substr(0,start);
-			std::string trailing_spaces = s_arg.substr(end+1);
+			std::wstring leading_spaces = s_arg.substr(0,start);
+			std::wstring trailing_spaces = s_arg.substr(end+1);
 
-			std::string string_arg = format( "%s%s(%s)%s", leading_spaces, FUNCTION_CALL, var_name, trailing_spaces );
+			std::wstring string_arg = wformat( L"%s%s(%s)%s", leading_spaces, FUNCTION_CALL, var_name, trailing_spaces );
 
 			func.args[FUNCTION_ARG_NUM-1] = string_arg;
 			changed_something = true;
@@ -153,7 +153,7 @@ std::string AddMlM::patch_file( const std::string & file )
 			start_in_file = pos + FUNCTION_NAME.size();
 		}
 
-	} while( pos != std::string::npos && start_in_file < res.size() );
+	} while( pos != std::wstring::npos && start_in_file < res.size() );
 
 
 	return res;

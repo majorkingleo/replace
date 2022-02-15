@@ -17,8 +17,8 @@ protected:
 	class UnusedVarWarnigs : public Location
 	{
 	public:
-		std::string var_name;
-		std::string compile_log_line;
+		std::wstring var_name;
+		std::wstring compile_log_line;
 		bool fixed;
 
 	public:
@@ -37,7 +37,7 @@ protected:
 public:
 	UnusedVariableHandler( bool comment_only );
 
-	virtual void read_compile_log_line( const std::string & line );
+	virtual void read_compile_log_line( const std::wstring & line );
 
 	virtual bool want_file( const FixFromCompileLog::File & file );
 
@@ -45,11 +45,11 @@ public:
 
 	virtual void report_unfixed_compile_logs();
 
-	virtual void fix_warning( UnusedVarWarnigs & warning, std::string & content );
+	virtual void fix_warning( UnusedVarWarnigs & warning, std::wstring & content );
 
-	static void replace_line( std::string & buffer, std::string::size_type pos, const std::string & new_line );
+	static void replace_line( std::wstring & buffer, std::wstring::size_type pos, const std::wstring & new_line );
 
-	static std::string::size_type find_var_name( const std::string line, const std::string & var_name );
+	static std::wstring::size_type find_var_name( const std::wstring line, const std::wstring & var_name );
 };
 
 

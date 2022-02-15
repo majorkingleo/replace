@@ -26,6 +26,9 @@
 #include "implicit_handler.h"
 #include "implicit_handler2.h"
 #include "space_between_literal_handler.h"
+#include "HandleFile.h"
+#include "utf8_util.h"
+#include "read_file.h"
 
 using namespace Tools;
 
@@ -34,12 +37,12 @@ FixFromCompileLog::Handler::~Handler()
 
 }
 
-FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_from_line( const std::string & line )
+FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_from_line( const std::wstring & line )
 {
-	std::vector<std::string> sl = split_simple( line, ":");
+	std::vector<std::wstring> sl = split_simple( line, L":");
 
 	if( sl.size() < 2 ) {
-		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", line ) );
+		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
 	}
 
 	Location location;
@@ -48,12 +51,12 @@ FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_fr
 	location.line = s2x<int>(sl[1],-1);
 
 	if( location.line == -1 ) {
-		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", line ) );
+		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
 	}
 
-	CppDir::File file( location.file );
+	CppDir::File file( Utf8Util::wStringToUtf8(location.file) );
 
-	location.file = file.get_name();
+	location.file = Utf8Util::utf8toWString(file.get_name());
 
 	return location;
 }
@@ -110,8 +113,8 @@ void FixFromCompileLog::run()
 		throw REPORT_EXCEPTION( format("no .c or .cc files found at %s", path ) );
 	}
 
-	std::set<std::string> file_names;
-	std::set<std::string> already_warned_file_names;
+	std::set<std::wstring> file_names;
+	std::set<std::wstring> already_warned_file_names;
 
 	for( FILE_SEARCH_LIST::iterator fit = all_files.begin(); fit != all_files.end(); fit++ )
 	{
@@ -120,15 +123,15 @@ void FixFromCompileLog::run()
 
 		File file;
 
-		file.path_name = fit->getPath();
-		CppDir::File f( file.path_name );
-		file.name = f.get_name();
+		file.path_name = HandleFile::in2w(fit->getPath());
+		CppDir::File f( fit->getPath() );
+		file.name = HandleFile::in2w(f.get_name());
 
 		if( file_names.find(file.name) != file_names.end() ) {
 
 			if(already_warned_file_names.find(file.name) == already_warned_file_names.end() )
 			{
-				std::cout << format("warning duplicate filename %s detected. Can't be automatically fixed.\n", file.name );
+				std::cout << format("warning duplicate filename %s detected. Can't be automatically fixed.\n", HandleFile::w2out(file.name) );
 				already_warned_file_names.insert( file.name );
 			}
 
@@ -157,14 +160,15 @@ void FixFromCompileLog::run()
 
 void FixFromCompileLog::read_compile_log()
 {
-	std::string content;
+	std::wstring content;
+	ReadFile read_file;
 
-	if( !XML::read_file( compile_log, content ) )
+	if( !read_file.read_file( compile_log, content ) )
 	{
 		throw REPORT_EXCEPTION( format("cannot open file %s for reading", compile_log, strerror(errno)) );
 	}
 
-	std::vector<std::string> lines = split_simple( content, "\n");
+	std::vector<std::wstring> lines = split_simple( content, L"\n");
 
 	for( Iterator<HANDLER_LIST::iterator> it = handlers.begin(); it != handlers.end(); it++ )
 	{
@@ -186,13 +190,15 @@ void FixFromCompileLog::fix_from_compile_log()
 			{
 				if( fit->content.empty() )
 				{
-					if( !XML::read_file( fit->path_name, fit->content ) )
+					ReadFile read_file;
+					if( !read_file.read_file( HandleFile::w2out(fit->path_name), fit->content ) )
 					{
-						std::cerr << format("cannot open file %s for reading (%s).\n", fit->path_name, strerror(errno) );
+						std::cerr << format("cannot open file %s for reading (%s).\n", HandleFile::w2out(fit->path_name), strerror(errno) );
 						continue;
 					}
 
 					fit->original_content = fit->content;
+					fit->encoding = read_file.getFileEncoding();
 				}
 
 				it->fix_file( *fit );
@@ -215,7 +221,7 @@ void FixFromCompileLog::show_diffs()
 	{
 		if( fit->content != fit->original_content ) {
 
-			std::cout << "patching file " << fit->path_name << std::endl;
+			std::cout << "patching file " << HandleFile::w2out(fit->path_name) << std::endl;
 			DEBUG( diff_lines( fit->original_content,  fit->content  ) );
 		}
 	}
@@ -227,20 +233,22 @@ void FixFromCompileLog::doit()
 	{
 		if( fit->content != fit->original_content ) {
 
-			if( rename( fit->path_name.c_str(), TO_CHAR(fit->path_name + ".save") ) != 0 )
+			if( rename(  HandleFile::w2out(fit->path_name).c_str(), TO_CHAR( HandleFile::w2out(fit->path_name + L".save")) ) != 0 )
 			{
 				std::cerr << strerror(errno) << std::endl;
 			}
 
-			std::ofstream out( fit->path_name.c_str(), std::ios_base::trunc );
+			std::ofstream out( HandleFile::w2out(fit->path_name).c_str(), std::ios_base::trunc );
 
 			if( !out )
 			{
-				std::cerr << "cannot overwrite file " << fit->path_name << std::endl;
+				std::cerr << "cannot overwrite file " <<  HandleFile::w2out(fit->path_name) << std::endl;
 				continue;
 			}
 
-			out << fit->content;
+			ReadFile read_file;
+
+			out << read_file.convert( "UTF-8", fit->encoding, Utf8Util::wStringToUtf8(fit->content) );
 
 			out.close();
 		}

@@ -18,14 +18,14 @@ FixMlM::FixMlM()
 
 }
 
-std::string FixMlM::patch_file( const std::string & file )
+std::wstring FixMlM::patch_file( const std::wstring & file )
 {
-	std::string::size_type pos = 0;
+	std::wstring::size_type pos = 0;
 
-	std::string res(file);
+	std::wstring res(file);
 
 	do {
-		pos = find_function( "MlM", res, pos );
+		pos = find_function( L"MlM", res, pos );
 
 		if( pos == std::string::npos )
 			return res;
@@ -33,26 +33,26 @@ std::string FixMlM::patch_file( const std::string & file )
 		DEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
 
 
-		std::string line_before = get_whole_line( res, pos );
-		if( line_before.find( "LsMessage") != std::string::npos ) {
+		std::wstring line_before = get_whole_line( res, pos );
+		if( line_before.find( L"LsMessage") != std::string::npos ) {
 			//  LsMessage(MlM("Seite %ld von %ld")) is allowed
 			pos += 3;
 			continue;
 		}
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( get_function( res, pos, start, end, &func ) ) {
 
 			//DEBUG( "loaded function" );
 
 			if( func.args.size()  > 0 ) {
-				const std::string & arg = func.args[0];
+				const std::wstring & arg = func.args[0];
 
-				std::string::size_type pos_fmt = arg.find('%');
+				std::wstring::size_type pos_fmt = arg.find('%');
 
-				if( pos_fmt != std::string::npos ) {
+				if( pos_fmt != std::wstring::npos ) {
 /*
 					DEBUG( format("format string: %s", arg ) );
 					DEBUG( format("found format string at ", pos_fmt ) );
@@ -62,14 +62,14 @@ std::string FixMlM::patch_file( const std::string & file )
 						if( arg[pos_fmt+1] != '%' ) {
 
 							// make MlMsg out of it
-							res.insert(pos+3,"sg");
+							res.insert(pos+3,L"sg");
 							pos+=2;
 
-							std::string after = get_whole_line( res, pos );
+							std::wstring after = get_whole_line( res, pos );
 
 							DEBUG( format( "line %d\n- %s\n+ %s",
 									get_linenum(res,pos),
-									line_before, after) );
+									w2out(line_before), w2out(after)) );
 						}
 					}
 				} // if
@@ -78,7 +78,7 @@ std::string FixMlM::patch_file( const std::string & file )
 
 		pos += 3;
 
-	} while( pos != std::string::npos && pos < res.size() );
+	} while( pos != std::wstring::npos && pos < res.size() );
 
 	return res;
 }

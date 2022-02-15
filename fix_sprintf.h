@@ -13,15 +13,15 @@
 
 class FixSprintf : public HandleFile
 {
-	static const std::string KEY_WORD;
+	static const std::wstring KEY_WORD;
 
 public:
 	FixSprintf();
 
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file_ext( const FILE_TYPE & file_type, bool is_cpp_file );
+	bool want_file_ext( const FILE_TYPE & file_type, bool is_cpp_file ) override;
 };
 
 

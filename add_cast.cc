@@ -17,20 +17,20 @@
 
 using namespace Tools;
 
-AddCast::AddCast( const std::string & FUNCTION_NAME_ )
+AddCast::AddCast( const std::wstring & FUNCTION_NAME_ )
 	: FUNCTION_NAME( FUNCTION_NAME_ )
 {
 	keywords.push_back( FUNCTION_NAME );
 }
 
-std::string AddCast::patch_file( const std::string & file )
+std::wstring AddCast::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring res( file );
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	do
 	{
@@ -45,20 +45,20 @@ std::string AddCast::patch_file( const std::string & file )
 		if( pos == std::string::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
        int extra = 0;
 
 
           {
-            // Zurücksuchen, bis zum Ende des Bezeichners,
-            std::string::size_type pos2 = pos;
+            // Zurï¿½cksuchen, bis zum Ende des Bezeichners,
+            std::wstring::size_type pos2 = pos;
 
             while( pos2 > 0 && ( isalnum( res[pos2] ) || res[pos2] == '_' || res[pos2] == '$' ) &&
                    !isspace(res[pos2]) &&
-                   res[pos2] != '=' )
+                   res[pos2] != L'=' )
               {
                 pos2--;
                 extra++;
@@ -66,72 +66,72 @@ std::string AddCast::patch_file( const std::string & file )
           }
 
 
-          std::string var = get_assignment_var( res, pos-(extra) );
+          std::wstring var = get_assignment_var( res, pos-(extra) );
 		if (var.empty()) {
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
-		std::string::size_type decl_pos = 0;
-		std::string decl;
+		std::wstring::size_type decl_pos = 0;
+		std::wstring decl;
 
 		find_decl( res, pos, var, decl, decl_pos );
 
-		if( decl_pos == std::string::npos || decl_pos == 0 ) {
+		if( decl_pos == std::wstring::npos || decl_pos == 0 ) {
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
-		DEBUG( format( "'%s' decl: '%s' line: %d", var, decl, get_linenum(res,decl_pos)) );
+		DEBUG( wformat( L"'%s' decl: '%s' line: %d", var, decl, get_linenum(res,decl_pos)) );
 
-		std::string line = get_whole_line( res, decl_pos );
-		size_t zStartDecl = line.find_first_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		std::wstring line = get_whole_line( res, decl_pos );
+		size_t zStartDecl = line.find_first_of(L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 		line = line.substr(zStartDecl, line.size()-zStartDecl);
-		size_t zEndDecl = line.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_");
+		size_t zEndDecl = line.find_first_not_of(L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_");
 		line = line.substr(0, zEndDecl);
 
-		if (line.find ("void") != std::string::npos) {
+		if (line.find (L"void") != std::wstring::npos) {
 			DEBUG( "Do not cast to void");
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 		
-		std::string sCast = "(" + line + "*)";
-		std::string sTypeId = line;
+		std::wstring sCast = L"(" + line + L"*)";
+		std::wstring sTypeId = line;
 
-		DEBUG( format( "CAST:  '%s' var: '%s' decl: '%s' line: %d", sCast, var, decl, get_linenum(res,decl_pos)) );
+		DEBUG( wformat( L"CAST:  '%s' var: '%s' decl: '%s' line: %d", sCast, var, decl, get_linenum(res,decl_pos)) );
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(format("unable to load %s function", FUNCTION_NAME) );
+			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( format("function name is '%s'", func.name) );
+			DEBUG( wformat( L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 		
 		line = get_whole_line(res, pos);
 
-		if (line.find(sTypeId) != std::string::npos) {
+		if (line.find(sTypeId) != std::wstring::npos) {
 			start_in_file = pos+FUNCTION_NAME.size();
 			continue;
 		}
-		if (line.find(FUNCTION_NAME) == std::string::npos) {
+		if (line.find(FUNCTION_NAME) == std::wstring::npos) {
 			start_in_file = pos+FUNCTION_NAME.size();
 			continue;
 		}
 		DEBUG( format( "found Cast at line: %d", get_linenum(res,pos-1)) );
 
-		std::string new_line = substitude( line, FUNCTION_NAME, sCast+FUNCTION_NAME );
+		std::wstring new_line = substitude( line, FUNCTION_NAME, sCast+FUNCTION_NAME );
 
 		replace_line_from_start_of_line( res, pos, new_line );
 
 		start_in_file = pos + FUNCTION_NAME.size() + sCast.size();
 
-	} while( pos != std::string::npos && start_in_file < res.size() );
+	} while( pos != std::wstring::npos && start_in_file < res.size() );
 
 
 	return res;
@@ -148,7 +148,7 @@ bool AddCast::want_file( const FILE_TYPE & file_type )
 	}
 }
 
-void AddCast::replace_line_from_start_of_line( std::string & buffer, std::string::size_type pos, const std::string & new_line )
+void AddCast::replace_line_from_start_of_line( std::wstring & buffer, std::wstring::size_type pos, const std::wstring & new_line )
 {
 	if( pos == std::string::npos )
 		return;

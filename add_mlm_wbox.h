@@ -13,19 +13,19 @@
 
 class AddMlMWBox : public HandleFile
 {
-	const std::string FUNCTION_NAME;
-	std::set<std::string> key_args;
-	static const std::string STRFORM;
+	const std::wstring FUNCTION_NAME;
+	std::set<std::wstring> key_args;
+	static const std::wstring STRFORM;
 
 public:
-	AddMlMWBox(const std::string & FUNCTION_NAME_ = "WamasBox" );
+	AddMlMWBox(const std::wstring & FUNCTION_NAME_ = L"WamasBox" );
 
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 
-	static bool isNotTranslatable( const std::string & s );
+	static bool isNotTranslatable( const std::wstring & s );
 };
 
 

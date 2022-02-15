@@ -11,5 +11,5 @@
 ImplicitHandler2::ImplicitHandler2( const std::string & srcdir_ )
 : ImplicitHandler( srcdir_ )
 {
-	warning_text = "incompatible implicit declaration of built-in function";
+	warning_text = L"incompatible implicit declaration of built-in function";
 }

@@ -4,23 +4,23 @@
 #include <vector>
 #include <string>
 
-std::string::size_type find_first_of( const std::string & file,
-										std::string::size_type start,
-									   const std::string & a);
+std::wstring::size_type find_first_of( const std::wstring & file,
+										std::wstring::size_type start,
+									   const std::wstring & a);
 
-std::string::size_type find_first_of( const std::string & file,
-										std::string::size_type start,
-									   const std::string & a,
-									   const std::string & b );
+std::wstring::size_type find_first_of( const std::wstring & file,
+										std::wstring::size_type start,
+									   const std::wstring & a,
+									   const std::wstring & b );
 
-std::string::size_type find_first_of( const std::string & file,
-										std::string::size_type start,
-									   const std::string & a,
-									   const std::string & b,
-									   const std::string & c );
+std::wstring::size_type find_first_of( const std::wstring & file,
+										std::wstring::size_type start,
+									   const std::wstring & a,
+									   const std::wstring & b,
+									   const std::wstring & c );
 
-std::string::size_type find_first_of( const std::string & file,
-									   std::string::size_type start,
-									   const std::vector<std::string> & sl );
+std::wstring::size_type find_first_of( const std::wstring & file,
+									   std::wstring::size_type start,
+									   const std::vector<std::wstring> & sl );
 
 #endif

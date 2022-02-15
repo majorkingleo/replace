@@ -15,9 +15,9 @@ class UninitializedVariableHandler : public UnusedVariableHandler
 public:
 	UninitializedVariableHandler();
 
-	void read_compile_log_line( const std::string & line );
+	void read_compile_log_line( const std::wstring & line );
 
-	void fix_warning( UnusedVarWarnigs & warning, std::string & content );
+	void fix_warning( UnusedVarWarnigs & warning, std::wstring & content );
 };
 
 

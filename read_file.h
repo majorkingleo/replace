@@ -42,6 +42,6 @@ public:
 
 };
 
-static ReadFile READ_FILE;
+extern ReadFile READ_FILE;
 
 #endif /* READ_FILE_H_ */

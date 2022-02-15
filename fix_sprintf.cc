@@ -14,22 +14,22 @@
 
 using namespace Tools;
 
-const std::string FixSprintf::KEY_WORD = "sprintf";
+const std::wstring FixSprintf::KEY_WORD = L"sprintf";
 
 FixSprintf::FixSprintf()
 {
 	keywords.push_back( KEY_WORD );
 }
 
-std::string FixSprintf::patch_file( const std::string & file )
+std::wstring FixSprintf::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
+	std::wstring res( file );
 
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	do
 	{
@@ -41,13 +41,13 @@ std::string FixSprintf::patch_file( const std::string & file )
 
 		pos = res.find( KEY_WORD, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", KEY_WORD, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", KEY_WORD, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
 			DEBUG("unable to load sprintf function");
@@ -74,32 +74,14 @@ std::string FixSprintf::patch_file( const std::string & file )
 			// das machen
 			//   StrCpyDestLen(acLabZiel, MlMsg("Ziel"));
 
-			func.name = "StrCpyDestLen";
+			func.name = L"StrCpyDestLen";
 
 			changed_something = true;
 
-			if( func.args.at(1).find( "%" ) != std::string::npos ) {
+			if( func.args.at(1).find( L"%" ) != std::wstring::npos ) {
 				create_error_message = true;
 			}
 		}
-#if 0
-		else if( func.args.size() == 3 &&
-			strip(func.args[1]) == "\"%s\"" )
-		{
-
-			// aus
-			//    sprintf( acBuf, "%s", xxx )
-			// das machen
-			//    StrCpyDestLen( acBuf, xxx )
-
-			func.name = "StrCpyDestLen";
-			func.args[1] = func.args[2];
-
-			func.args.resize(2);
-
-			changed_something = true;
-		}
-#endif
 		else
 		{
 			// aus
@@ -108,60 +90,60 @@ std::string FixSprintf::patch_file( const std::string & file )
 			//    StrCpy( acBuf, format( "%s %d", xxx, yyy ) )
 
 
-			func.name = "StrCpy";
-			func.args[1] = "format( " + func.args[1];
-			*func.args.rbegin() += ")";
+			func.name = L"StrCpy";
+			func.args[1] = L"format( " + func.args[1];
+			*func.args.rbegin() += L")";
 
 			changed_something = true;
 		}
 
 		if( changed_something )
 		{
-			static const std::string STRFORM = "StrForm";
+			static const std::wstring STRFORM = L"StrForm";
 
-			if( strip( func.args[1] ).find( STRFORM ) != std::string::npos )
+			if( strip( func.args[1] ).find( STRFORM ) != std::wstring::npos )
 			{
-				std::string a = func.args[1].substr( STRFORM.size() + 1 );
-				func.args[1] = "format" + a;
+				std::wstring a = func.args[1].substr( STRFORM.size() + 1 );
+				func.args[1] = L"format" + a;
 				create_error_message = false;
 			}
 
-			std::string first_part_of_file = res.substr(0,pos);
+			std::wstring first_part_of_file = res.substr(0,pos);
 
-			std::stringstream str;
-			std::string indent;
+			std::wstringstream str;
+			std::wstring indent;
 
 			if( create_error_message ) {
-				str << "\n#error \"replace: % deteced in format string. Please check if the behavior is still correct.\"\n";
+				str << L"\n#error \"replace: % deteced in format string. Please check if the behavior is still correct.\"\n";
 
-				std::string::size_type pos_line_break = first_part_of_file.rfind('\n');
+				std::wstring::size_type pos_line_break = first_part_of_file.rfind('\n');
 
-				if( pos_line_break != std::string::npos ) {
+				if( pos_line_break != std::wstring::npos ) {
 					indent = first_part_of_file.substr( pos_line_break );
 					first_part_of_file = first_part_of_file.substr( 0, pos_line_break );
 				}
 			}
 
-			str << indent << func.name << "(";
+			str << indent << func.name << L"(";
 
 			for( unsigned i = 0; i < func.args.size(); i++ )
 			{
 				if( i > 0 )
-					str << ", ";
+					str << L", ";
 
 				str << func.args[i];
 			}
 
 			DEBUG( str.str() );
 
-			std::string second_part_of_file = res.substr(end);
+			std::wstring second_part_of_file = res.substr(end);
 
 			res = first_part_of_file + str.str() + second_part_of_file;
 		}
 
 		start_in_file = end;
 
-	} while( pos != std::string::npos && start_in_file < res.size() );
+	} while( pos != std::wstring::npos && start_in_file < res.size() );
 
 	return res;
 }

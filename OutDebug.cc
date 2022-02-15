@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <DetectLocale.h>
 
 OutDebug::OutDebug()
 : Debug(),
@@ -37,3 +38,22 @@ void OutDebug::add( const char *file, unsigned line, const char *function, const
 			<< '\n';
 }
 
+void OutDebug::add( const char *file, unsigned line, const char *function, const std::wstring & s )
+{
+	if( colored_output )
+	{
+		std::cout << "\033[1;33m";
+	}
+
+	std::cout << file;
+
+	if( colored_output )
+	{
+		std::cout << "\033[0m";
+	}
+
+	std::cout << ':' << line
+			<< " " // << function
+			<< DetectLocale::w2out(s)
+			<< '\n';
+}

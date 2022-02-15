@@ -11,11 +11,11 @@
 #include <string>
 
 
-std::string find_decl( const std::string &s,
-				      std::string::size_type start_,
-				      const std::string & name,
-				      std::string & decl,
-				      std::string::size_type & at_pos );
+std::wstring find_decl( const std::wstring &s,
+				      std::wstring::size_type start_,
+				      const std::wstring & name,
+				      std::wstring & decl,
+				      std::wstring::size_type & at_pos );
 
 
 #endif /* FIND_DECL_H_ */

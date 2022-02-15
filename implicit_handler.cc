@@ -14,6 +14,8 @@
 #include "find_files.h"
 #include "cppdir.h"
 #include "xml.h"
+#include "read_file.h"
+#include "HandleFile.h"
 
 using namespace Tools;
 
@@ -23,7 +25,7 @@ ImplicitHandler::ImplicitHandler( const std::string & srcdir_ )
   srcdir(srcdir_),
   header_files(),
   symbol_header_file_map(),
-  warning_text("warning: implicit declaration of function")
+  warning_text(L"warning: implicit declaration of function")
 {
 	search_for_header_files();
 
@@ -32,13 +34,13 @@ ImplicitHandler::ImplicitHandler( const std::string & srcdir_ )
 void ImplicitHandler::search_for_header_files()
 {
 	// add some defaults
-	add_default( "memset", "string.h");
-	add_default( "strcpy", "string.h");
-	add_default( "memcpy", "string.h");
-	add_default( "bsearch", "stdlib.h");
-	add_default( "qsort", "stdlib.h");
-	add_default( "free", "stdlib.h");
-	add_default( "malloc", "stdlib.h");
+	add_default( L"memset", L"string.h");
+	add_default( L"strcpy", L"string.h");
+	add_default( L"memcpy", L"string.h");
+	add_default( L"bsearch", L"stdlib.h");
+	add_default( L"qsort", L"stdlib.h");
+	add_default( L"free", L"stdlib.h");
+	add_default( L"malloc", L"stdlib.h");
 
 
 	FILE_SEARCH_LIST files;
@@ -85,8 +87,9 @@ void ImplicitHandler::search_for_header_files()
 	{
 		if( it->getType() == FILE_TYPE::HEADER )
 		{
-			std::string content;
-			if( !XML::read_file( it->getPath(), content ) )
+			ReadFile read_file;
+			std::wstring content;
+			if( !read_file.read_file( it->getPath(), content ) )
 			{
 				std::cerr << "cannot read " << it->getPath() << std::endl;
 				continue;
@@ -94,10 +97,10 @@ void ImplicitHandler::search_for_header_files()
 
 			HeaderFile header;
 
-			header.path = it->getPath();
+			header.path = HandleFile::in2w(it->getPath());
 
-			CppDir::File file( header.path );
-			header.name = file.get_name();
+			CppDir::File file( it->getPath() );
+			header.name = HandleFile::in2w(file.get_name());
 			header.content = content;
 
 			header_files.push_back( header );
@@ -105,16 +108,16 @@ void ImplicitHandler::search_for_header_files()
 	}
 }
 
-void ImplicitHandler::add_default( const std::string & symbol, const std::string & header_file )
+void ImplicitHandler::add_default( const std::wstring & symbol, const std::wstring & header_file )
 {
 	HeaderFile header;
 	header.name = header_file;
-	header.content = format( "   %s();  ", symbol );
+	header.content = wformat( L"   %s();  ", symbol );
 	// DEBUG( format( "content: %s", header.content ));
 	header_files.push_back( header );
 }
 
-void ImplicitHandler::read_compile_log_line( const std::string & line )
+void ImplicitHandler::read_compile_log_line( const std::wstring & line )
 {
 	// warning: implicit declaration of function ‘tdb_LockRec’
 
@@ -123,22 +126,22 @@ void ImplicitHandler::read_compile_log_line( const std::string & line )
 
 	ImplicitWarnigs location = get_location_from_line( line );
 
-	std::string::size_type start = line.find( "function" );
+	std::wstring::size_type start = line.find( L"function" );
 
 	location.symbol = line.substr( start + 8 );
-	location.symbol = strip( location.symbol ,  "'‘’ " );
+	location.symbol = strip( location.symbol ,  L"'‘’ " );
 
 	// test.c:7:2: warning: incompatible implicit declaration of built-in function ‘memset’ [enabled by default]
 
 	// uebrig bleibt:
 	// memset’ [enabled by default]
 
-	std::string::size_type end = location.symbol.find_first_of( "'‘’ ");
+	std::wstring::size_type end = location.symbol.find_first_of( L"'‘’ ");
 
-	if( end != std::string::npos && end != 0 )
+	if( end != std::wstring::npos && end != 0 )
 	{
 		location.symbol = location.symbol.substr( 0, end );
-		location.symbol = strip( location.symbol ,  "'‘’ " );
+		location.symbol = strip( location.symbol ,  L"'‘’ " );
 	}
 
 	location.compile_log_line = line;
@@ -176,16 +179,16 @@ void ImplicitHandler::report_unfixed_compile_logs()
 	{
 		if( !implicit_warnings_locations[i].fixed )
 		{
-			std::cout << "(unfixed) " << implicit_warnings_locations[i].compile_log_line << '\n';
+			std::cout << "(unfixed) " << HandleFile::w2out(implicit_warnings_locations[i].compile_log_line) << '\n';
 		}
 	}
 }
 
-void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::string & content )
+void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::wstring & content )
 {
 	for( HEADER_FILE::iterator it = header_files.begin(); it != header_files.end(); it++ )
 	{
-		if( it->path.find("cpputils") != std::string::npos )
+		if( it->path.find(L"cpputils") != std::wstring::npos )
 			continue;
 
 		if( is_symbol_in_header_file( it->content, warning.symbol ) )
@@ -200,7 +203,7 @@ void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::string & cont
 				warning.fixed = true;
 				break;
 			} else {
-				DEBUG( format( "can't insert include for header '%s' for symbol '%s'", it->name, warning.symbol ) );
+				DEBUG( wformat( L"can't insert include for header '%s' for symbol '%s'", it->name, warning.symbol ) );
 			}
 		} else {
 			// DEBUG( format( "symbol: '%s' not found in header: '%s'", warning.symbol, it->name ));
@@ -208,15 +211,15 @@ void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::string & cont
 	}
 }
 
-bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, const std::string & symbol )
+bool ImplicitHandler::is_symbol_in_header_file( const std::wstring & content, const std::wstring & symbol )
 {
 	for( std::string::size_type pos = content.find( symbol ); pos != std::string::npos; pos = content.find( symbol, pos+1 ) )
 	{
-		std::string line = get_whole_line( content, pos );
+		std::wstring line = get_whole_line( content, pos );
 
 		// DEBUG( format( "line: '%s'", line ) );
 
-		if( line.find( "#define" ) != std::string::npos ) {
+		if( line.find( L"#define" ) != std::wstring::npos ) {
 			continue;
 		}
 
@@ -232,13 +235,13 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 
 		switch( pos_before )
 		{
-		case ' ': break;
-		case '\t': break;
-		case '*': break;
-		case '\n': break;
-		case '\r': break;
-		case '<': break;
-		case '"': break;
+		case L' ': break;
+		case L'\t': break;
+		case L'*': break;
+		case L'\n': break;
+		case L'\r': break;
+		case L'<': break;
+		case L'"': break;
 		default:
 			// this is no symbol
 			continue;
@@ -248,14 +251,14 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 
 		switch( pos_after )
 		{
-		case ' ': break;
-		case '\t': break;
-		case '\n': break;
-		case '\r': break;
-		case '(': break;
-		case '>': break;
-		case ';': break;
-		case '"': break;
+		case L' ': break;
+		case L'\t': break;
+		case L'\n': break;
+		case L'\r': break;
+		case L'(': break;
+		case L'>': break;
+		case L';': break;
+		case L'"': break;
 		default:
 			// this is no symbol
 			continue;
@@ -269,43 +272,43 @@ bool ImplicitHandler::is_symbol_in_header_file( const std::string & content, con
 }
 
 
-bool ImplicitHandler::insert_include_for( const ImplicitWarnigs & warning, const std::string & file_name, std::string & content, bool & already_included )
+bool ImplicitHandler::insert_include_for( const ImplicitWarnigs & warning, const std::wstring & file_name, std::wstring & content, bool & already_included )
 {
 	if( file_name.empty() )
 		return false;
 
-	const std::string include_string = format("#include \"%s\"", file_name);
+	const std::wstring include_string = wformat(L"#include \"%s\"", file_name);
 
-	DEBUG( format( "%s %s %s", warning, warning.symbol, include_string ) );
+	DEBUG( wformat( L"%s %s %s", warning, warning.symbol, include_string ) );
 
-	std::string::size_type pos = content.rfind( "#include" );
+	std::string::size_type pos = content.rfind( L"#include" );
 
 	if( pos == std::string::npos )
 		return false;
 
-	pos = content.find( '\n', pos );
+	pos = content.find( L'\n', pos );
 
-	if( pos == std::string::npos )
+	if( pos == std::wstring::npos )
 		return false;
 
 
 	// include bereits vorhanden?
-	if( content.find( include_string ) != std::string::npos ) {
+	if( content.find( include_string ) != std::wstring::npos ) {
 		already_included = true;
 		return false;
 	}
 
 	pos++;
 
-	std::string left = content.substr( 0, pos );
-	std::string right = content.substr( pos );
+	std::wstring left = content.substr( 0, pos );
+	std::wstring right = content.substr( pos );
 
 	if( !left.empty() && left[left.size()-1] != '\n')
 	{
 		left += '\n';
 	}
 
-	content = left + include_string + "\n" + right;
+	content = left + include_string + L"\n" + right;
 
 	return true;
 }

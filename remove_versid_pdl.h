@@ -8,20 +8,20 @@ class RemoveVersidPdl : public RemoveVersid
 public:
 	RemoveVersidPdl();
 
-	std::string remove_versid(  const std::string & file );
+	std::wstring remove_versid(  const std::wstring & file );
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 
-	virtual std::string patch_file( const std::string & file )
+	std::wstring patch_file( const std::wstring & file ) override
 	{
 		return remove_versid( file );
 	}
 
 protected:
-	std::string cut_revision_history( const std::string & file ) const;
-	std::string cut_VERSID( const std::string & file ) const;
-	std::string cut_versid_function( const std::string & file ) const;
-	std::string add_eof( const std::string & file ) const;
+	std::wstring cut_revision_history( const std::wstring & file ) const;
+	std::wstring cut_VERSID( const std::wstring & file ) const;
+	std::wstring cut_versid_function( const std::wstring & file ) const;
+	std::wstring add_eof( const std::wstring & file ) const;
 };
 
 #endif

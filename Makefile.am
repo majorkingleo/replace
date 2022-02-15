@@ -93,6 +93,13 @@ cpputils_cpputilsshared_libcpputilsshared_a_SOURCES= \
 
 cpputils_cpputilsshared_cpputilsformat_libcpputilsformat_a_SOURCES= \
 	cpputils/cpputilsshared/cpputilsformat/format1.cc \
-	cpputils/cpputilsshared/cpputilsformat/format2.cc
+	cpputils/cpputilsshared/cpputilsformat/format2.cc \
+	cpputils/cpputilsshared/cpputilsformat/format2.h \
+	cpputils/cpputilsshared/cpputilsformat/format1.h \
+	cpputils/cpputilsshared/cpputilsformat/cformat.h \
+	cpputils/cpputilsshared/cpputilsformat/wformat2.cc \
+	cpputils/cpputilsshared/cpputilsformat/wformat2.h \
+	cpputils/cpputilsshared/cpputilsformat/cwformat.h \
+	cpputils/cpputilsshared/cpputilsformat/cwformat.cc
 
 replace_LDADD = tools/libtools.a cpputils/cpputilsshared/libcpputilsshared.a cpputils/cpputilsshared/cpputilsformat/libcpputilsformat.a

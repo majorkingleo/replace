@@ -13,14 +13,14 @@
 
 class CorrectVaMultipleMalloc : public HandleFile
 {
-	static const std::string KEY_WORD;
-	static const std::string VA_MALLOC;
+	static const std::wstring KEY_WORD;
+	static const std::wstring VA_MALLOC;
 
 public:
 	CorrectVaMultipleMalloc();
 
 
-	virtual std::string patch_file( const std::string & file );
+	virtual std::wstring patch_file( const std::wstring & file );
 
 	virtual bool want_file( const FILE_TYPE & file_type );
 };

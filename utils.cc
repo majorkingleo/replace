@@ -9,12 +9,13 @@
 #include "xml.h"
 #include "debug.h"
 #include <algorithm>
+#include "DetectLocale.h"
 
 using namespace Tools;
 
-bool is_in( char c, const std::string &values )
+bool is_in( wchar_t c, const std::wstring &values )
 {
-    for( std::string::size_type i = 0; i < values.size(); i++ )
+    for( std::wstring::size_type i = 0; i < values.size(); i++ )
     {
 		if( c == values[i] )
 			return true;
@@ -23,7 +24,7 @@ bool is_in( char c, const std::string &values )
     return false;
 }
 
-unsigned get_linenum( const std::string &s, std::string::size_type pos )
+unsigned get_linenum( const std::wstring &s, std::string::size_type pos )
 {
     unsigned ret = 1;
     std::string::size_type p = 0;
@@ -38,32 +39,32 @@ unsigned get_linenum( const std::string &s, std::string::size_type pos )
     return ret;
 }
 
-template <class T> bool is_define_line( const T &s, std::string::size_type pos )
+template <class T> bool is_define_line( const T &s, std::wstring::size_type pos )
 {
-	if( pos == std::string::npos )
+	if( pos == std::wstring::npos )
 		return false;
 
 	for( ; pos > 0; pos-- )
-		if( s[pos] == '\n' )
+		if( s[pos] == L'\n' )
 		{
 			pos++;
 			break;
 		}
 
-	return s[pos] == '#';
+	return s[pos] == L'#';
 }
 
-std::string::size_type find_function( const std::string & function, 
-									  const std::string &s, 
-									  std::string::size_type start )
+std::wstring::size_type find_function( const std::wstring & function,
+									  const std::wstring &s,
+									  std::wstring::size_type start )
 {
     bool found = false;
 
-    DEBUG( format("try finding function '%s'", function));
+    DEBUG( format("try finding function '%s'", DETECT_LOCALE.wString2output(function)));
 
     while( !found )
     {   
-		std::string::size_type pos = s.find( function, start );
+		std::wstring::size_type pos = s.find( function, start );
 
 		if( pos == std::string::npos )
 			return pos;
@@ -71,12 +72,15 @@ std::string::size_type find_function( const std::string & function,
 		if( pos + function.size() >= s.size() )
 			return std::string::npos;
 
-		DEBUG( format( "found %s at line %d => %s", function, get_linenum(s,pos), get_whole_line(s, pos) ));
+		DEBUG( wformat( L"found %s at line %d => %s",
+				function,
+				get_linenum(s,pos),
+				get_whole_line(s, pos) ));
 
 		if( isalpha( s[pos-1] ) ||
 		    isalpha( s[pos+function.size()] ) ||
-			s[pos-1] == '_' ||
-			s[pos-1] == '$' )
+			s[pos-1] == L'_' ||
+			s[pos-1] == L'$' )
 		{ 
 			start = pos + function.size();
 			continue;
@@ -84,7 +88,7 @@ std::string::size_type find_function( const std::string & function,
 
 		// now an '(' has to follow and nothing in beween except spaces or newlines
 
-		for( std::string::size_type i = pos + function.size(); 
+		for( std::wstring::size_type i = pos + function.size();
 			 i < s.size(); i++ )
 		{
 			if( s[i] == '(' )
@@ -97,18 +101,18 @@ std::string::size_type find_function( const std::string & function,
 				  }
 
 				// wen vorher extern steht, dann ist es eine Dekleration, von der ma nix wollen
-				std::string::size_type pp = skip_spaces( s, pos, true );
+				std::wstring::size_type pp = skip_spaces( s, pos, true );
 
-				while( pp > 0 && pp != std::string::npos )
+				while( pp > 0 && pp != std::wstring::npos )
 				  {
 					if( !isalpha( s[pp] ) )
 					  break;
 					pp--;
 				  }
 
-				if( pp > 0 && pp != std::string::npos ) 
+				if( pp > 0 && pp != std::wstring::npos )
 				  {
-					if( strip( s.substr( pp, pp - pos ) ) == "extern" )
+					if( strip( s.substr( pp, pp - pos ) ) == L"extern" )
 					  {
 						start = pos + function.size();
 						break;
@@ -118,7 +122,7 @@ std::string::size_type find_function( const std::string & function,
 				return pos;
 			  }
 
-			if( !is_in( s[i], " \t\n" ) ) {
+			if( !is_in( s[i], L" \t\n" ) ) {
 				start = pos + function.size();
 				break;
 			}
@@ -128,12 +132,12 @@ std::string::size_type find_function( const std::string & function,
     assert( 0 ); // will never be reached
 }
 
-std::string strip_stuff( const std::string &s, 
-						 const std::string &start, 
-						 const std::string &end )
+std::wstring strip_stuff( const std::wstring &s,
+						 const std::wstring &start,
+						 const std::wstring &end )
 {
-  std::string::size_type pos1 = 0, pos2 = 0, last = 0;
-  std::string ret;
+  std::wstring::size_type pos1 = 0, pos2 = 0, last = 0;
+  std::wstring ret;
 
   ret.reserve( s.size() );
 
@@ -142,7 +146,7 @@ std::string strip_stuff( const std::string &s,
   do
 	{
 
-	  std::string::size_type pos3 = last;
+	  std::wstring::size_type pos3 = last;
 	  bool cont = false;
 
 	  do {
@@ -158,7 +162,7 @@ std::string strip_stuff( const std::string &s,
 			} 
 	  } while ( cont );	
 
-	  if( pos1 == std::string::npos )
+	  if( pos1 == std::wstring::npos )
 		{
 		  ret += s.substr( last, pos1 );
 		  return ret;
@@ -178,7 +182,7 @@ std::string strip_stuff( const std::string &s,
 			} 
       } while ( cont ); 
 
-	  if( pos2 == std::string::npos )
+	  if( pos2 == std::wstring::npos )
 		{
 		  ret += s.substr( last, pos2 );
 		  return ret;
@@ -188,30 +192,30 @@ std::string strip_stuff( const std::string &s,
 
 	  ret += s.substr( last, pos1 - last );
 
-	  std::string nlines = s.substr( pos1, pos2 - pos1 );
+	  std::wstring nlines = s.substr( pos1, pos2 - pos1 );
 
 	  // std::cout << "'" << nlines << "'" << std::endl;
 
 	  for( unsigned i = 0; i < nlines.size(); i++ )
-		if( nlines[i] == '\n' )
-		  ret += '\n';
+		if( nlines[i] == L'\n' )
+		  ret += L'\n';
 
 	  last = pos2 + end.size();
 
-	} while( last != std::string::npos );
+	} while( last != std::wstring::npos );
 
   return ret;
 }
 
-void strip_cpp_comment( std::string &s, const std::string & pattern )
+void strip_cpp_comment( std::wstring &s, const std::wstring & pattern )
 {
-  std::string::size_type pos = 0;
+  std::wstring::size_type pos = 0;
 
   do
 	{
 	  pos = s.find( pattern, pos );
 
-	  if( pos == std::string::npos )
+	  if( pos == std::wstring::npos )
 		  return;
 
 	  if( is_in_string( s, pos ) )
@@ -222,25 +226,25 @@ void strip_cpp_comment( std::string &s, const std::string & pattern )
 
 	  // std::cout << get_line( s, pos ) << std::endl;
 
-	  while( pos < s.size() && s[pos] != '\n' )
+	  while( pos < s.size() && s[pos] != L'\n' )
 		{
-		  s[pos] = ' '; // mit spaces auffuellen
+		  s[pos] = L' '; // mit spaces auffuellen
 		  pos++;
 		}
 
-	} while( pos != std::string::npos );
+	} while( pos != std::wstring::npos );
 }
 
-static void strip_define( std::string &s, const std::string & pattern, bool save_numeric_defines )
+static void strip_define( std::wstring &s, const std::wstring & pattern, bool save_numeric_defines )
 {
-  std::string::size_type pos = 0;
+  std::wstring::size_type pos = 0;
 
   do
 	{
 
-	  std::string::size_type start = pos = s.find( pattern, pos );
+	  std::wstring::size_type start = pos = s.find( pattern, pos );
 
-	  if( pos == std::string::npos )
+	  if( pos == std::wstring::npos )
 		  return;
 
 	  if( is_in_string( s, pos ) )
@@ -253,15 +257,15 @@ static void strip_define( std::string &s, const std::string & pattern, bool save
 
 	  // "# define" finden
 	  
-	  for( std::string::size_type p = pos-1; p > 0; p-- )
+	  for( std::wstring::size_type p = pos-1; p > 0; p-- )
 	  {
-		  if( s[p] == '#' )
+		  if( s[p] == L'#' )
 		  {
 			  pos = p;
 			  break;
 		  }
 
-		  if( s[p] == '\n' )
+		  if( s[p] == L'\n' )
 			  break;
 
 		  if( isspace( s[p] ) )
@@ -272,12 +276,12 @@ static void strip_define( std::string &s, const std::string & pattern, bool save
 
 	  if( save_numeric_defines )
 	    {
-	      std::string ss = get_line( s, start );
-	      std::vector<std::string> sl = split_simple( ss );
+	      std::wstring ss = get_line( s, start );
+	      std::vector<std::wstring> sl = split_simple( ss );
 
 	      if( sl.size() == 3 )
 		{
-		  std::string sss = strip(sl[2], "()" );
+		  std::wstring sss = strip(sl[2], L"()" );
 
 		  if( is_int( sss ) )
 		    {
@@ -287,52 +291,52 @@ static void strip_define( std::string &s, const std::string & pattern, bool save
 		}
 	    }
 
-	  while( pos < s.size() && s[pos] != '\n' )
+	  while( pos < s.size() && s[pos] != L'\n' )
 		{
-		  s[pos] = ' '; // mit spaces auffuellen
+		  s[pos] = L' '; // mit spaces auffuellen
 		  pos++;
 		}
 
-	} while( pos != std::string::npos );
+	} while( pos != std::wstring::npos );
 }
 
-std::string strip_comments( const std::string &s )
+std::wstring strip_comments( const std::wstring &s )
 {
-  std::string ret( strip_stuff( s, "/*", "*/" ) );
+  std::wstring ret( strip_stuff( s, L"/*", L"*/" ) );
 
   strip_cpp_comment( ret );
 
   // std::cout << ret << std::endl;
 
-  strip_define( ret, "define", true );
-  strip_define( ret, "ifndef", false );
+  strip_define( ret, L"define", true );
+  strip_define( ret, L"ifndef", false );
 
   // std::cout << rope.string() << std::endl;
 
   return ret;
 }
 
-std::string strip_ifdefelse( const std::string &s, 
-			     const std::string & start,
-			     const std::string & end,
-			     const std::string & middle )
+std::wstring strip_ifdefelse( const std::wstring &s,
+			     const std::wstring & start,
+			     const std::wstring & end,
+			     const std::wstring & middle )
 {
-  std::string::size_type pos1 = 0, pos2 = 0, last = 0;
-  std::string ret;
+  std::wstring::size_type pos1 = 0, pos2 = 0, last = 0;
+  std::wstring ret;
 
   ret.reserve( s.size() );
 
   do
 	{
 	  pos1 = s.find( start, last );
-	  if( pos1 == std::string::npos )
+	  if( pos1 == std::wstring::npos )
 		{
 		  ret += s.substr( last, pos1 );
 		  return ret;
 		}
 
 	  pos2 = s.find( end, pos1 );
-	  if( pos2 == std::string::npos )
+	  if( pos2 == std::wstring::npos )
 		{
 		  ret += s.substr( last, pos2 );
 		  return ret;
@@ -340,13 +344,13 @@ std::string strip_ifdefelse( const std::string &s,
 
 	  ret += s.substr( last, pos1 - last );
 
-	  std::string nlines = s.substr( pos1, pos2 - pos1 );
+	  std::wstring nlines = s.substr( pos1, pos2 - pos1 );
 
 	  // find middle
-	  std::string::size_type pos3 = nlines.find( middle );
-	  std::string else_tree;
+	  std::wstring::size_type pos3 = nlines.find( middle );
+	  std::wstring else_tree;
 
-	  if( pos3 != std::string::npos )
+	  if( pos3 != std::wstring::npos )
 		{
 		  // add else tree
 		  else_tree = nlines.substr( pos3 + middle.size(), nlines.size() - end.size() );		 
@@ -356,28 +360,28 @@ std::string strip_ifdefelse( const std::string &s,
 		}
 
 	  for( unsigned i = 0; i < nlines.size(); i++ )
-		if( nlines[i] == '\n' )
-		  ret += '\n';
+		if( nlines[i] == L'\n' )
+		  ret += L'\n';
 
 	  ret += else_tree;
 
 	  last = pos2 + end.size();
 
-	} while( last != std::string::npos );
+	} while( last != std::wstring::npos );
 
   return ret;
 }
 
-std::string strip_ifnull( const std::string &s )
+std::wstring strip_ifnull( const std::wstring &s )
 {
-  return strip_stuff( s, "#if 0", "#endif" );
+  return strip_stuff( s, L"#if 0", L"#endif" );
 }
 
-std::string erase( const std::string & s, const std::string & what )
+std::wstring erase( const std::wstring & s, const std::wstring & what )
 {
-  std::vector<std::string> sl = split_simple( s, what );
+  std::vector<std::wstring> sl = split_simple( s, what );
 
-  std::string ret;
+  std::wstring ret;
 
   ret.reserve( s.size() );
 
@@ -388,38 +392,38 @@ std::string erase( const std::string & s, const std::string & what )
 }
 
 
-std::vector<std::string> sequence_point_split( const std::string & s )
+std::vector<std::wstring> sequence_point_split( const std::wstring & s )
 {
-	std::string::size_type point = s.find( "." );
-	std::string::size_type pointer = s.find( "->" );
+	std::wstring::size_type point = s.find( L"." );
+	std::wstring::size_type pointer = s.find( L"->" );
 
-	std::vector<std::string> sl;
+	std::vector<std::wstring> sl;
 
-	std::string splitter;
+	std::wstring splitter;
 
-	if( point != std::string::npos && pointer == std::string::npos )
-		splitter = ".";
-	else if( point == std::string::npos && pointer != std::string::npos )
-		splitter = "->";
-	else if( point == std::string::npos && pointer == std::string::npos )
+	if( point != std::string::npos && pointer == std::wstring::npos )
+		splitter = L".";
+	else if( point == std::wstring::npos && pointer != std::wstring::npos )
+		splitter = L"->";
+	else if( point == std::wstring::npos && pointer == std::wstring::npos )
 	{
 		sl.push_back( s );
 		return sl;
 	} else 	if( point < pointer ) {
-		splitter = ".";
+		splitter = L".";
 	} else if( point > pointer ) {
-		splitter = "->";
+		splitter = L"->";
 	}
 
-	std::string::size_type pos = s.find( splitter );
+	std::wstring::size_type pos = s.find( splitter );
 
 	sl.push_back( strip( s.substr( 0, pos ) ) );
 
-	std::string rest = strip( s.substr( pos + splitter.size() ) );
+	std::wstring rest = strip( s.substr( pos + splitter.size() ) );
 
-	if( rest.find( "." ) != std::string::npos || rest.find( "->" ) != std::string::npos )
+	if( rest.find( L"." ) != std::string::npos || rest.find( L"->" ) != std::wstring::npos )
 	{
-		std::vector<std::string> ssl = sequence_point_split( rest );
+		std::vector<std::wstring> ssl = sequence_point_split( rest );
 
 		for( unsigned i = 0; i < ssl.size(); i++ )
 			sl.push_back( ssl[i] );
@@ -430,9 +434,9 @@ std::vector<std::string> sequence_point_split( const std::string & s )
 	return sl;
 }
 
-std::string::size_type skip_spaces( const std::string & s, std::string::size_type pos, bool reverse  )
+std::wstring::size_type skip_spaces( const std::wstring & s, std::wstring::size_type pos, bool reverse  )
 {
-  if( pos == std::string::npos )
+  if( pos == std::wstring::npos )
 	return pos;
 
 	if( reverse )
@@ -446,29 +450,29 @@ std::string::size_type skip_spaces( const std::string & s, std::string::size_typ
 				return pos;
 	}
 
-	return std::string::npos;
+	return std::wstring::npos;
 }
 
 
-bool is_in_string( const std::string &s, std::string::size_type pos )
+bool is_in_string( const std::wstring &s, std::wstring::size_type pos )
 {
-  if( pos == std::string::npos )
+  if( pos == std::wstring::npos )
     return false;
 
-  std::string::size_type start = pos;
+  std::wstring::size_type start = pos;
 
-  std::string::size_type p = s.rfind( '\n', start );
-  if( p == std::string::npos )
+  std::wstring::size_type p = s.rfind( L'\n', start );
+  if( p == std::wstring::npos )
 	start = 0;
   else
 	start = ++p;
 
-  std::string line = get_line( s, start );
+  std::wstring line = get_line( s, start );
 
-  if( line.find( '"' ) == std::string::npos )
+  if( line.find( L'"' ) == std::wstring::npos )
 	return false;
 
-  Tools::Pairs pairs( line );
+  Tools::WPairs pairs( line );
 
   if( pairs.is_in_pair( pos - start ) )
     return true;
@@ -476,26 +480,26 @@ bool is_in_string( const std::string &s, std::string::size_type pos )
   return false;
 }
 
-std::string get_assignment_var( const std::string & s, std::string::size_type pos )
+std::wstring get_assignment_var( const std::wstring & s, std::wstring::size_type pos )
 {
-  std::string::size_type p = skip_spaces( s, pos, true );
+  std::wstring::size_type p = skip_spaces( s, pos, true );
   
-  if( p == std::string::npos )
-    return std::string();    
+  if( p == std::wstring::npos )
+    return std::wstring();
 
-  if( s[p] != '=' )
-    return std::string();
+  if( s[p] != L'=' )
+    return std::wstring();
 
   p--;
 
   p = skip_spaces( s, p, true );
 
-  if( p == std::string::npos )
-    return std::string();
+  if( p == std::wstring::npos )
+    return std::wstring();
 
-  std::string::size_type end = p;
+  std::wstring::size_type end = p;
 
-  while( p > 0 && ( isalnum( s[p] ) || s[p] == '_' || s[p] == '$' ) && !isspace(s[p]) )
+  while( p > 0 && ( isalnum( s[p] ) || s[p] == L'_' || s[p] == L'$' ) && !isspace(s[p]) )
     {
       p--;
     }
@@ -537,15 +541,15 @@ bool overlap( const std::vector<std::string> &list1, const std::vector<std::stri
   return false;
 }
 
-bool get_function( const std::string &s,
-                   std::string::size_type pos,
-                   std::string::size_type &start,
-                   std::string::size_type &end, Function *func, bool strip_args )
+bool get_function( const std::wstring &s,
+                   std::wstring::size_type pos,
+                   std::wstring::size_type &start,
+                   std::wstring::size_type &end, Function *func, bool strip_args )
 {
     int count = 1;
-    start = s.find( '(', pos );
+    start = s.find( L'(', pos );
 
-    if( start == std::string::npos )
+    if( start == std::wstring::npos )
         return false;
 
     if( func )
@@ -555,7 +559,7 @@ bool get_function( const std::string &s,
 
     bool in_string = false;
     bool escaped = false;
-    std::string::size_type last_arg_end = pos + 1;
+    std::wstring::size_type last_arg_end = pos + 1;
 
     do
     {
@@ -564,7 +568,7 @@ bool get_function( const std::string &s,
         if( pos >= s.size() )
             return false;
 
-        if( s[pos] == '\\' )
+        if( s[pos] == L'\\' )
         {
             if( escaped ) // \\ gefunden
                 escaped = false;
@@ -572,25 +576,25 @@ bool get_function( const std::string &s,
                 escaped = true;
             continue;
         }
-        if( s[pos] == '"' && !escaped )
+        if( s[pos] == L'"' && !escaped )
              in_string = !in_string;
 
          escaped = false;
 
          if( !in_string )
          {
-             if( s[pos] == '(' )
+             if( s[pos] == L'(' )
                  count++;
-             if( s[pos] == ')' )
+             if( s[pos] == L')' )
                  count--;
 
-             if( func && s[pos] == ',' && count == 1 )
+             if( func && s[pos] == L',' && count == 1 )
              {
                // handle ','
-               if( pos > 0 && pos < s.size() - 1 && s[pos-1] == '\'' && s[pos+1] == '\'' )
+               if( pos > 0 && pos < s.size() - 1 && s[pos-1] == L'\'' && s[pos+1] == L'\'' )
                  continue;
 
-                 std::string ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
+                 std::wstring ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
 
                  if( !ss.empty() ) {
                 	 if( strip_args )
@@ -608,7 +612,7 @@ bool get_function( const std::string &s,
 
     if( func )
     {
-        std::string ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
+        std::wstring ss = strip( s.substr( last_arg_end, pos - last_arg_end ) );
 
         if( !ss.empty() ) {
         	if( strip_args )
@@ -617,14 +621,14 @@ bool get_function( const std::string &s,
         		func->args.push_back( s.substr( last_arg_end, pos - last_arg_end ) );
         }
 
-        std::string::size_type send = end;
+        std::wstring::size_type send = end;
 
         for( send = end+1; send < s.size(); send++ )
           {
             if( isspace( s[send] ) )
               continue;
 
-            if( s[send] == '{' )
+            if( s[send] == L'{' )
               func->is_impl = true;
 
             break;
@@ -653,42 +657,42 @@ bool get_function( const std::string &s,
     return true;
 }
 
-std::string function_to_string( const std::string & res,
+std::wstring function_to_string( const std::wstring & res,
 								const Function & func,
-								std::string::size_type start,
-								std::string::size_type end )
+								std::wstring::size_type start,
+								std::wstring::size_type end )
 {
-	std::string first_part_of_file = res.substr(0,start);
+	std::wstring first_part_of_file = res.substr(0,start);
 
-	std::stringstream str;
+	std::wstringstream str;
 
-	str << func.name << "(";
+	str << func.name << L"(";
 
 	for( unsigned i = 0; i < func.args.size(); i++ )
 	{
 		if( i > 0 ) {
-			str << ",";
+			str << L",";
 		}
 
 		str << func.args[i];
 	}
 
-	str << ")";
+	str << L")";
 
 	DEBUG( str.str() );
 
-	std::string second_part_of_file = res.substr(end);
+	std::wstring second_part_of_file = res.substr(end);
 
 	return first_part_of_file + str.str() + second_part_of_file;
 }
 
-std::string get_whole_line( const std::string & s, std::string::size_type pos )
+std::wstring get_whole_line( const std::wstring & s, std::wstring::size_type pos )
 {
-	if( pos == std::string::npos ) {
-		return std::string();
+	if( pos == std::wstring::npos ) {
+		return std::wstring();
 	}
 
-	std::string::size_type ppos = s.rfind( '\n', pos );
+	std::wstring::size_type ppos = s.rfind( '\n', pos );
 
 	if( ppos == std::string::npos ) {
 		ppos = 0;
@@ -696,8 +700,8 @@ std::string get_whole_line( const std::string & s, std::string::size_type pos )
 		ppos++;
 	}
 
-    std::string::size_type p = s.find( '\n', ppos );
-    std::string ret = s.substr( ppos, p - ppos );
+    std::wstring::size_type p = s.find( '\n', ppos );
+    std::wstring ret = s.substr( ppos, p - ppos );
 
     // std::cout << "ppos: " << ppos << " p: " << p << " >" << ret << "< " << std::endl;
 
@@ -705,21 +709,21 @@ std::string get_whole_line( const std::string & s, std::string::size_type pos )
 }
 
 
-std::string::size_type rfind_first_of( const std::string & s, const std::string & delims, std::string::size_type start )
+std::wstring::size_type rfind_first_of( const std::wstring & s, const std::wstring & delims, std::wstring::size_type start )
 {
-	std::string copy( s );
+	std::wstring copy( s );
 	std::reverse(copy.begin(), copy.end());
 
-	std::string::size_type start_pos = 0;
+	std::wstring::size_type start_pos = 0;
 
-	if( start != std::string::npos ) {
+	if( start != std::wstring::npos ) {
 		start_pos = s.size() - start;
 	}
 
-	std::string::size_type pos = copy.find_first_of( delims, start_pos );
+	std::wstring::size_type pos = copy.find_first_of( delims, start_pos );
 
-	if( pos == std::string::npos ) {
-		return std::string::npos;
+	if( pos == std::wstring::npos ) {
+		return std::wstring::npos;
 	}
 
 	return copy.size() - pos;

@@ -38,15 +38,21 @@
 #include "add_mlm_wbox.h"
 #include "DetectLocale.h"
 #include "read_file.h"
+#include "utf8_util.h"
 
 using namespace Tools;
 
-std::string patch_file( const std::string & file, std::string search, std::string repl )
+static std::string patch_file( const std::string & file, std::string search, std::string repl )
 {
   return substitude( file, search, repl );
 }
 
-void usage( const std::string & prog )
+static std::wstring patch_file( const std::wstring & file, std::wstring search, std::wstring repl )
+{
+  return substitude( file, search, repl );
+}
+
+static void usage( const std::string & prog )
 {
   std::cerr << "usage: "
 			<< prog << " PATH -replace WHAT WITH [-doit]\n";
@@ -78,7 +84,7 @@ void usage( const std::string & prog )
   			<< prog << " PATH -remove-versid [-doit]\n";
 }
 
-static std::string unescape( std::string search, const std::string & what, const std::string & with )
+static std::wstring unescape( std::wstring search, const std::wstring & what, const std::wstring & with )
 {
 	std::string::size_type pos = 0;
 
@@ -91,8 +97,8 @@ static std::string unescape( std::string search, const std::string & what, const
 
 		if( pos == 0 )
 		{
-			std::string left = search.substr( 0, pos );
-			std::string right = search.substr( pos + what.size() );
+			std::wstring left = search.substr( 0, pos );
+			std::wstring right = search.substr( pos + what.size() );
 			search = left + with + right;
 			pos += with.size();
 		}
@@ -523,6 +529,7 @@ int main( int argc, char **argv )
       o_fix_long_function_arg.setMaxValues(1);
       oc_fix_long.addOptionR(&o_fix_long_function_arg);
 
+  DetectLocale dl;
 
   const unsigned int console_width = 80;
 
@@ -591,8 +598,8 @@ int main( int argc, char **argv )
 	  return 1;
   }
 
-  std::string search = "";
-  std::string replace = "";
+  std::wstring search = L"";
+  std::wstring replace = L"";
   bool doit =  o_doit.getState();
   bool show_diff = false;
 
@@ -627,20 +634,19 @@ int main( int argc, char **argv )
 
   if( o_replace.isSet() )
   {
-	  search = o_replace.getValues()->at(0);
+	  search = dl.inputString2wString( o_replace.getValues()->at(0) );
 
-	  search = unescape( search, "\\t", "\t" );
-	  search = unescape( search, "\\n", "\n" );
+	  search = unescape( search, L"\\t", L"\t" );
+	  search = unescape( search, L"\\n", L"\n" );
 
-	  DEBUG( format(  "unescaped search string: '%s'", search) );;
+	  DEBUG( format(  "unescaped search string: '%s'", dl.wString2output( search ) ) );;
 
-	  replace = o_replace.getValues()->at(1);
+	  replace = dl.inputString2wString( o_replace.getValues()->at(1) );
 
-	  replace = unescape( replace, "\\t", "\t" );
-	  replace = unescape( replace, "\\n", "\n" );
+	  replace = unescape( replace, L"\\t", L"\t" );
+	  replace = unescape( replace, L"\\n", L"\n" );
 
-	  DEBUG( format(  "unescaped replac string: '%s'", replace) );;
-
+	  DEBUG( format(  "unescaped replace string: '%s'", dl.wString2output( replace ) ) );;
 
 	  show_diff = true;
   }
@@ -698,9 +704,9 @@ int main( int argc, char **argv )
 
 
   if( o_assign.getState() ) {
-	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModelessCreate") );
-	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModalCreate" ) );
-	  handlers.push_back( new AddWamasWdgAssignMenu( "ApShellModalCreateRel" ) );
+	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModelessCreate") );
+	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModalCreate" ) );
+	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModalCreateRel" ) );
   }
 
 
@@ -710,52 +716,52 @@ int main( int argc, char **argv )
 
   if( o_remove_generic_cast.getState() ) {
 	  handlers.push_back( new RemoveGenericCast() );
-	  handlers.push_back( new RemoveGenericCast("MskUpdateVar") );
-	  handlers.push_back( new RemoveGenericCast("MskQueryRl") );
-	  handlers.push_back( new RemoveGenericCast("LmskGetVar") );
+	  handlers.push_back( new RemoveGenericCast( L"MskUpdateVar") );
+	  handlers.push_back( new RemoveGenericCast( L"MskQueryRl") );
+	  handlers.push_back( new RemoveGenericCast( L"LmskGetVar") );
   }
   if (o_addcast.getState() ) {
 	  handlers.push_back( new AddCast() );
-	  handlers.push_back( new AddCast("ArrWalkNext") );
-	  handlers.push_back( new AddCast("ArrGetEle") );
-	  handlers.push_back( new AddCast("malloc") );
-	  handlers.push_back( new AddCast("realloc") );
+	  handlers.push_back( new AddCast(L"ArrWalkNext") );
+	  handlers.push_back( new AddCast(L"ArrGetEle") );
+	  handlers.push_back( new AddCast(L"malloc") );
+	  handlers.push_back( new AddCast(L"realloc") );
   }
   if( o_prmget.getState() ) {
 	  handlers.push_back( new FixPrmGet() );
-	  handlers.push_back( new FixPrmGet( "PrmGet2Parameter", 5 ) );
-	  handlers.push_back( new FixPrmGet( "PrmGet3Parameter", 6 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get1Parameter", 4 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get2Parameter", 5 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get3Parameter", 6 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get1ParameterWp", 3 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get2ParameterWp", 4 ) );
-	  handlers.push_back( new FixPrmGet( "ParamSIf_Get3ParameterWp", 5 ) );
+	  handlers.push_back( new FixPrmGet( L"PrmGet2Parameter", 5 ) );
+	  handlers.push_back( new FixPrmGet( L"PrmGet3Parameter", 6 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get1Parameter", 4 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get2Parameter", 5 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get3Parameter", 6 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get1ParameterWp", 3 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get2ParameterWp", 4 ) );
+	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get3ParameterWp", 5 ) );
   }
 
   if (o_convnull.getState() ) {
 	  handlers.push_back ( new FixConversionNull() );
-	  handlers.push_back ( new FixConversionNull("ArrSort", 3) );
+	  handlers.push_back ( new FixConversionNull( L"ArrSort", 3) );
   }
 
   if( o_add_mlm.getState() ) {
-	  std::string function_name = o_add_mlm_function_name.getValues()->at(0);
+	  std::wstring function_name = DetectLocale::in2w(o_add_mlm_function_name.getValues()->at(0));
 	  unsigned function_arg = s2x<unsigned>(o_add_mlm_function_arg.getValues()->at(0));
-	  std::string function_call = o_add_mlm_function_call.getValues()->at(0);
+	  std::wstring function_call = DetectLocale::in2w( o_add_mlm_function_call.getValues()->at(0));
 
 	  handlers.push_back( new AddMlM( function_name, function_arg, function_call ));
   }
 
   if( o_add_mlm_wbox.getState() ) {
 	  handlers.push_back( new AddMlMWBox());
-	  handlers.push_back( new AddMlMWBox("WamasBoxAlert"));
-	  handlers.push_back( new AddMlMWBox("WamasBoxCommit"));
-	  handlers.push_back( new AddMlMWBox("WamasBoxInfo"));
-	  handlers.push_back( new AddMlMWBox("WamasBoxInput"));
+	  handlers.push_back( new AddMlMWBox( L"WamasBoxAlert") );
+	  handlers.push_back( new AddMlMWBox( L"WamasBoxCommit") );
+	  handlers.push_back( new AddMlMWBox( L"WamasBoxInfo") );
+	  handlers.push_back( new AddMlMWBox( L"WamasBoxInput") );
   }
 
   if( o_fix_long.getState() ) {
-	  std::string function_name = o_fix_long_function_name.getValues()->at(0);
+	  std::wstring function_name = DetectLocale::in2w(o_fix_long_function_name.getValues()->at(0));
 	  unsigned function_arg = s2x<unsigned>(o_fix_long_function_arg.getValues()->at(0));
 
 	  handlers.push_back( new FixPrmGet( function_name, function_arg ));
@@ -763,35 +769,38 @@ int main( int argc, char **argv )
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )
 	{
-	  std::string file;
+	  // std::string file;
 	  FILE_TYPE file_type = it->getType();
 	  bool is_cpp_file = it->isCppFile();
 
+	  /*
 	  if( !XML::read_file( it->getPath(), file ) )
 		{
 		  std::cerr << "cannot open file: " << it->getPath() << std::endl;
 		  continue;
 		}
-
-	  /*
+	  */
+	  
 	  std::wstring wfile;
+	  std::string encoding;
 
 	  if( !READ_FILE.read_file( it->getPath(), wfile ) )
-		{
-		  std::cerr << "cannot open or convert file: " << it->getPath() << " Error: " <<  READ_FILE.getError() <<  std::endl;
-		  continue;
-		}
-		*/
+	    {
+	      std::cerr << "cannot open or convert file: " << it->getPath() << " Error: " <<  READ_FILE.getError() <<  std::endl;
+	      continue;
+	    }	  
 
-	  DEBUG( format( "working on file %s",  it->getPath() ) );
+	  encoding = READ_FILE.getFileEncoding();
 
-	  std::string file_erg = file;
+	  DEBUG( format( "working on file %s encoding: %s",  it->getPath(), encoding ) );
+
+	  std::wstring file_erg = wfile;
 
 	  switch( file_type )
 	  {
 	  case FILE_TYPE::RC_FILE:
 		  if( o_replace.isSet() )
-		  	  file_erg = patch_file( file_erg, search , replace );
+		  	  file_erg = patch_file( file_erg, search, replace );
 
 		  break;
 
@@ -816,12 +825,16 @@ int main( int argc, char **argv )
 			  }
 		  }
 
-		  if( file_erg != file )
+		  if( file_erg != wfile )
 		  {
 			  std::cout << "patching file " << it->getPath() << std::endl;
 
 			  if( show_diff || o_diff.getState() ) {
-				  std::cout << diff_lines( file, file_erg ) << std::endl;
+				  std::wstring diff = diff_lines( wfile, file_erg );
+
+				  std::string utf8_result = Utf8Util::wStringToUtf8( diff );
+
+				  std::cout << READ_FILE.convert( utf8_result, "UTF-8", dl.getInputEncoding() ) << std::endl;
 			  }
 		  }
 		  else
@@ -847,7 +860,9 @@ int main( int argc, char **argv )
 			  continue;
 			}
 		  
-		  out << file_erg;
+		  std::string utf8_result = Utf8Util::wStringToUtf8( file_erg );
+
+		  out << READ_FILE.convert( utf8_result, "UTF-8", encoding );
 
 		  out.close();
 		}

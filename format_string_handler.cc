@@ -11,6 +11,7 @@
 #include "getline.h"
 #include "utils.h"
 #include "string_utils.h"
+#include "HandleFile.h"
 
 using namespace Tools;
 
@@ -19,20 +20,20 @@ FormatStringHandler::FormatStringHandler()
   format_warnings_locations(),
   fix_table()
 {
-	fix_table.push_back( FixTable( "%d",  "long",               "%ld"));
-	fix_table.push_back( FixTable( "%d",  "long int",           "%ld"));
-	fix_table.push_back( FixTable( "%ld", "int",                "%d"));
-	fix_table.push_back( FixTable( "%d",  "unsigned long",      "%ld"));
-	fix_table.push_back( FixTable( "%d",  "unsigned long int",  "%ld"));
-	fix_table.push_back( FixTable( "%f",  "double",  			"%lf"));
-	fix_table.push_back( FixTable( "%lf", "float",  			"%f"));
-	fix_table.push_back( FixTable( "%ld", "unsigned int",  		"%u"));
-	fix_table.push_back( FixTable( "%d",  "unsigned int",  		"%u"));
-	fix_table.push_back( FixTable( "%d",  "unsigned long",  	"%lu"));
-	fix_table.push_back( FixTable( "%ld", "unsigned long",  	"%lu"));
+	fix_table.push_back( FixTable( L"%d",  L"long",               L"%ld"));
+	fix_table.push_back( FixTable( L"%d",  L"long int",           L"%ld"));
+	fix_table.push_back( FixTable( L"%ld", L"int",                L"%d"));
+	fix_table.push_back( FixTable( L"%d",  L"unsigned long",      L"%ld"));
+	fix_table.push_back( FixTable( L"%d",  L"unsigned long int",  L"%ld"));
+	fix_table.push_back( FixTable( L"%f",  L"double",  			  L"%lf"));
+	fix_table.push_back( FixTable( L"%lf", L"float",  			  L"%f"));
+	fix_table.push_back( FixTable( L"%ld", L"unsigned int",  	  L"%u"));
+	fix_table.push_back( FixTable( L"%d",  L"unsigned int",  	  L"%u"));
+	fix_table.push_back( FixTable( L"%d",  L"unsigned long",  	  L"%lu"));
+	fix_table.push_back( FixTable( L"%ld", L"unsigned long",  	  L"%lu"));
 }
 
-void FormatStringHandler::read_compile_log_line( const std::string & line )
+void FormatStringHandler::read_compile_log_line( const std::wstring & line )
 {
 	if( !is_interested_in_line( line ) )
 	{
@@ -44,34 +45,34 @@ void FormatStringHandler::read_compile_log_line( const std::string & line )
 	// ./me_kpl.c:291: warning: format ‘%s’ expects type ‘char *’, but argument 3 has type ‘int’
 
 	// extract format
-	std::string::size_type start = line.find( "format");
-	std::string::size_type end = line.find( "expects", start );
+	std::wstring::size_type start = line.find( L"format");
+	std::wstring::size_type end = line.find( L"expects", start );
 
-	if( start == std::string::npos ||
-		end == std::string::npos ) {
+	if( start == std::wstring::npos ||
+		end == std::wstring::npos ) {
 		return;
 	}
 
 	location.format = line.substr( start + 6, end - (start + 6) );
-	location.format = strip( location.format, "'‘’ " );
+	location.format = strip( location.format, L"'‘’ " );
 
-	start = line.find( "type", end );
-	end = line.find( "but", start );
+	start = line.find( L"type", end );
+	end = line.find( L"but", start );
 
-	if( start == std::string::npos ||
-		end == std::string::npos ) {
+	if( start == std::wstring::npos ||
+		end == std::wstring::npos ) {
 		return;
 	}
 
 	location.expected_type = line.substr( start + 4, end - (start + 4) );
-	location.expected_type = strip(location.expected_type, "'‘’, " );
+	location.expected_type = strip(location.expected_type, L"'‘’, " );
 
 
-	start = line.find( "argument", end );
-	end = line.find( "has", start );
+	start = line.find( L"argument", end );
+	end = line.find( L"has", start );
 
-	if( start == std::string::npos ||
-			end == std::string::npos ) {
+	if( start == std::wstring::npos ||
+			end == std::wstring::npos ) {
 		return;
 	}
 
@@ -80,14 +81,14 @@ void FormatStringHandler::read_compile_log_line( const std::string & line )
 		return;
 
 
-	start = line.find( "type", end );
+	start = line.find( L"type", end );
 
 	if( start == std::string::npos ) {
 		return;
 	}
 
 	location.target_type = line.substr( start + 4 );
-	location.target_type = strip(location.target_type, "'‘’, " );
+	location.target_type = strip(location.target_type, L"'‘’, " );
 
 	strip_target_type( location );
 
@@ -118,7 +119,7 @@ void FormatStringHandler::read_compile_log_line( const std::string & line )
 
 	location.compile_log_line = line;
 
-	DEBUG( format( "%s format string: '%s' expected type: '%d' target_type: '%d' argument: %d",
+	DEBUG( wformat( L"%s format string: '%s' expected type: '%d' target_type: '%d' argument: %d",
 					location,
 					location.format,
 					location.expected_type,
@@ -156,31 +157,31 @@ void FormatStringHandler::report_unfixed_compile_logs()
 	{
 		if( !format_warnings_locations[i].fixed )
 		{
-			std::cout << "(unfixed) " << format_warnings_locations[i].compile_log_line << '\n';
+			std::cout << "(unfixed) " << HandleFile::w2out(format_warnings_locations[i].compile_log_line) << '\n';
 		}
 	}
 }
 
-void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & content )
+void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & content )
 {
-	std::string::size_type pos = get_pos_for_line( content, warning.line );
+	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
 	if( pos == std::string::npos ) {
-		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", warning.compile_log_line));
+		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", HandleFile::w2out(warning.compile_log_line)));
 	}
 
-	std::string::size_type function_end = content.find( ");", pos );
+	std::wstring::size_type function_end = content.find( L");", pos );
 
-	if( function_end == std::string::npos )
-		function_end = content.find( ")", pos );
+	if( function_end == std::wstring::npos )
+		function_end = content.find( L")", pos );
 
 	if( function_end == std::string::npos )
 	{
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( format("Cannot handle %s (%d)", HandleFile::w2out(warning.compile_log_line), __LINE__ ) );
 		return;
 	}
 
-	std::string::size_type function_start = function_end;
+	std::wstring::size_type function_start = function_end;
 
 	int count=1;
 	bool in_string = false;
@@ -190,15 +191,15 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	{
 		// DEBUG( format( "pos: %c %s", content[function_start], get_line( content, function_start) ) );
 
-		if( content[function_start] == ')' && !in_string )
+		if( content[function_start] == L')' && !in_string )
 		{
 			count++;
 		}
-		else if( content[function_start] == '('  && !in_string )
+		else if( content[function_start] == L'('  && !in_string )
 		{
 			count--;
 		}
-		else if ( content[function_start] == '"' )
+		else if ( content[function_start] == L'"' )
 		{
 			in_string = !in_string;
 
@@ -206,7 +207,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 				in_string_started = true;
 			}
 			continue;
-		} else if( content[function_start] == '\\' && in_string && in_string_started ) {
+		} else if( content[function_start] == L'\\' && in_string && in_string_started ) {
 			in_string = false;
 		}
 
@@ -217,13 +218,13 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	}
 
 
-	if( function_start == std::string::npos ) {
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+	if( function_start == std::wstring::npos ) {
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
 	if( function_end == std::string::npos ) {
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -234,8 +235,8 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 	for( p = static_cast<int>(function_start) - 1; p > 0; p-- )
 	{
-		if( content[p] == ' ' ||
-		    content[p] == '\t' )
+		if( content[p] == L' ' ||
+		    content[p] == L'\t' )
 		{
 			if( var_started )
 				break;
@@ -245,23 +246,23 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 		if( var_started )
 		{
-			if( content[p] == ';' ||
-				content[p] == ',' ||
-				content[p] == '=' )
+			if( content[p] == L';' ||
+				content[p] == L',' ||
+				content[p] == L'=' )
 			{
 				p++;
 				break;
 			}
 		}
 
-		if( content[p] == '_' || isalnum(content[p]) ) {
+		if( content[p] == L'_' || isalnum(content[p]) ) {
 			var_started = true;
 			continue;
 		}
 	}
 
 	if( p <= 0 ) {
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -270,14 +271,14 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 	if( !get_function( content, p, function_start, function_end, &func, false ) )
 	{
-		DEBUG( format("%s:%d get_function failed", warning.file, warning.line ));
+		DEBUG( wformat(L"%s:%d get_function failed", warning.file, warning.line ));
 		return;
 	}
 
-	DEBUG( format("%s:%d %s", warning.file, warning.line, func.name ) );
+	DEBUG( wformat(L"%s:%d %s", warning.file, warning.line, func.name ) );
 
 
-	std::string func_name = strip( func.name );
+	std::wstring func_name = strip( func.name );
 
 	if( func_name.empty() )
 		return;
@@ -285,11 +286,11 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	int format_string_pos = 0;
 	int format_string_to_change  = 0;
 	bool found = false;
-	std::string fix_string;
+	std::wstring fix_string;
 
 	for( unsigned i = 0; i < func.args.size(); i++ )
 	{
-		if( func.args[i].find( warning.format ) == std::string::npos  ) {
+		if( func.args[i].find( warning.format ) == std::wstring::npos  ) {
 			continue;
 		}
 
@@ -307,7 +308,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 				format_string_to_change = warning.argnum - (format_string_pos + 1);
 				fix_string = fix_table[j].correct_type;
 
-				DEBUG( format("%s:%d %s => format string at pos: %d pos %d %s", warning.file, warning.line, warning.compile_log_line,
+				DEBUG( wformat(L"%s:%d %s => format string at pos: %d pos %d %s", warning.file, warning.line, warning.compile_log_line,
 						format_string_pos + 1,
 						format_string_to_change,
 						fix_table[j].correct_type) );
@@ -319,7 +320,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 		if( !found )
 		{
-			DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+			DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 			return;
 		}
 
@@ -328,12 +329,12 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 
 	if( !found ) {
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
-	std::string format_string_line_orig = func.args[format_string_pos];
-	std::string new_format_string_line = func.args[format_string_pos];
+	std::wstring format_string_line_orig = func.args[format_string_pos];
+	std::wstring new_format_string_line = func.args[format_string_pos];
 
 	in_string = false;
 	bool escape_sign = false;
@@ -344,17 +345,17 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 
 	for( unsigned i = 0; i < new_format_string_line.size(); i++ )
 	{
-		if( new_format_string_line[i] == '"' && !escape_sign )
+		if( new_format_string_line[i] == L'"' && !escape_sign )
 		{
 			in_string = !in_string;
-		} else if( new_format_string_line[i] == '\\' ) {
+		} else if( new_format_string_line[i] == L'\\' ) {
 			escape_sign = !escape_sign;
 			continue;
-		} else if( new_format_string_line[i] == '%' && in_string ) {
+		} else if( new_format_string_line[i] == L'%' && in_string ) {
 
 			if( i + 1 < new_format_string_line.size() ) {
 				// %%
-				if( new_format_string_line[i+1] == '%' ) {
+				if( new_format_string_line[i+1] == L'%' ) {
 					continue;
 				}
 			}
@@ -375,24 +376,24 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 	}
 
 	if( format_string_start_pos == std::string::npos ) {
-		DEBUG( format( "no format_string_start_pos '%s'",  new_format_string_line ) );
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( wformat( L"no format_string_start_pos '%s'",  new_format_string_line ) );
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
-	std::string left = new_format_string_line.substr( 0 , format_string_start_pos );
-	std::string right = new_format_string_line.substr( format_string_start_pos + warning.format.size() );
+	std::wstring left = new_format_string_line.substr( 0 , format_string_start_pos );
+	std::wstring right = new_format_string_line.substr( format_string_start_pos + warning.format.size() );
 
 	new_format_string_line = left + fix_string + right;
 
-	DEBUG( format( "%s => %s", format_string_line_orig , new_format_string_line) );
+	DEBUG( wformat( L"%s => %s", format_string_line_orig , new_format_string_line) );
 
 	// new replace the format string.
 
 	std::string::size_type format_string_start = content.find( format_string_line_orig, function_start );
 
 	if( format_string_start == std::string::npos ) {
-		DEBUG( format("Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -407,12 +408,12 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::string & co
 }
 
 
-bool FormatStringHandler::is_interested_in_line( const std::string & line )
+bool FormatStringHandler::is_interested_in_line( const std::wstring & line )
 {
-	if( line.find( "warning: format") == std::string::npos ||
-	    line.find( "expects type") == std::string::npos ||
-	    line.find( "but argument")  == std::string::npos ||
-	    line.find( "has type")  == std::string::npos )
+	if( line.find( L"warning: format") == std::wstring::npos ||
+	    line.find( L"expects type") == std::wstring::npos ||
+	    line.find( L"but argument")  == std::wstring::npos ||
+	    line.find( L"has type")  == std::wstring::npos )
 	{
 		return false;
 	}

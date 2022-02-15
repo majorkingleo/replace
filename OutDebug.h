@@ -11,7 +11,8 @@ private:
 public:
 	OutDebug();
 
-	virtual void add( const char *file, unsigned line, const char *function, const std::string & s );
+	void add( const char *file, unsigned line, const char *function, const std::string & s ) override;
+	void add( const char *file, unsigned line, const char *function, const std::wstring & s ) override;
 
 	void setColoredOutput( bool colored_output_ ) {
 		colored_output = colored_output_;

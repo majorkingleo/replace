@@ -6,28 +6,28 @@
 class RemoveVersidCh : public RemoveVersid
 {
 	bool noheader;
-	std::string header_template;
+	std::wstring header_template;
 
 public:
 	RemoveVersidCh( bool noheader );
 
-	std::string remove_versid(  const std::string & file );
+	std::wstring remove_versid(  const std::wstring & file );
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 
-	virtual std::string patch_file( const std::string & file )
+	std::wstring patch_file( const std::wstring & file ) override
 	{
 		return remove_versid( file );
 	}
 
 protected:
 
-	std::string make_header_template() const;
-	std::string cut_revision_history( const std::string & file ) const;
-	std::string cut_versid_h( const std::string & file ) const;
-	std::string cut_versid_ch_makro( const std::string & file ) const;
-	std::string cut_the_easy_stuff( const std::string & file ) const;
-	std::string cut_static_versid( const std::string & file ) const;
+	std::wstring make_header_template() const;
+	std::wstring cut_revision_history( const std::wstring & file ) const;
+	std::wstring cut_versid_h( const std::wstring & file ) const;
+	std::wstring cut_versid_ch_makro( const std::wstring & file ) const;
+	std::wstring cut_the_easy_stuff( const std::wstring & file ) const;
+	std::wstring cut_static_versid( const std::wstring & file ) const;
 };
 
 

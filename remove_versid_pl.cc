@@ -15,14 +15,14 @@ RemoveVersidPl::RemoveVersidPl()
 	: RemoveVersidPdl()
 {
 	keywords.clear();
-	keywords.push_back("VERSID:");
-	keywords.push_back("$Log:");
-	keywords.push_back("$Header:");
+	keywords.push_back( L"VERSID:" );
+	keywords.push_back( L"$Log:" );
+	keywords.push_back( L"$Header:" );
 }
 
-std::string  RemoveVersidPl::cut_Header( const std::string & file ) const
+std::wstring  RemoveVersidPl::cut_Header( const std::wstring & file ) const
 {
-	std::string::size_type pos = find_first_of( file, 0, "$Header:" );
+	std::wstring::size_type pos = find_first_of( file, 0, L"$Header:" );
 
 	if( pos == std::string::npos )
 		return file;
@@ -31,21 +31,21 @@ std::string  RemoveVersidPl::cut_Header( const std::string & file ) const
 		return file;
 
 
-	std::string line = get_whole_line( file, pos );
+	std::wstring line = get_whole_line( file, pos );
 
 	// beginnt die Zeile mit einem Kommentar
-	if( line.find("#") != 0 )
+	if( line.find( L"#" ) != 0 )
 		return file;
 
-	if( line.find("cvsroot") == std::string::npos )
+	if( line.find( L"cvsroot" ) == std::wstring::npos )
 		return file;
 
-	std::string::size_type begin = file.rfind('\n', pos);
-	std::string::size_type end = file.find('\n', pos);
+	std::wstring::size_type begin = file.rfind( L'\n', pos);
+	std::wstring::size_type end = file.find( L'\n', pos);
 
-	std::string result;
+	std::wstring result;
 
-	if( begin != std::string::npos )
+	if( begin != std::wstring::npos )
 		result = file.substr(0,begin);
 
 	result += file.substr(end);
@@ -53,12 +53,12 @@ std::string  RemoveVersidPl::cut_Header( const std::string & file ) const
 	return result;
 }
 
-std::string RemoveVersidPl::remove_versid( const std::string & file )
+std::wstring RemoveVersidPl::remove_versid( const std::wstring & file )
 {
 	if( should_skip_file(file) )
 		return file;
 
-	std::string result = cut_revision_history( file );
+	std::wstring result = cut_revision_history( file );
 	result = cut_VERSID( result );
 	result = cut_Header( result );
 

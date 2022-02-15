@@ -13,24 +13,24 @@
 using namespace Tools;
 
 // die Funktion sucht rueckwaerts!
-std::string find_decl( const std::string &s,
-				      std::string::size_type start_,
-				      const std::string & name,
-				      std::string & decl,
-				      std::string::size_type & at_pos )
+std::wstring find_decl( const std::wstring &s,
+				      std::wstring::size_type start_,
+				      const std::wstring & name,
+				      std::wstring & decl,
+				      std::wstring::size_type & at_pos )
 {
-	DEBUG( format( "trying to find decl for '%s'", name));
+	DEBUG( wformat( L"trying to find decl for '%s'", name));
 
-	std::string ret;
+	std::wstring ret;
 
-	if( name == "NULL" )
+	if( name == L"NULL" )
 		return ret;
 
-	for( std::string::size_type start = start_; start > 0 && start != std::string::npos; start-- )
+	for( std::wstring::size_type start = start_; start > 0 && start != std::string::npos; start-- )
 	{
-		std::string::size_type pos = s.rfind( name, start );
+		std::wstring::size_type pos = s.rfind( name, start );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return ret;
 
 		if( s.size() < pos + name.size() )
@@ -44,7 +44,7 @@ std::string find_decl( const std::string &s,
 
 		if( pos > 0 )
 		  {
-			if( ( !isspace( s[pos-1] ) && s[pos-1] != ',' && s[pos-1] != '*' ) || is_in_string( s, pos ) )
+			if( ( !isspace( s[pos-1] ) && s[pos-1] != L',' && s[pos-1] != L'*' ) || is_in_string( s, pos ) )
 			  {
 				start = pos-1;
 				continue;
@@ -54,14 +54,14 @@ std::string find_decl( const std::string &s,
 		bool is_decl = false;
 
 		// kann das eine Dekleration sein?
-		for( std::string::size_type p = pos - 1; p > 0; p-- )
+		for( std::wstring::size_type p = pos - 1; p > 0; p-- )
 		{
 			if( isspace( s[p] ) )
 				continue;
 
 			// log( format("char. %c", s[p] ) );
 
-			if( s[p] == ',' || s[p] == '{' || s[p] == '*' || isalnum( s[p] ) )
+			if( s[p] == L',' || s[p] == L'{' || s[p] == L'*' || isalnum( s[p] ) )
 			{
 				is_decl = true;
 				break;
@@ -77,7 +77,7 @@ std::string find_decl( const std::string &s,
 
 		// Dekleration extrahieren
 		at_pos = pos;
-		std::string::size_type pos2 = s.find_first_of( ",;=)", pos );
+		std::wstring::size_type pos2 = s.find_first_of( L",;=)", pos );
 
 		decl = s.substr( pos, pos2 - pos + 1);
 
@@ -88,19 +88,19 @@ std::string find_decl( const std::string &s,
 
 		for( start = pos; start > 0; start-- )
 		{
-			if( s[start] == ';' || s[start] == '{' || s[start] == '(' )
+			if( s[start] == L';' || s[start] == L'{' || s[start] == L'(' )
 				break;
 		}
 
 		if( pos > start_ )
 		  {
 			start = start_;
-			DEBUG( format( "connot find type of %s", name ) );
+			DEBUG( wformat( L"cannot find type of %s", name ) );
 			return ret; // hat keinen Sinn mehr weiterzusuchen
 			// continue;
 		  }
 
-		if( s[start] == '(' )
+		if( s[start] == L'(' )
 		{
 			// wir sind in einer Funktion
 			start = pos;
@@ -114,17 +114,17 @@ std::string find_decl( const std::string &s,
 		if( pos > start_ )
 		  {
 			start = start_;
-			DEBUG( format( "connot find type of %s", name ) );
+			DEBUG( wformat( L"cannot find type of %s", name ) );
 			return ret; // hat keinen Sinn mehr weiterzusuchen
 			// continue;
 		  }
 
 		// ok, und nun vorwaerts suchen, dann muessten wir den Typ haben
-		std::string::size_type end = s.find_first_of( ",;)", start+1 );
+		std::wstring::size_type end = s.find_first_of( L",;)", start+1 );
 
 		if( end == std::string::npos )
 		{
-		  DEBUG( format( "connot find type of %s", name )  );
+		  DEBUG( wformat( L"cannot find type of %s", name )  );
 			return ret;
 		}
 
@@ -134,11 +134,11 @@ std::string find_decl( const std::string &s,
 			continue;
 		}
 
-		std::string cast = s.substr( start, end - (start-1) );
+		std::wstring cast = s.substr( start, end - (start-1) );
 
-	if( cast.size() && cast[0] == '(' && cast[cast.size()-1] == ')' )
+	if( cast.size() && cast[0] == L'(' && cast[cast.size()-1] == L')' )
 	  {
-		DEBUG( format( "ignoring cast type: %s for var %s", cast, name ) );
+		DEBUG( wformat( L"ignoring cast type: %s for var %s", cast, name ) );
 		start--;
 		continue;
 	  }
@@ -159,36 +159,36 @@ std::string find_decl( const std::string &s,
 		}
 	*/
 
-	std::string f = strip( s.substr( start+1, end - (start+1) ) );
+	std::wstring f = strip( s.substr( start+1, end - (start+1) ) );
 
 	// static rausschneiden
-	if( f.find( "static" ) == 0 )
+	if( f.find( L"static" ) == 0 )
 	{
 		f = strip( f.substr( 6 ) );
 	}
 
-	if( f.find( "unsigned char" ) == 0 )
+	if( f.find( L"unsigned char" ) == 0 )
 	  {
-	    f = "char";
+	    f = L"char";
 	  }
 
-	if( f.find("const") == 0 ) {
-		DEBUG( format( "const format detected: '%s'", f ) );
+	if( f.find(L"const") == 0 ) {
+		DEBUG( wformat( L"const format detected: '%s'", f ) );
 
 		if( f.size() > 6 ) {
-			std::string::size_type pp = skip_spaces( f, 5 );
+			std::wstring::size_type pp = skip_spaces( f, 5 );
 
-			if( pp != std::string::npos )
+			if( pp != std::wstring::npos )
 			{
 				f = f.substr( pp);
-				DEBUG( format( "removed const: '%s'", f ) );
+				DEBUG( wformat( L"removed const: '%s'", f ) );
 			}
 		}
 	}
 
-	std::string::size_type pp = f.find_first_of( " \t\n" );
+	std::wstring::size_type pp = f.find_first_of( L" \t\n" );
 
-	if( pp != std::string::npos )
+	if( pp != std::wstring::npos )
 	  {
 		f.resize( pp );
 	  }
@@ -205,7 +205,7 @@ std::string find_decl( const std::string &s,
 		continue;
 	}
 
-	if( f.find_first_of( "->.=[]{}," ) == std::string::npos )
+	if( f.find_first_of( L"->.=[]{}," ) == std::wstring::npos )
 	  {
 		/*
 		  DEBUG( log( format( "%s is of type %s, but what kind of stuff is that?", name, f)) );
@@ -218,7 +218,7 @@ std::string find_decl( const std::string &s,
 
 	} // for
 
-	DEBUG( format( "connot find type of %s", name ) );
+	DEBUG( wformat( L"cannot find type of %s", name ) );
 
 	return ret;
 }

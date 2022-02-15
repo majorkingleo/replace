@@ -11,13 +11,13 @@
 using namespace Tools;
 
 namespace {
-	std::ostream & operator<<( std::ostream & out, const PrimanList::SEL_CALLBACK & type )
+	std::wostream & operator<<( std::wostream & out, const PrimanList::SEL_CALLBACK & type )
 	{
 		switch( type )
 		{
-		case PrimanList::SEL_CALLBACK::AT_POS:    out << "AT_POS";    break;
-		case PrimanList::SEL_CALLBACK::IS_NULL:   out << "IS_NULL";   break;
-		case PrimanList::SEL_CALLBACK::NOT_FOUND: out << "NOT_FOUND"; break;
+		case PrimanList::SEL_CALLBACK::AT_POS:    out << L"AT_POS";    break;
+		case PrimanList::SEL_CALLBACK::IS_NULL:   out << L"IS_NULL";   break;
+		case PrimanList::SEL_CALLBACK::NOT_FOUND: out << L"NOT_FOUND"; break;
 		case PrimanList::SEL_CALLBACK::FIRST__: break;
 		case PrimanList::SEL_CALLBACK::LAST__: break;
 		}
@@ -28,67 +28,67 @@ namespace {
 
 PrimanList::PrimanList()
 {
-	keywords.push_back( "ListTXdialog" );
+	keywords.push_back( L"ListTXdialog" );
 	// test
 	// test 2
 }
 
-std::string PrimanList::toString( const SEL_CALLBACK & type )
+std::wstring PrimanList::toString( const SEL_CALLBACK & type )
 {
 	switch( type )
 	{
-	case PrimanList::SEL_CALLBACK::AT_POS:   return "AT_POS";    break;
-	case PrimanList::SEL_CALLBACK::IS_NULL:  return"IS_NULL";    break;
-	case PrimanList::SEL_CALLBACK::NOT_FOUND: return "NOT_FOUND"; break;
+	case PrimanList::SEL_CALLBACK::AT_POS:   return  L"AT_POS";    break;
+	case PrimanList::SEL_CALLBACK::IS_NULL:  return  L"IS_NULL";    break;
+	case PrimanList::SEL_CALLBACK::NOT_FOUND: return L"NOT_FOUND"; break;
 	case PrimanList::SEL_CALLBACK::FIRST__: break;
 	case PrimanList::SEL_CALLBACK::LAST__: break;
 	}
 
-	return std::string();
+	return std::wstring();
 }
 
-std::string PrimanList::include_primanlist( const std::string & file )
+std::wstring PrimanList::include_primanlist( const std::wstring & file )
 {
-	std::string::size_type pos = 0;
+	std::wstring::size_type pos = 0;
 
-	while (pos != std::string::npos) {
-		pos = file.find( "#include", pos );
+	while (pos != std::wstring::npos) {
+		pos = file.find( L"#include", pos );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return file;
 
 		if( is_in_string( file, pos ) )
 			return file;
 
-		std::string::size_type begin_of_line = file.rfind('\n',pos);
+		std::wstring::size_type begin_of_line = file.rfind(L'\n',pos);
 
 		if( pos == 0 )
 			begin_of_line =  0;
 
 		DEBUG( get_whole_line(file,begin_of_line-1) );
 
-		if( get_whole_line(file,begin_of_line-1).find("#ifdef") != std::string::npos )
+		if( get_whole_line(file,begin_of_line-1).find(L"#ifdef") != std::wstring::npos )
 		{
 			DEBUG(format("#ifdef found at line %d",get_linenum(file,pos-1)));
-			pos = file.find("#endif", pos+1)+6;
+			pos = file.find(L"#endif", pos+1)+6;
 			continue;
 		}
 
-		if( begin_of_line == std::string::npos )
+		if( begin_of_line == std::wstring::npos )
 			begin_of_line = 0;
 
-		std::string::size_type cut_pos;
-		std::string extra;
+		std::wstring::size_type cut_pos;
+		std::wstring extra;
 
 		if( begin_of_line > 0 ) {
 			cut_pos = begin_of_line+1;
 		} else {
 			cut_pos = 0;
-			extra = "\n";
+			extra = L"\n";
 		}
 
-		std::string result = file.substr( 0, cut_pos);
-		result += "#include <primanlist.h>" + extra;
+		std::wstring result = file.substr( 0, cut_pos);
+		result += L"#include <primanlist.h>" + extra;
 		result += file.substr(begin_of_line);
 
 		return result;
@@ -98,19 +98,19 @@ std::string PrimanList::include_primanlist( const std::string & file )
 }
 
 PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
-		const std::string & file,
-		std::string::size_type & pos)
+		const std::wstring & file,
+		std::wstring::size_type & pos)
 {
-	static const std::string function = "sel_callback";
+	static const std::wstring function = L"sel_callback";
 
 	pos = 0;
-	std::string::size_type start = pos;
+	std::wstring::size_type start = pos;
 
-	while( pos != std::string::npos )
+	while( pos != std::wstring::npos )
 	{
 		pos = file.find(function, start);
 
-		if( pos == std::string::npos ) {
+		if( pos == std::wstring::npos ) {
 			DEBUG( "sel_callback not found");
 			return SEL_CALLBACK::NOT_FOUND;
 		}
@@ -129,46 +129,46 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 
 		if( isalpha( file[pos-1] ) ||
 			isalpha( file[pos+function.size()] ) ||
-			file[pos-1] == '_' ||
-			file[pos-1] == '$' ||
-			file[pos+function.size()] == '_')
+			file[pos-1] == L'_' ||
+			file[pos-1] == L'$' ||
+			file[pos+function.size()] == L'_')
 		{
 			start = pos + function.size();
 			continue;
 		}
 
-		std::string line = get_whole_line(file,pos);
+		std::wstring line = get_whole_line(file,pos);
 
-		if( line.find("=") == std::string::npos ) {			;
+		if( line.find(L"=") == std::wstring::npos ) {			;
 			start = pos + function.size();
 			continue;
 		}
 
-		if( line.find("NULL") != std::string::npos )
+		if( line.find(L"NULL") != std::wstring::npos )
 			return SEL_CALLBACK::IS_NULL;
 
-		std::vector<std::string> sl = split_simple( line, "=");
+		std::vector<std::wstring> sl = split_simple( line, L"=");
 
-		std::string callback_name = strip(*sl.rbegin(),";\t\r ");
+		std::wstring callback_name = strip(*sl.rbegin(), L";\t\r ");
 
-		DEBUG(format("try to find function: %s",callback_name));
+		DEBUG(wformat(L"try to find function: %s",callback_name));
 
-		std::string::size_type pos2 = 0;
+		std::wstring::size_type pos2 = 0;
 
-		while( pos2 != std::string::npos )
+		while( pos2 != std::wstring::npos )
 		{
 			pos2 = find_function(callback_name,file,pos2);
 
-			if( pos2 != std::string::npos )
+			if( pos2 != std::wstring::npos )
 			{
-				std::string func_line = get_whole_line(file,pos2);
+				std::wstring func_line = get_whole_line(file,pos2);
 
 				if( is_in_comment( file, pos2 ) ) {
-					DEBUG( format("line: >%s< is a comment", func_line));
+					DEBUG( wformat(L"line: >%s< is a comment", func_line));
 					// comment line
 					pos2 += callback_name.size();
 				} else {
-					DEBUG( format("found %s call at line %d", func_line, get_linenum(file,pos2)));
+					DEBUG( wformat(L"found %s call at line %d", func_line, get_linenum(file,pos2)));
 					break;
 				}
 			}
@@ -176,7 +176,7 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 
 		pos = pos2;
 
-		if( pos2 != std::string::npos )
+		if( pos2 != std::wstring::npos )
 		{
 			return SEL_CALLBACK::AT_POS;
 		}
@@ -185,23 +185,23 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 	return SEL_CALLBACK::NOT_FOUND;
 }
 
-std::string PrimanList::patch_null_selcallback( const std::string & file, std::string::size_type pos )
+std::wstring PrimanList::patch_null_selcallback( const std::wstring & file, std::wstring::size_type pos )
 {
-	std::string::size_type begin = file.find('=', pos);
-	std::string::size_type end = file.find(';', begin);
+	std::wstring::size_type begin = file.find(L'=', pos);
+	std::wstring::size_type end = file.find(L';', begin);
 
-	std::string result = file.substr(0,begin+1);
-	result += " PrimanListSelCallbackLocal;";
+	std::wstring result = file.substr(0,begin+1);
+	result += L" PrimanListSelCallbackLocal;";
 	result += file.substr(end+1);
 
 	return result;
 }
 
-std::string PrimanList::get_varname( const std::string & var )
+std::wstring PrimanList::get_varname( const std::wstring & var )
 {
 	for(int pos = var.length() - 1; pos >= 0; pos-- )
 	{
-		if( !isalnum(var[pos]) && var[pos] != '_' )
+		if( !isalnum(var[pos]) && var[pos] != L'_' )
 			return var.substr(pos+1);
 	}
 
@@ -216,12 +216,12 @@ void PrimanList::strip_argtypes( Function & f )
 	}
 }
 
-std::string PrimanList::add_selcallback_to_reasons( const std::string & file, std::string::size_type pos )
+std::wstring PrimanList::add_selcallback_to_reasons( const std::wstring & file, std::wstring::size_type pos )
 {
 	Function func;
-	std::string::size_type start, end;
+	std::wstring::size_type start, end;
 
-	DEBUG( format("line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
+	DEBUG( wformat(L"line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
 
 
 	if( !get_function(file,pos,start,end,&func) ) {
@@ -229,68 +229,68 @@ std::string PrimanList::add_selcallback_to_reasons( const std::string & file, st
 		return file;
 	}
 
-	DEBUG( format("function args: %s", func.args.size() ) );
+	DEBUG( wformat(L"function args: %d", func.args.size() ) );
 
 	if( func.args.size() != 5 ) {
-		throw REPORT_EXCEPTION( format("cannot find the correct number of arguments for function %s", func.name ) );
+		throw REPORT_EXCEPTION( format("cannot find the correct number of arguments for function %s", w2out(func.name) ) );
 	}
 
 	strip_argtypes(func);
 
-	DEBUG(format("found function %s at %d up to %d", func.name, pos, start, end));
+	DEBUG(wformat(L"found function %s at %d up to %d", func.name, pos, start, end));
 
-	pos = file.find( "case", start);
+	pos = file.find( L"case", start);
 
 	if( pos == std::string::npos ) {
 		DEBUG("cannot find position for inserting Priman Callback reason");
 		return file;
 	}
 
-	std::string line = get_whole_line( file, pos);
+	std::wstring line = get_whole_line( file, pos);
 
 	// das machen wird dazu damit wir wissen
 	// wieviel wir einrücken sollen
 	// damits auch besser aussieht
-	std::string::size_type start_of_case = find_first_of( line, 0, "case", "default" );
-	std::string indent = line.substr(0,start_of_case);
+	std::wstring::size_type start_of_case = find_first_of( line, 0, L"case", L"default" );
+	std::wstring indent = line.substr(0,start_of_case);
 
-	pos = file.rfind('\n', pos);
+	pos = file.rfind(L'\n', pos);
 
-	std::stringstream str;
+	std::wstringstream str;
 	str << file.substr(0,pos);
 
-	str << '\n';
-	str << '\n';
+	str << L'\n';
+	str << L'\n';
 	str << indent;
-	str << "case SEL_REASON_PRINT:\n";
+	str << L"case SEL_REASON_PRINT:\n";
 	str << indent;
-	str << "\treturn PrimanListSelCallbackLocal(";
+	str << L"\treturn PrimanListSelCallbackLocal(";
 
 	for( unsigned i = 0; i < func.args.size(); i++ )
 	{
 		if( i > 0 )
-			str << ", ";
+			str << L", ";
 
 		str << func.args[i];
 	}
 
-	str << ");\n";
+	str << L");\n";
 
 	str << file.substr(pos);
 
 	return str.str();
 }
 
-std::string PrimanList::insert_selcallback( const std::string & file )
+std::wstring PrimanList::insert_selcallback( const std::wstring & file )
 {
-	static const std::string action_type = "ListTaction";
-	std::string::size_type pos = 0;
+	static const std::wstring action_type = L"ListTaction";
+	std::wstring::size_type pos = 0;
 
-	while( pos != std::string::npos )
+	while( pos != std::wstring::npos )
 	{
 		pos = file.find(action_type, pos);
 
-		if( pos == std::string::npos ) {
+		if( pos == std::wstring::npos ) {
 			break;
 		}
 
@@ -299,16 +299,16 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 			continue;
 		}
 
-		std::string line = get_whole_line( file, pos );
+		std::wstring line = get_whole_line( file, pos );
 
-		if( line.find("memset") == std::string::npos ) {
+		if( line.find(L"memset") == std::wstring::npos ) {
 			pos += action_type.length();
 			continue;
 		}
 
-		std::string::size_type memset_pos = file.rfind("memset", pos );
+		std::wstring::size_type memset_pos = file.rfind(L"memset", pos );
 		Function func_memset;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(file, memset_pos, start, end, &func_memset) )
 		{
@@ -321,18 +321,18 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 		// pListAction->sel_callback = PrimanListSelCallbackLocal
 		// hinzufügen
 
-		std::string::size_type next_line = file.find('\n', pos);
+		std::wstring::size_type next_line = file.find(L'\n', pos);
 
-		std::stringstream str;
+		std::wstringstream str;
 
 		str << file.substr( 0, next_line );
 
-		std::string indent = line.substr(0,line.find("memset"));
+		std::wstring indent = line.substr(0,line.find(L"memset"));
 
-		str << '\n';
+		str << L'\n';
 		str << indent;
 		str << *func_memset.args.begin();
-		str << "->sel_callback = PrimanListSelCallbackLocal;";
+		str << L"->sel_callback = PrimanListSelCallbackLocal;";
 
 		str << file.substr( next_line );
 
@@ -342,25 +342,25 @@ std::string PrimanList::insert_selcallback( const std::string & file )
 	return file;
 }
 
-std::string PrimanList::patch_file( const std::string & file )
+std::wstring PrimanList::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
 	// file already patched ?
 	if( find_first_of(file, 0,
-				  "primanlist.h",
-				  "SEL_REASON_PRINT:") != std::string::npos ) {
+				  L"primanlist.h",
+				  L"SEL_REASON_PRINT:") != std::wstring::npos ) {
 		return file;
 	}
 
-	std::string result = include_primanlist( file );
+	std::wstring result = include_primanlist( file );
 
-	std::string::size_type pos = 0;
+	std::wstring::size_type pos = 0;
 
 	SEL_CALLBACK sc_type = detect_sel_callback(file,pos);
 
-	DEBUG( format("ret: %s pos: %d", toString(sc_type), pos) );
+	DEBUG( wformat(L"ret: %s pos: %d", toString(sc_type), pos) );
 
 	switch( sc_type )
 	{
@@ -385,11 +385,11 @@ bool PrimanList::want_file( const FILE_TYPE & file_type )
 	}
 }
 
-bool PrimanList::is_in_comment( const std::string & file, std::string::size_type pos )
+bool PrimanList::is_in_comment( const std::wstring & file, std::wstring::size_type pos )
 {
-	std::string func_line = get_whole_line(file,pos);
+	std::wstring func_line = get_whole_line(file,pos);
 
-	if( func_line.find("-*") == 0 ) {
+	if( func_line.find(L"-*") == 0 ) {
 		return true;
 	}
 

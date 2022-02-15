@@ -19,10 +19,11 @@ class FixFromCompileLog
 public:
 	struct File
 	{
-		std::string path_name;
-		std::string name;
-		std::string content;
-		std::string original_content;
+		std::wstring path_name;
+		std::wstring name;
+		std::wstring content;
+		std::wstring original_content;
+		std::string encoding;
 	};
 
 	class Handler
@@ -31,7 +32,7 @@ public:
 		class Location
 		{
 		public:
-			std::string file;
+			std::wstring file;
 			int line;
 
 			Location() : file(), line(0) {}
@@ -41,10 +42,10 @@ public:
 		Handler() {}
 		virtual ~Handler();
 
-		virtual void read_compile_log_line( const std::string & line ) {};
+		virtual void read_compile_log_line( const std::wstring & line ) {};
 		virtual void fix_file( File & file ) {};
 
-		Location get_location_from_line( const std::string & line );
+		Location get_location_from_line( const std::wstring & line );
 
 		virtual bool want_file( const File & file ) { return false; }
 
@@ -89,7 +90,7 @@ private:
 	void show_diffs();
 };
 
-inline std::ostream & operator<<( std::ostream & out, const FixFromCompileLog::Handler::Location & location )
+inline std::wostream & operator<<( std::wostream & out, const FixFromCompileLog::Handler::Location & location )
 {
 	out << location.file;
 	out << ':';

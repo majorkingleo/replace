@@ -13,38 +13,38 @@
 
 using namespace Tools;
 
-const std::string FixScopedCStr::KEY_WORD = "scoped_cstr::form";
+const std::wstring FixScopedCStr::KEY_WORD = L"scoped_cstr::form";
 
 FixScopedCStr::FixScopedCStr()
 {
 	keywords.push_back( KEY_WORD );
 
-	casts.push_back( "(const char*)" );
-	casts.push_back( "(char const*)" );
+	casts.push_back( L"(const char*)" );
+	casts.push_back( L"(char const*)" );
 }
 
-std::string FixScopedCStr::patch_file( const std::string & file )
+std::wstring FixScopedCStr::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
+	std::wstring res( file );
 
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	do
 	{
 		// file already patched ?
 		pos = res.find( KEY_WORD, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", KEY_WORD, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", KEY_WORD, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
 			DEBUG("unable to load scoped_cstr::form function");
@@ -65,27 +65,27 @@ std::string FixScopedCStr::patch_file( const std::string & file )
 		//    wamas::platform:string::form( acBuf, "%s %d", xxx, yyy ).c_str()
 
 
-		func.name = "wamas::platform::string::form";
+		func.name = L"wamas::platform::string::form";
 		// *func.args.rbegin() += ".c_str()";
 
-		std::string first_part_of_file = res.substr(0,pos);
+		std::wstring first_part_of_file = res.substr(0,pos);
 
 		// den (const char*) cast entfernen
-		std::string::size_type spaces_pos = skip_spaces( res, pos, true );
+		std::wstring::size_type spaces_pos = skip_spaces( res, pos, true );
 
-		std::string line = get_whole_line( res, pos );
+		std::wstring line = get_whole_line( res, pos );
 
 		bool found_std_string = false;
 
-		if( line.find( "std::string" ) != std::string::npos ) {
+		if( line.find( L"std::string" ) != std::wstring::npos ) {
 			found_std_string = true;
 		}
 
 		bool found_cast = false;
 
-		for( const std::string & CAST : casts ) {
+		for( const std::wstring & CAST : casts ) {
 
-			std::string::size_type cast_pos = res.rfind( CAST, spaces_pos );
+			std::wstring::size_type cast_pos = res.rfind( CAST, spaces_pos );
 
 			// DEBUG( format( "spaces_pos: %d cast_pos: %d diff: %d", spaces_pos, cast_pos, spaces_pos - CAST.size() ));
 
@@ -96,14 +96,14 @@ std::string FixScopedCStr::patch_file( const std::string & file )
 			}
 		}
 
-		std::stringstream str;
+		std::wstringstream str;
 
-		str << func.name << "(";
+		str << func.name << L"(";
 
 		for( unsigned i = 0; i < func.args.size(); i++ )
 		{
 			if( i > 0 )
-				str << ", ";
+				str << L", ";
 
 			str << func.args[i];
 		}
@@ -114,17 +114,17 @@ std::string FixScopedCStr::patch_file( const std::string & file )
 			end += 1; // ) weglassen
 		}
 
-		std::string second_part_of_file = res.substr(end);
+		std::wstring second_part_of_file = res.substr(end);
 
 		if( !found_std_string ) {
-			second_part_of_file = ").c_str()" + second_part_of_file;
+			second_part_of_file = L").c_str()" + second_part_of_file;
 		}
 
 		res = first_part_of_file + str.str() + second_part_of_file;
 
 		start_in_file = end;
 
-	} while( pos != std::string::npos && start_in_file < res.size() );
+	} while( pos != std::wstring::npos && start_in_file < res.size() );
 
 	return res;
 }

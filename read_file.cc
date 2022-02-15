@@ -14,6 +14,8 @@
 
 using namespace Tools;
 
+ReadFile READ_FILE;
+
 // all encodings listed by iconv --list
 static const char* ENCODINGS[] = {
 		"ISO-8859-1",

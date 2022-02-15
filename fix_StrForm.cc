@@ -13,40 +13,40 @@
 
 using namespace Tools;
 
-const std::string FixStrForm::KEY_WORD = "StrForm";
+const std::wstring FixStrForm::KEY_WORD = L"StrForm";
 
 FixStrForm::FixStrForm()
 {
 	keywords.push_back( KEY_WORD );
 }
 
-std::string FixStrForm::patch_file( const std::string & file )
+std::wstring FixStrForm::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
+	std::wstring res( file );
 
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	do
 	{
 		// file already patched ?
-		if( res.find(KEY_WORD, start_in_file) == std::string::npos ) {
+		if( res.find(KEY_WORD, start_in_file) == std::wstring::npos ) {
 			return res;
 		}
 
 
 		pos = res.find( KEY_WORD, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", KEY_WORD, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", KEY_WORD, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
 			DEBUG("unable to load sprintf function");
@@ -67,32 +67,32 @@ std::string FixStrForm::patch_file( const std::string & file )
 		//    TO_CHAR(format( acBuf, format( "%s %d", xxx, yyy ) ))
 
 
-		func.name = "TO_CHAR(format";
-		*func.args.rbegin() += ")";
+		func.name = L"TO_CHAR(format";
+		*func.args.rbegin() += L")";
 
-		std::string first_part_of_file = res.substr(0,pos);
+		std::wstring first_part_of_file = res.substr(0,pos);
 
-		std::stringstream str;
+		std::wstringstream str;
 
-		str << func.name << "(";
+		str << func.name << L"(";
 
 		for( unsigned i = 0; i < func.args.size(); i++ )
 		{
 			if( i > 0 )
-				str << ", ";
+				str << L", ";
 
 			str << func.args[i];
 		}
 
 		DEBUG( str.str() );
 
-		std::string second_part_of_file = res.substr(end);
+		std::wstring second_part_of_file = res.substr(end);
 
 		res = first_part_of_file + str.str() + second_part_of_file;
 
 		start_in_file = end;
 
-	} while( pos != std::string::npos && start_in_file < res.size() );
+	} while( pos != std::wstring::npos && start_in_file < res.size() );
 
 	return res;
 }

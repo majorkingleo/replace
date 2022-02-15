@@ -11,6 +11,7 @@
 #include "getline.h"
 #include <cpp_util.h>
 #include "unused_variable_handler.h"
+#include "DetectLocale.h"
 
 using namespace Tools;
 
@@ -20,20 +21,20 @@ SpaceBetweenLiteralHandler::SpaceBetweenLiteralHandler()
 
 }
 
-void SpaceBetweenLiteralHandler::read_compile_log_line( const std::string & line )
+void SpaceBetweenLiteralHandler::read_compile_log_line( const std::wstring & line )
 {
-	if( line.find( "-Wliteral-suffix") == std::string::npos )
+	if( line.find( L"-Wliteral-suffix") == std::wstring::npos )
 		return;
 
 	SpaceBetweenLiteralWarnings location = get_location_from_line( line );
 
-	std::vector<std::string> sl = split_simple( line, " ");
+	std::vector<std::wstring> sl = split_simple( line, L" ");
 
-	std::vector<std::string>::reverse_iterator it = sl.rbegin();
+	std::vector<std::wstring>::reverse_iterator it = sl.rbegin();
 
 	// GCC 4.8 style: warning: unused variable 'dbrv' [-Wunused-variable]
 
-	if( *it->begin() == '[' && *it->rbegin() == ']' ) {
+	if( *it->begin() == L'[' && *it->rbegin() == L']' ) {
 		it++;
 	}
 
@@ -42,10 +43,10 @@ void SpaceBetweenLiteralHandler::read_compile_log_line( const std::string & line
 	}
 
 	location.var_name = *it;
-	location.var_name = strip( location.var_name, "'‘’");
+	location.var_name = strip( location.var_name, L"'‘’");
 	location.compile_log_line = line;
 
-	DEBUG( format( "%s %s", location, location.var_name ) );
+	DEBUG( wformat( L"%s %s", location, location.var_name ) );
 
 	locations.push_back( location );
 }
@@ -78,7 +79,7 @@ void SpaceBetweenLiteralHandler::report_unfixed_compile_logs()
 	{
 		if( !locations[i].fixed )
 		{
-			std::cout << "(unfixed) " << locations[i].compile_log_line << '\n';
+			std::cout << "(unfixed) " << DetectLocale::w2out(locations[i].compile_log_line) << L'\n';
 		}
 	}
 }
@@ -86,122 +87,122 @@ void SpaceBetweenLiteralHandler::report_unfixed_compile_logs()
 
 
 
-bool SpaceBetweenLiteralHandler::is_escaped( const std::string &s, std::string::size_type start )
+bool SpaceBetweenLiteralHandler::is_escaped( const std::wstring &s, std::wstring::size_type start )
 {
-  bool escaped = false;
+	bool escaped = false;
 
-  if( start > 0 )
-    {
-      if( s[start-1] == '\\' )
+	if( start > 0 )
 	{
-	  escaped = true;
-
-	  if( start > 1 )
-	    {
-	      if( s[start-2] == '\\' )
+		if( s[start-1] == L'\\' )
 		{
-		  escaped = false;
+			escaped = true;
+
+			if( start > 1 )
+			{
+				if( s[start-2] == L'\\' )
+				{
+					escaped = false;
+				}
+			}
 		}
-	      }
 	}
-    }
 
-  return escaped;
+	return escaped;
 }
 
-std::vector<SpaceBetweenLiteralHandler::Pair> SpaceBetweenLiteralHandler::find_exclusive( const std::string &s )
+std::vector<SpaceBetweenLiteralHandler::Pair> SpaceBetweenLiteralHandler::find_exclusive( const std::wstring &s )
 {
-  std::vector<Pair> ex;
+	std::vector<Pair> ex;
 
-  std::string::size_type pos = 0, start = 0, end = 0;
+	std::wstring::size_type pos = 0, start = 0, end = 0;
 
-  while( true )
-    {
-
-      /* find starting pos */
-      while( true )
+	while( true )
 	{
-	  start = s.find( '"', pos );
 
-	  if( start == std::string::npos )
-	    return ex;
+		/* find starting pos */
+		while( true )
+		{
+			start = s.find( L'"', pos );
 
-	  /* is the " escaped? */
-	  if( is_escaped( s, start ) )
-	    {
-	      pos = start + 1;
-	      continue;
-	    }
+			if( start == std::wstring::npos )
+				return ex;
 
-	  break;
+			/* is the " escaped? */
+			if( is_escaped( s, start ) )
+			{
+				pos = start + 1;
+				continue;
+			}
+
+			break;
+		}
+
+		// find second "
+		pos = start + 1;
+		while( true )
+		{
+			end = s.find( L'"', pos );
+
+			if( end == std::wstring::npos )
+				return ex;
+
+			if( is_escaped( s, end ) )
+			{
+				pos = end + 1;
+				continue;
+			}
+
+			break;
+		}
+
+		ex.push_back( Pair( start, end ) );
+		pos = end + 1;
 	}
+}
 
-      // find second "
-      pos = start + 1;
-      while( true )
+bool SpaceBetweenLiteralHandler::is_exclusive( const std::wstring &s, const std::vector<SpaceBetweenLiteralHandler::Pair> &exclude, std::wstring::size_type pos1 )
+{
+	bool exclusive = false;
+	for( unsigned i = 0; i < exclude.size(); i++ )
 	{
-	  end = s.find( '"', pos );
-
-	  if( end == std::string::npos )
-	    return ex;
-
-	  if( is_escaped( s, end ) )
-	    {
-	      pos = end + 1;
-	      continue;
-	    }
-
-	  break;
+		if( exclude[i].start < pos1 &&
+				exclude[i].end > pos1 )
+		{
+			exclusive = true;
+			break;
+		}
 	}
 
-      ex.push_back( Pair( start, end ) );
-      pos = end + 1;
-    }
-}
-
-bool SpaceBetweenLiteralHandler::is_exclusive( const std::string &s, const std::vector<SpaceBetweenLiteralHandler::Pair> &exclude, std::string::size_type pos1 )
-{
-  bool exclusive = false;
-  for( unsigned i = 0; i < exclude.size(); i++ )
-    {
-      if( exclude[i].start < pos1 &&
-	  exclude[i].end > pos1 )
-        {
-	  exclusive = true;
-	  break;
-	}
-    }
-
-  return exclusive;
+	return exclusive;
 }
 
 
-void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warning, std::string & content )
+void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warning, std::wstring & content )
 {
-	std::string::size_type pos = get_pos_for_line( content, warning.line );
+	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
-	if( pos == std::string::npos ) {
-		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", warning.compile_log_line));
+	if( pos == std::wstring::npos ) {
+		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", DetectLocale::w2out(warning.compile_log_line)));
 	}
 
-	std::string line = getline(content,  pos );
+	std::wstring line = getline(content,  pos );
 
 	DEBUG( line );
 
 	std::vector<Pair> exclude = find_exclusive( line );
 
-	std::string::size_type pos1 = 0;
-	std::string::size_type last_pos = 0;
+	std::wstring::size_type pos1 = 0;
+	std::wstring::size_type last_pos = 0;
 
 	bool string_started = false;
 
-	std::stringstream res;
+	std::wstringstream res;
 
 	do
 	{
-		pos1 = line.find( '"', pos1 );
+		pos1 = line.find( L'"', pos1 );
 
-		if( pos1 == std::string::npos ) {
+		if( pos1 == std::wstring::npos ) {
 			break;
 		}
 
@@ -218,18 +219,18 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 		} else {
 			// jetzt einen space einbauen
 			res << line.substr( last_pos, pos1 - last_pos + 1)
-				<< ' ';
+				<< L' ';
 			last_pos = pos1+1;
 			string_started = false;
 		}
 
 		pos1++;
 
-	} while( pos1 != std::string::npos );
+	} while( pos1 != std::wstring::npos );
 
 	res << line.substr( last_pos );
 
-	std::string new_line = res.str();
+	std::wstring new_line = res.str();
 
 	UnusedVariableHandler::replace_line( content, pos, new_line );
 

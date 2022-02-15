@@ -13,11 +13,11 @@
 
 class AddWamasWdgAssignMenu : public HandleFile
 {
-	const std::string SHELL_CREATE_FUNCTION;
+	const std::wstring SHELL_CREATE_FUNCTION;
 public:
-	AddWamasWdgAssignMenu( const std::string & assign_function );
+	AddWamasWdgAssignMenu( const std::wstring & assign_function );
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 	virtual bool want_file( const FILE_TYPE & file_type );
 };
 

@@ -16,12 +16,12 @@ class OwCallback1 : public HandleFile
 public:
 	OwCallback1();
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
 	virtual bool want_file( const FILE_TYPE & file_type );
 
 protected:
-	void fix_owcallbackx( std::string & file, int num );
+	void fix_owcallbackx( std::wstring & file_content, int num );
 };
 
 

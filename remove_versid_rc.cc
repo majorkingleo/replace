@@ -11,43 +11,43 @@ RemoveVersidRc::RemoveVersidRc()
 	: RemoveVersidPdl()
 {
 	keywords.clear();
-	keywords.push_back("Version");
-	keywords.push_back("VERSID:");
-	keywords.push_back("$Log:");
+	keywords.push_back( L"Version" );
+	keywords.push_back( L"VERSID:" );
+	keywords.push_back( L"$Log:" );
 }
 
-std::string RemoveVersidRc::cut_versid_atom( const std::string & file ) const
+std::wstring RemoveVersidRc::cut_versid_atom( const std::wstring & file ) const
 {
-	std::string::size_type pos = find_first_of( file, 0, "Version" );
+	std::wstring::size_type pos = find_first_of( file, 0, L"Version" );
 
-	if( pos == std::string::npos )
+	if( pos == std::wstring::npos )
 		return file;
 
 	if( is_in_string( file, pos ) )
 		return file;
 
 
-	std::string line = get_whole_line( file, pos );
+	std::wstring line = get_whole_line( file, pos );
 
-	if( line.find("$Header") == std::string::npos )
+	if( line.find( L"$Header" ) == std::wstring::npos )
 		return file;
 
-	std::string::size_type begin = file.rfind('\n', pos);
-	std::string::size_type end = file.find('\n', pos);
+	std::wstring::size_type begin = file.rfind( L'\n', pos);
+	std::wstring::size_type end = file.find( L'\n', pos);
 
-	std::string result = file.substr(0,begin);
+	std::wstring result = file.substr(0,begin);
 	result += file.substr(end);
 
 	return result;
 }
 
 
-std::string RemoveVersidRc::remove_versid( const std::string & file )
+std::wstring RemoveVersidRc::remove_versid( const std::wstring & file )
 {
 	if( should_skip_file(file) )
 		return file;
 
-	std::string result = cut_revision_history( file );
+	std::wstring result = cut_revision_history( file );
 	result = cut_VERSID( result );
 	result = cut_versid_atom( result );
 

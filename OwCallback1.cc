@@ -12,59 +12,59 @@ using namespace Tools;
 
 OwCallback1::OwCallback1()
 {
-	keywords.push_back( "OwCallback2" );
-	keywords.push_back( "OwCallback3" );
-	keywords.push_back( "OwCallback4" );
-	keywords.push_back( "OwCallback5" );
-	keywords.push_back( "OwCallback6" );
-	keywords.push_back( "OwCallback7" );
-	keywords.push_back( "OwCallback8" );
-	keywords.push_back( "OwCallback9" );
+	keywords.push_back( L"OwCallback2" );
+	keywords.push_back( L"OwCallback3" );
+	keywords.push_back( L"OwCallback4" );
+	keywords.push_back( L"OwCallback5" );
+	keywords.push_back( L"OwCallback6" );
+	keywords.push_back( L"OwCallback7" );
+	keywords.push_back( L"OwCallback8" );
+	keywords.push_back( L"OwCallback9" );
 
 }
 
-void OwCallback1::fix_owcallbackx( std::string & s, int num )
+void OwCallback1::fix_owcallbackx( std::wstring & s, int num )
 {
-	std::string callback_first = format("OwCallback%d", num );
-	std::string callback_second = format("OwCallback%d", num + 1);
+	std::wstring callback_first = wformat(L"OwCallback%d", num );
+	std::wstring callback_second = wformat(L"OwCallback%d", num + 1);
 
-	for( std::string::size_type pos = 0; pos != std::string::npos && pos < s.size(); pos++ )
+	for( std::string::size_type pos = 0; pos != std::wstring::npos && pos < s.size(); pos++ )
 	{
-		if( ( pos = s.find( callback_second, pos ) ) != std::string::npos )
+		if( ( pos = s.find( callback_second, pos ) ) != std::wstring::npos )
 		{
 			if( is_in_string( s, pos ) )
 			{
 				continue;
 			}
 
-			std::string::size_type begin_of_pos = s.rfind("[", pos);
-			std::string::size_type pos_callback1 = s.rfind(callback_first,pos);
+			std::wstring::size_type begin_of_pos = s.rfind(L"[", pos);
+			std::wstring::size_type pos_callback1 = s.rfind(callback_first,pos);
 
-			if( begin_of_pos == std::string::npos ) {
-				pos = s.find( '\n', pos );
+			if( begin_of_pos == std::wstring::npos ) {
+				pos = s.find( L'\n', pos );
 				continue;
 
-			} else if( pos_callback1 == std::string::npos ||
+			} else if( pos_callback1 == std::wstring::npos ||
 					pos_callback1 < begin_of_pos ) {
 
 
 				// now fix it
-				s[pos+10] = '0' + num;
+				s[pos+10] = L'0' + num;
 			}
 
-			pos = s.find( '\n', pos );
+			pos = s.find( L'\n', pos );
 		} else {
 			break;
 		}
 	}
 }
 
-std::string OwCallback1::patch_file( const std::string & file )
+std::wstring OwCallback1::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string result( file );
+	std::wstring result( file );
 
 	for( int i = 0; i < 8; i++ ) {
 		fix_owcallbackx( result, 1 );

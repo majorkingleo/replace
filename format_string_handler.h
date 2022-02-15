@@ -17,11 +17,11 @@ protected:
 	class FormatWarnigs : public Location
 	{
 	public:
-		std::string format;
+		std::wstring format;
 		int argnum;
-		std::string expected_type;
-		std::string target_type;
-		std::string compile_log_line;
+		std::wstring expected_type;
+		std::wstring target_type;
+		std::wstring compile_log_line;
 		bool fixed;
 
 	public:
@@ -39,13 +39,13 @@ protected:
 	class FixTable
 	{
 	public:
-		std::string format;
-		std::string target_type;
-		std::string correct_type;
+		std::wstring format;
+		std::wstring target_type;
+		std::wstring correct_type;
 
-		FixTable( const std::string & format_,
-				  const std::string & target_type_,
-				  const std::string & correct_type_ )
+		FixTable( const std::wstring & format_,
+				  const std::wstring & target_type_,
+				  const std::wstring & correct_type_ )
 		: format( format_ ),
 		  target_type( target_type_ ),
 		  correct_type( correct_type_ )
@@ -58,7 +58,7 @@ protected:
 public:
 	FormatStringHandler();
 
-	virtual void read_compile_log_line( const std::string & line );
+	virtual void read_compile_log_line( const std::wstring & line );
 
 	virtual bool want_file( const FixFromCompileLog::File & file );
 
@@ -66,10 +66,10 @@ public:
 
 	virtual void report_unfixed_compile_logs();
 
-	virtual void fix_warning( FormatWarnigs & warning, std::string & content );
+	virtual void fix_warning( FormatWarnigs & warning, std::wstring & content );
 
 protected:
-	virtual bool is_interested_in_line( const std::string & line );
+	virtual bool is_interested_in_line( const std::wstring & line );
 
 	virtual void strip_target_type( FormatWarnigs & location ) {}
 };

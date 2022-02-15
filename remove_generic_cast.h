@@ -5,16 +5,16 @@
 
 class RemoveGenericCast : public HandleFile
 {
-	static const std::string KEY_WORD;
-	const std::string FUNCTION_NAME;
+	static const std::wstring KEY_WORD;
+	const std::wstring FUNCTION_NAME;
 
 public:
-	RemoveGenericCast(const std::string & FUNCTION_NAME_ =  "MskVaAssign" );
+	RemoveGenericCast(const std::wstring & FUNCTION_NAME_ =  L"MskVaAssign" );
 
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 };
 
 #endif

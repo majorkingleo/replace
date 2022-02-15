@@ -16,10 +16,10 @@ class SpaceBetweenLiteralHandler : public FixFromCompileLog::Handler
 public:
 	struct Pair
 	{
-	  std::string::size_type start;
-	  std::string::size_type end;
+	  std::wstring::size_type start;
+	  std::wstring::size_type end;
 
-	  Pair( std::string::size_type start_,   std::string::size_type end_ )
+	  Pair( std::wstring::size_type start_,   std::wstring::size_type end_ )
 	    : start( start_ ) , end( end_ )
 	  {}
 	};
@@ -28,8 +28,8 @@ protected:
 	class SpaceBetweenLiteralWarnings : public Location
 	{
 	public:
-		std::string var_name;
-		std::string compile_log_line;
+		std::wstring var_name;
+		std::wstring compile_log_line;
 		bool fixed;
 
 	public:
@@ -47,7 +47,7 @@ protected:
 public:
 	SpaceBetweenLiteralHandler();
 
-	virtual void read_compile_log_line( const std::string & line );
+	virtual void read_compile_log_line( const std::wstring & line );
 
 	virtual bool want_file( const FixFromCompileLog::File & file );
 
@@ -55,12 +55,12 @@ public:
 
 	virtual void report_unfixed_compile_logs();
 
-	virtual void fix_warning( SpaceBetweenLiteralWarnings & warning, std::string & content );
+	virtual void fix_warning( SpaceBetweenLiteralWarnings & warning, std::wstring & content );
 
 protected:
-	static bool is_escaped( const std::string &s, std::string::size_type start );
-	static std::vector<Pair> find_exclusive( const std::string &s );
-	static bool is_exclusive( const std::string &s, const std::vector<Pair> &exclude, std::string::size_type pos1 );
+	static bool is_escaped( const std::wstring &s, std::wstring::size_type start );
+	static std::vector<Pair> find_exclusive( const std::wstring &s );
+	static bool is_exclusive( const std::wstring &s, const std::vector<Pair> &exclude, std::wstring::size_type pos1 );
 };
 
 

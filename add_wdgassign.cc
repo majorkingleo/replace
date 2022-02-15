@@ -14,17 +14,17 @@
 
 using namespace Tools;
 
-AddWamasWdgAssignMenu::AddWamasWdgAssignMenu( const std::string & assign_function )
+AddWamasWdgAssignMenu::AddWamasWdgAssignMenu( const std::wstring & assign_function )
 	: SHELL_CREATE_FUNCTION( assign_function )
 {
 
 }
 
-std::string AddWamasWdgAssignMenu::patch_file( const std::string & file )
+std::wstring AddWamasWdgAssignMenu::patch_file( const std::wstring & file )
 {
-	std::string::size_type pos = 0;
+	std::wstring::size_type pos = 0;
 
-	std::string res(file);
+	std::wstring res(file);
 
 	bool add_include_line = false;
 
@@ -36,13 +36,13 @@ std::string AddWamasWdgAssignMenu::patch_file( const std::string & file )
 			break;
 		}
 
-		DEBUG( format( "found %s at line %d", SHELL_CREATE_FUNCTION,  get_linenum(res,pos) ));
+		DEBUG( format( "found %s at line %d", w2out(SHELL_CREATE_FUNCTION), get_linenum(res,pos) ));
 
-		std::string shell;
-		std::string::size_type assign_pos;
+		std::wstring shell;
+		std::wstring::size_type assign_pos;
 
-		std::string line_before = get_whole_line( res, pos );
-		if( ( assign_pos = line_before.find( "=" ) ) != std::string::npos ) {
+		std::wstring line_before = get_whole_line( res, pos );
+		if( ( assign_pos = line_before.find( L"=" ) ) != std::wstring::npos ) {
 			shell = strip(line_before.substr(0,assign_pos));
 		}
 
@@ -53,10 +53,10 @@ std::string AddWamasWdgAssignMenu::patch_file( const std::string & file )
 		}
 
 		// wenn schon WamasWdgAssignMenu dannach dasteht, dann brauch ma nix mehr machen
-		std::string::size_type end_of_function = res.find("}", pos );
-		std::string::size_type existing_wdg_assign = res.find( "WamasWdgAssignMenu", pos );
+		std::wstring::size_type end_of_function = res.find(L"}", pos );
+		std::wstring::size_type existing_wdg_assign = res.find( L"WamasWdgAssignMenu", pos );
 
-		if( existing_wdg_assign != std::string::npos && end_of_function != std::string::npos )
+		if( existing_wdg_assign != std::wstring::npos && end_of_function != std::string::npos )
 		{
 			if( end_of_function >  existing_wdg_assign )
 			{
@@ -68,24 +68,24 @@ std::string AddWamasWdgAssignMenu::patch_file( const std::string & file )
 
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( get_function( res, pos, start, end, &func ) ) {
 
-			std::string::size_type indent_count = line_before.find_first_not_of( " \t" );
+			std::wstring::size_type indent_count = line_before.find_first_not_of( L" \t" );
 
-			std::string indent;
+			std::wstring indent;
 
 			if( indent_count != std::string::npos )
 			{
 				indent = line_before.substr( 0,indent_count );
 			}
 
-			std::string::size_type line_end = res.find("\n", end );
+			std::wstring::size_type line_end = res.find(L"\n", end );
 
 			CppDir::File cppfile( file_name );
 
-			std::string assig_menu_string = format( "\n%sWamasWdgAssignMenu(%s,\"%s\");", indent, shell, cppfile.get_name());
+			std::wstring assig_menu_string = wformat( L"\n%sWamasWdgAssignMenu(%s,\"%s\");", indent, shell, in2w(cppfile.get_name()));
 
 			res.insert( line_end, assig_menu_string );
 
@@ -97,17 +97,17 @@ std::string AddWamasWdgAssignMenu::patch_file( const std::string & file )
 
 		pos += SHELL_CREATE_FUNCTION.size();
 
-	} while( pos != std::string::npos && pos < res.size() );
+	} while( pos != std::wstring::npos && pos < res.size() );
 
 	DEBUG( format( "add_include_line %d", add_include_line));
 
 	if( add_include_line )
 	{
-		std::string::size_type include_pos = res.rfind( "#include" );
+		std::wstring::size_type include_pos = res.rfind( L"#include" );
 
 		if( include_pos != std::string::npos )
 		{
-			res.insert(include_pos,"#include <wamaswdg.h>\n");
+			res.insert(include_pos,L"#include <wamaswdg.h>\n");
 		}
 	}
 

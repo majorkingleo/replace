@@ -18,6 +18,7 @@ class Debug
   virtual ~Debug();
   
   virtual void add( const char *file, unsigned line, const char *function, const std::string & s ) = 0;
+  virtual void add( const char *file, unsigned line, const char *function, const std::wstring & s ) = 0;
 };
 
 extern Debug *x_debug;

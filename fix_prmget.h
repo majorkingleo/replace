@@ -5,19 +5,19 @@
 
 class FixPrmGet : public HandleFile
 {
-	const std::string FUNCTION_NAME;
+	const std::wstring FUNCTION_NAME;
 	const unsigned LONG_ARG_NUM;
 
 public:
-	FixPrmGet(const std::string & FUNCTION_NAME_ =  "PrmGet1Parameter",
+	FixPrmGet(const std::wstring & FUNCTION_NAME_ =  L"PrmGet1Parameter",
 			  const unsigned LONG_ARG_NUM = 4 );
 
 
-	virtual std::string patch_file( const std::string & file );
+	std::wstring patch_file( const std::wstring & file ) override;
 
-	virtual bool want_file( const FILE_TYPE & file_type );
+	bool want_file( const FILE_TYPE & file_type ) override;
 
-	void replace_line_from_start_of_line( std::string & buffer, std::string::size_type pos, const std::string & new_line );
+	void replace_line_from_start_of_line( std::wstring & buffer, std::wstring::size_type pos, const std::wstring & new_line );
 };
 
 #endif

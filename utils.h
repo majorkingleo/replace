@@ -51,14 +51,14 @@ typedef Tools::EnumRange<ArgEnumType,CopyArgType> ArgType;
 class Function
 {
 public:
-    std::string name;
+    std::wstring name;
     unsigned line;
     ArgType ret_type;
-    std::string ret_string;
-    std::vector<std::string> args;
+    std::wstring ret_string;
+    std::vector<std::wstring> args;
     bool is_impl;
     bool is_static;
-    std::string impl;
+    std::wstring impl;
 
   Function()
     : line(0), is_impl(false), is_static(false)
@@ -68,28 +68,28 @@ public:
 };
 
 
-bool is_in( char c, const std::string &values );
+bool is_in( wchar_t c, const std::wstring &values );
 
-unsigned get_linenum( const std::string &s, std::string::size_type pos );
+unsigned get_linenum( const std::wstring &s, std::string::size_type pos );
 
-inline std::string get_line( const std::string &s, std::string::size_type pos )
+inline std::wstring get_line( const std::wstring &s, std::wstring::size_type pos )
 {
-	if( pos == std::string::npos )
-		return std::string();
+	if( pos == std::wstring::npos )
+		return std::wstring();
 
-    std::string::size_type p = s.find( '\n', pos );
+    std::wstring::size_type p = s.find( L'\n', pos );
     return s.substr( pos, p - pos );
 }
 
-template <class T> bool is_in_string( const T &s, std::string::size_type pos )
+template <class T> bool is_in_string( const T &s, std::wstring::size_type pos )
 {
-  if( pos == std::string::npos )
+  if( pos == std::wstring::npos )
     return false;
 
-  if( s.find( '"' ) == std::string::npos )
+  if( s.find( L'"' ) == std::wstring::npos )
 	return false;
 
-  std::string::size_type start = pos;
+  std::wstring::size_type start = pos;
 
   while( start )
     {
@@ -102,12 +102,12 @@ template <class T> bool is_in_string( const T &s, std::string::size_type pos )
       start--;
     }
 
-  std::string line = get_line( s, start );
+  std::wstring line = get_line( s, start );
 
-  if( line.find( '"' ) == std::string::npos )
+  if( line.find( L'"' ) == std::wstring::npos )
 	return false;
 
-  Tools::Pairs pairs( line );
+  Tools::WPairs pairs( line );
 
   if( pairs.is_in_pair( pos - start ) )
     return true;
@@ -115,39 +115,39 @@ template <class T> bool is_in_string( const T &s, std::string::size_type pos )
   return false;
 }
 
-bool is_in_string( const std::string &s, std::string::size_type pos );
+bool is_in_string( const std::wstring &s, std::wstring::size_type pos );
 
-std::string::size_type find_function( const std::string & function, 
-									  const std::string &s, 
-									  std::string::size_type start = 0 );
+std::wstring::size_type find_function( const std::wstring & function,
+									   const std::wstring &s,
+									   std::wstring::size_type start = 0 );
 
-std::string erase( const std::string & s, const std::string & what );
+std::wstring erase( const std::wstring & s, const std::wstring & what );
 
-std::string strip_ifnull( const std::string &s );
+std::wstring strip_ifnull( const std::wstring &s );
 
-std::string strip_ifdefelse( const std::string &s, 
-			     const std::string & start = "#ifdef",
-			     const std::string & end = "#endif",
-			     const std::string & middle = "#else" );
+std::wstring strip_ifdefelse( const std::wstring &s,
+			     const std::wstring & start = L"#ifdef",
+			     const std::wstring & end = L"#endif",
+			     const std::wstring & middle = L"#else" );
 
-std::string strip_comments( const std::string &s );
+std::wstring strip_comments( const std::wstring &s );
 
-void strip_cpp_comment( std::string &s, const std::string & pattern = "//" );
+void strip_cpp_comment( std::wstring &s, const std::wstring & pattern = L"//" );
 
-std::string strip_stuff( const std::string &s, 
-						 const std::string &start, 
-						 const std::string &end );
+std::wstring strip_stuff( const std::wstring &s,
+						 const std::wstring &start,
+						 const std::wstring &end );
 
 
-std::vector<std::string> sequence_point_split( const std::string & s );
+std::vector<std::wstring> sequence_point_split( const std::wstring & s );
 
 std::string::size_type find_function_decl( const std::string & s, std::string::size_type pos, Function & f );
 
-std::string get_whole_line( const std::string & s, std::string::size_type pos );
+std::wstring get_whole_line( const std::wstring & s, std::wstring::size_type pos );
 
-std::string::size_type skip_spaces( const std::string & s, std::string::size_type pos, bool reverse = false );
+std::wstring::size_type skip_spaces( const std::wstring & s, std::wstring::size_type pos, bool reverse = false );
 
-std::string get_assignment_var( const std::string & s, std::string::size_type pos );
+std::wstring get_assignment_var( const std::wstring & s, std::wstring::size_type pos );
 
 bool overlap( const std::vector<std::string> &list1, const std::vector<std::string> & list2 );
 
@@ -155,16 +155,16 @@ bool is_in_list( const std::string & s,  const std::vector<std::string> & list )
 
 std::ostream & operator<<(std::ostream & out, const std::vector<std::string> & list );
 
-bool get_function( const std::string &s,
-                   std::string::size_type pos,
-                   std::string::size_type &start,
-                   std::string::size_type &end, Function *func,  bool strip_args = true );
+bool get_function( const std::wstring &s,
+                   std::wstring::size_type pos,
+                   std::wstring::size_type &start,
+                   std::wstring::size_type &end, Function *func,  bool strip_args = true );
 
-std::string function_to_string( const std::string & s,
+std::wstring function_to_string( const std::wstring & s,
 								const Function & func,
-								std::string::size_type start,
-								std::string::size_type end );
+								std::wstring::size_type start,
+								std::wstring::size_type end );
 
-std::string::size_type rfind_first_of( const std::string & s, const std::string & delims, std::string::size_type start = std::string::npos );
+std::wstring::size_type rfind_first_of( const std::wstring & s, const std::wstring & delims, std::wstring::size_type start = std::wstring::npos );
 
 #endif

@@ -18,29 +18,29 @@
 
 using namespace Tools;
 
-const std::string AddMlMWBox::STRFORM = "StrForm";
+const std::wstring AddMlMWBox::STRFORM = L"StrForm";
 
-AddMlMWBox::AddMlMWBox( const std::string & FUNCTION_NAME_ )
+AddMlMWBox::AddMlMWBox( const std::wstring & FUNCTION_NAME_ )
 	: FUNCTION_NAME( FUNCTION_NAME_ )
 {
 	keywords.push_back( FUNCTION_NAME );
 
-	key_args.insert( "WboxNbuttonText" );
-	key_args.insert( "WboxNmwmTitle" );
-	key_args.insert( "WboxNtext" );
-	key_args.insert( "WboxNescButtonText" );
-	key_args.insert( "WboxNdefaultButtonText" );
-	key_args.insert( "WboxNfocusButtonText" );
+	key_args.insert( L"WboxNbuttonText" );
+	key_args.insert( L"WboxNmwmTitle" );
+	key_args.insert( L"WboxNtext" );
+	key_args.insert( L"WboxNescButtonText" );
+	key_args.insert( L"WboxNdefaultButtonText" );
+	key_args.insert( L"WboxNfocusButtonText" );
 }
 
-std::string AddMlMWBox::patch_file( const std::string & file )
+std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 {
 	if( should_skip_file( file ))
 		return file;
 
-	std::string res( file );
-	std::string::size_type start_in_file = 0;
-	std::string::size_type pos = 0;
+	std::wstring res( file );
+	std::wstring::size_type start_in_file = 0;
+	std::wstring::size_type pos = 0;
 
 	bool restart_file_patching = false;
 
@@ -55,16 +55,16 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 
 		pos = res.find( FUNCTION_NAME, start_in_file );
 
-		if( pos == std::string::npos )
+		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( format( "%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
-		std::string::size_type start, end;
+		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(format("unable to load %s function", FUNCTION_NAME) );
+			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -73,7 +73,7 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( format("function name is '%s'", func.name) );
+			DEBUG( wformat(L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -81,7 +81,7 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 		bool changed_something = false;
 
 		for( size_t idx = 0; idx < func.args.size(); idx++ ) {
-			std::string var_name = strip( func.args[idx] );
+			std::wstring var_name = strip( func.args[idx] );
 
 			if( key_args.count( var_name ) == 0 ) {
 				continue;
@@ -91,22 +91,22 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 				continue;
 			}
 
-			std::string sstring_arg = strip( func.args[idx+1] );
+			std::wstring sstring_arg = strip( func.args[idx+1] );
 
-			DEBUG( format("processing: '%s'", sstring_arg ) );
+			DEBUG( wformat(L"processing: '%s'", sstring_arg ) );
 
 			// we found a C string, just do normal replacement
-			if( sstring_arg.find( "\"" ) == 0 ) {
+			if( sstring_arg.find( L"\"" ) == 0 ) {
 
-				const std::string c_string_arg = func.args[idx+1];
+				const std::wstring c_string_arg = func.args[idx+1];
 
-				std::string::size_type c_start = c_string_arg.find("\"");
-				std::string::size_type c_end = c_string_arg.rfind("\"");
+				std::wstring::size_type c_start = c_string_arg.find(L"\"");
+				std::wstring::size_type c_end = c_string_arg.rfind(L"\"");
 
-				std::string leading_spaces = c_string_arg.substr(0,c_start);
-				std::string trailing_spaces = c_string_arg.substr(c_end+1);
+				std::wstring leading_spaces = c_string_arg.substr(0,c_start);
+				std::wstring trailing_spaces = c_string_arg.substr(c_end+1);
 
-				std::string string_arg = format( "%sMlM(%s)%s", leading_spaces, sstring_arg, trailing_spaces );
+				std::wstring string_arg = wformat( L"%sMlM(%s)%s", leading_spaces, sstring_arg, trailing_spaces );
 				func.args[idx+1] = string_arg;
 
 				/*
@@ -121,16 +121,16 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 
 			} else if( sstring_arg.find( STRFORM ) == 0 ) {
 
-				DEBUG(format("%s found", STRFORM ));
+				DEBUG(wformat(L"%s found", STRFORM ));
 
-				std::string::size_type strform_start = 0;
-				std::string::size_type strform_end = 0;
-				std::string::size_type strform_pos = 0;
+				std::wstring::size_type strform_start = 0;
+				std::wstring::size_type strform_end = 0;
+				std::wstring::size_type strform_pos = 0;
 
 				Function f_strform;
 
 				if( !get_function(sstring_arg,strform_pos,strform_start,strform_end,&f_strform, false) ) {
-					DEBUG(format("unable to load %s function. get_function() failed", STRFORM) );
+					DEBUG(wformat(L"unable to load %s function. get_function() failed", STRFORM) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
@@ -139,37 +139,37 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 				strform_end += 1;
 
 				if( f_strform.name != STRFORM ) {
-					DEBUG(format("unable to load %s function. Name is: '%s' instead of '%s'", STRFORM, f_strform.name, STRFORM ) );
+					DEBUG(wformat(L"unable to load %s function. Name is: '%s' instead of '%s'", STRFORM, f_strform.name, STRFORM ) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
 
 				if( f_strform.args.size() == 0 ) {
-					DEBUG(format("unable to load %s function. Invalid number of arguments: %d", STRFORM, f_strform.args.size() ) );
+					DEBUG(wformat(L"unable to load %s function. Invalid number of arguments: %d", STRFORM, f_strform.args.size() ) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
 
-				std::string strform_sstring_arg = strip( f_strform.args[0] );
+				std::wstring strform_sstring_arg = strip( f_strform.args[0] );
 
-				if( strform_sstring_arg.find( "\"" ) == 0 && !isNotTranslatable(strform_sstring_arg) ) {
+				if( strform_sstring_arg.find( L"\"" ) == 0 && !isNotTranslatable(strform_sstring_arg) ) {
 
-					DEBUG( format( "pure C-string processing for '%s'", strform_sstring_arg ));
+					DEBUG( wformat( L"pure C-string processing for '%s'", strform_sstring_arg ));
 
-					std::string & format_arg = f_strform.args[0];
+					std::wstring & format_arg = f_strform.args[0];
 
-					std::string::size_type c_start = format_arg.find("\"");
-					std::string::size_type c_end = format_arg.rfind("\"");
+					std::wstring::size_type c_start = format_arg.find(L"\"");
+					std::wstring::size_type c_end = format_arg.rfind(L"\"");
 
-					std::string leading_spaces = format_arg.substr(0,c_start);
-					std::string trailing_spaces = format_arg.substr(c_end+1);
+					std::wstring leading_spaces = format_arg.substr(0,c_start);
+					std::wstring trailing_spaces = format_arg.substr(c_end+1);
 
-					std::string string_arg = format( "%sMlMsg(%s)%s", leading_spaces, strform_sstring_arg, trailing_spaces );
+					std::wstring string_arg = wformat( L"%sMlMsg(%s)%s", leading_spaces, strform_sstring_arg, trailing_spaces );
 					format_arg = string_arg;
 
 
-					const std::string arg_before = func.args[idx+1];
-					std::string & s_res = func.args[idx+1];
+					const std::wstring arg_before = func.args[idx+1];
+					std::wstring & s_res = func.args[idx+1];
 
 					strform_pos = arg_before.find( STRFORM );
 
@@ -177,8 +177,8 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 
 					s_res = function_to_string( arg_before, f_strform,  strform_pos, strform_end + strform_pos );
 
-					DEBUG( format( "arg_before: '%s'", arg_before ));
-					DEBUG( format( "s_res: '%s'", s_res ));
+					DEBUG( wformat( L"arg_before: '%s'", arg_before ));
+					DEBUG( wformat( L"s_res: '%s'", s_res ));
 
 					/*
 					if( s_res.size() > arg_before.size() ) {
@@ -189,16 +189,16 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 					changed_something = true;
 
 				} // if
-			} else if( sstring_arg.find( "(" ) == std::string::npos ) {
+			} else if( sstring_arg.find( L"(" ) == std::wstring::npos ) {
 
-				std::string::size_type decl_pos = 0;
-				std::string decl;
+				std::wstring::size_type decl_pos = 0;
+				std::wstring decl;
 
 				find_decl( res, pos, sstring_arg, decl, decl_pos );
 
-				if( decl_pos == std::string::npos || decl_pos == 0 ) {
+				if( decl_pos == std::wstring::npos || decl_pos == 0 ) {
 					// write a warning message
-					func.args[idx+1] += " /* replace: add MlMsg() */";
+					func.args[idx+1] += L" /* replace: add MlMsg() */";
 					continue;
 				}
 
@@ -206,18 +206,18 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 					continue;
 				}
 
-				DEBUG( format( "'%s' decl: '%s' line: %d", sstring_arg, decl, get_linenum(res,decl_pos)) );
+				DEBUG( wformat( L"'%s' decl: '%s' line: %d", sstring_arg, decl, get_linenum(res,decl_pos)) );
 
-				std::string sub_file_start_till_decl = res.substr( 0, decl_pos );
-				std::string sub_file_middle = res.substr( decl_pos, pos - decl_pos );
-				std::string sub_file_end = res.substr( pos );
+				std::wstring sub_file_start_till_decl = res.substr( 0, decl_pos );
+				std::wstring sub_file_middle = res.substr( decl_pos, pos - decl_pos );
+				std::wstring sub_file_end = res.substr( pos );
 
-				AddMlM add_mlm_sprintf( "sprintf", 2, "MlMsg" );
+				AddMlM add_mlm_sprintf( L"sprintf", 2, L"MlMsg" );
 				add_mlm_sprintf.set_file_name( file_name );
 				add_mlm_sprintf.addChecker( new AddMlM::PatchThisFunctionIfArgXequals( 0, sstring_arg ));
-				std::string new_sub_file_middle = add_mlm_sprintf.patch_file( sub_file_middle );
+				std::wstring new_sub_file_middle = add_mlm_sprintf.patch_file( sub_file_middle );
 
-				AddMlM add_mlm_snprintf( "snprintf", 3, "MlMsg" );
+				AddMlM add_mlm_snprintf( L"snprintf", 3, L"MlMsg" );
 				add_mlm_snprintf.addChecker( new AddMlM::PatchThisFunctionIfArgXequals( 0, sstring_arg ));
 				add_mlm_snprintf.set_file_name( file_name );
 				new_sub_file_middle = add_mlm_snprintf.patch_file( new_sub_file_middle );
@@ -256,16 +256,16 @@ std::string AddMlMWBox::patch_file( const std::string & file )
 	return res;
 }
 
-bool AddMlMWBox::isNotTranslatable( const std::string & s )
+bool AddMlMWBox::isNotTranslatable( const std::wstring & s )
 {
-	static std::set<std::string> EMPTY_STRINGS;
+	static std::set<std::wstring> EMPTY_STRINGS;
 
 	if( EMPTY_STRINGS.empty() ) {
-		EMPTY_STRINGS.insert( "\"\"" );
-		EMPTY_STRINGS.insert( "\"%s\"" );
-		EMPTY_STRINGS.insert( "\"%s\\n%s\"" );
-		EMPTY_STRINGS.insert( "\"%s%s\"" );
-		EMPTY_STRINGS.insert( "\" \"" );
+		EMPTY_STRINGS.insert( L"\"\"" );
+		EMPTY_STRINGS.insert( L"\"%s\"" );
+		EMPTY_STRINGS.insert( L"\"%s\\n%s\"" );
+		EMPTY_STRINGS.insert( L"\"%s%s\"" );
+		EMPTY_STRINGS.insert( L"\" \"" );
 	}
 
 	if( EMPTY_STRINGS.find( s ) != EMPTY_STRINGS.end() ) {

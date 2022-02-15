@@ -15,6 +15,8 @@
 
 using namespace Tools;
 
+DetectLocale DETECT_LOCALE;
+
 DetectLocale::DetectLocale()
 : is_utf8( false ),
   input_encoding(),
@@ -126,4 +128,14 @@ std::string DetectLocale::wString2output( const std::wstring & str )
 	std::string out_str;
 
 	return READ_FILE.convert( utf8_str, "UTF-8", input_encoding );
+}
+
+std::string DetectLocale::w2out( const std::wstring & out )
+{
+	return DETECT_LOCALE.wString2output( out );
+}
+
+std::wstring DetectLocale::in2w( const std::string & in )
+{
+	return DETECT_LOCALE.inputString2wString( in );
 }
