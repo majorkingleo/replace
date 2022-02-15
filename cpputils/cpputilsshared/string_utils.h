@@ -25,13 +25,29 @@
 namespace Tools {
 
 std::string toupper( std::string s );
+std::wstring toupper( std::wstring s );
+
 std::string tolower( std::string s );
+std::wstring tolower( std::wstring s );
+
 std::string strip( const std::string& str, const std::string& what = " \t\n\r" );
+std::wstring strip( const std::wstring& str, const std::wstring& what = L" \t\n\r" );
+
 std::string strip_leading( const std::string& str, const std::string& what = " \t\n\r" );
+std::wstring strip_leading( const std::wstring& str, const std::wstring& what = L" \t\n\r" );
+
 std::string strip_trailing( const std::string& str, const std::string& what = " \t\n\r" );
+std::wstring strip_trailing( const std::wstring& str, const std::wstring& what = L" \t\n\r" );
+
 bool is_int( const std::string &s );
+bool is_int( const std::wstring &s );
+
 std::vector<std::string> split_simple( std::string str, std::string seperator = " \t\n", int max = -1 );
+std::vector<std::wstring> split_simple( std::wstring str, std::wstring seperator = L" \t\n", int max = -1 );
+
 std::vector<std::string> split_string( std::string str, std::string seperator, int max = -1 );
+std::vector<std::wstring> split_string( std::wstring str, std::wstring seperator, int max = -1 );
+
 std::vector<std::string> split_and_strip_simple( std::string str, const std::string & sep = " \t\n", int max = -1 );
 
 inline bool is_bool( const bool &b ) { return true; }
@@ -45,6 +61,7 @@ template<class T> T get_bool( bool b ) { return T(); }
 
 
 bool s2bool( const std::string &s );
+bool s2bool( const std::wstring &s );
 
 /// convert a string to anything
 template <class T> T s2x( const std::string& s )
@@ -91,6 +108,24 @@ template <class T> T s2x( const std::string& s, const T & init )
   return t;
 }
 
+#if __cplusplus >= 201103
+/// convert a string to anything
+template <class T> T s2x( const std::wstring& s, const T & init )
+{
+    if( is_bool( T() ) )
+    {
+	return s2bool( s );
+    }
+
+  std::wstringstream str;
+
+  str << s;
+  T t(init);
+  str >> t;
+
+  return t;
+}
+#endif
 
 /// converts anything to a string
 template<class T>std::string x2s( T what )
@@ -118,7 +153,8 @@ inline std::string auto_linebreak( std::string text, unsigned int max_size = 90 
 }
 
 std::string substitude( const std::string & str, const std::string & what, const std::string & with, std::string::size_type start = 0 );
-
+std::wstring substitude( const std::wstring & str, const std::wstring & what, const std::wstring & with, std::wstring::size_type start = 0 );
+ 
 std::string prepand( std::string str, std::string what, std::string prefix );
 
 inline bool icase_cmp( const std::string &a, const std::string &b )

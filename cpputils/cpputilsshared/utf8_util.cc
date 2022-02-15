@@ -6,6 +6,9 @@
  */
 #include "utf8_util.h"
 #include "utf8.h"
+#include <cpp_util.h>
+
+#if __cplusplus >= 201103
 
 namespace Tools {
 
@@ -66,11 +69,56 @@ std::wstring Utf8Util::utf8toWString( const std::string & text )
 {
 	if( sizeof( wchar_t ) == sizeof( int16_t ) ) {
 		return toWcharString16( text );
-	} else {
+	} else if( sizeof( wchar_t ) == sizeof( int32_t ) ) {
 		return toWcharString32( text );
+	} else {
+		throw REPORT_EXCEPTION( "unknown wchar size" );
+	}
+}
+
+
+std::string Utf8Util::utf16toString( const std::wstring & text )
+{
+	std::u16string wstr;
+
+	wstr.resize(text.size());
+
+	for( unsigned i = 0; i < text.size(); i++ ) {
+		wstr[i] = text[i];
+	}
+
+	std::string str = utf8::utf16to8(wstr);
+
+	return str;
+}
+
+std::string Utf8Util::utf32toString( const std::wstring & text )
+{
+	std::u32string wstr;
+
+	wstr.resize(text.size());
+
+	for( unsigned i = 0; i < text.size(); i++ ) {
+		wstr[i] = text[i];
+	}
+
+	std::string str = utf8::utf32to8(wstr);
+
+	return str;
+}
+
+std::string Utf8Util::wStringToUtf8( const std::wstring & text )
+{
+	if( sizeof( wchar_t ) == sizeof( int16_t ) ) {
+		return utf16toString( text );
+	} else if( sizeof( wchar_t ) == sizeof( int32_t ) ) {
+		return utf32toString( text );
+	} else {
+		throw REPORT_EXCEPTION( "unknown wchar size" );
 	}
 }
 
 } // namespace Tools;
 
+#endif
 
