@@ -1,0 +1,3 @@
+./ma_stat.cc:3:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+./ma_stat.cc:7:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+./ma_stat.cc:12:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]

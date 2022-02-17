@@ -283,12 +283,23 @@ template <class T> std::string IterableToFormattedString (
 
 
 std::string fill_leading( std::string s, const std::string fill_sign, unsigned int len );
+std::wstring fill_leading( std::wstring s, const std::wstring fill_sign, unsigned int len );
+
 std::string fill_trailing( std::string s, const std::string fill_sign, unsigned int len );
+std::wstring fill_trailing( std::wstring s, const std::wstring fill_sign, unsigned int len );
 
 bool is_empty_str( const char *pcString );
 bool is_empty_str( const std::string & string );
+
+bool is_empty_str( const wchar_t *pcString );
+bool is_empty_str( const std::wstring & string );
+
 inline bool is_empty_string( const char *pcString ) { return is_empty_str( pcString ); }
 inline bool is_empty_string(  const std::string & s ) {  return is_empty_str( s ); }
+
+inline bool is_empty_string( const wchar_t *pcString ) { return is_empty_str( pcString ); }
+inline bool is_empty_string(  const std::wstring & s ) {  return is_empty_str( s ); }
+
 
 } // namespace Tools
 

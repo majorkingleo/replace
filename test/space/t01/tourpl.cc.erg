@@ -1234,7 +1234,7 @@ void cbbt_ftNewName(MskDialog mask,MskStatic ef, MskElement el, int reason,void 
 				/* Check the Name of new Tour */
 				if (!Util_IsEmptyStr(cd->tourname)) {
 					/* Check if Tourname already exists */
-					if (TExecSql(mask,"SELECT %MAM from mam where mam.status<>" STR_MASTAT_FERTIG
+					if (TExecSql(mask, "SELECT %MAM from mam where mam.status<>" STR_MASTAT_FERTIG
 								 " and mam.status<>" STR_MASTAT_NI
 								 " and mam.rectyp=" STR_RECTYP_TOUR
 								 " and mam.parentid=:a"

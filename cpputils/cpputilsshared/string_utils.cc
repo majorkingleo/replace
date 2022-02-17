@@ -730,6 +730,17 @@ std::string fill_leading( std::string s, const std::string fill_sign, unsigned i
 	return s;
 }
 
+std::wstring fill_leading( std::wstring s, const std::wstring fill_sign, unsigned int len )
+{
+	s.reserve(len);
+
+	while( s.size() < len )
+		s = fill_sign + s;
+
+	return s;
+}
+
+
 bool is_empty_str( const char *pcString )
 {
   if( pcString == NULL )
@@ -745,6 +756,28 @@ bool is_empty_str( const char *pcString )
 }
 
 bool is_empty_str( const std::string & string )
+{
+  if( string.empty() )
+	return true;
+
+  return is_empty_str( string.c_str() );
+}
+
+bool is_empty_str( const wchar_t *pcString )
+{
+  if( pcString == NULL )
+	return true;
+
+  for( int i = 0; pcString[i] != L'\0'; i++ )
+	{
+	  if( pcString[i] != L' ' )
+		return false;
+	}
+
+  return true;
+}
+
+bool is_empty_str( const std::wstring & string )
 {
   if( string.empty() )
 	return true;

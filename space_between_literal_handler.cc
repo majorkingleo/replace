@@ -79,7 +79,7 @@ void SpaceBetweenLiteralHandler::report_unfixed_compile_logs()
 	{
 		if( !locations[i].fixed )
 		{
-			std::cout << "(unfixed) " << DetectLocale::w2out(locations[i].compile_log_line) << L'\n';
+			std::cout << "(unfixed) " << DetectLocale::w2out(locations[i].compile_log_line) << '\n';
 		}
 	}
 }
@@ -124,8 +124,9 @@ std::vector<SpaceBetweenLiteralHandler::Pair> SpaceBetweenLiteralHandler::find_e
 		{
 			start = s.find( L'"', pos );
 
-			if( start == std::wstring::npos )
+			if( start == std::wstring::npos ) {
 				return ex;
+			}
 
 			/* is the " escaped? */
 			if( is_escaped( s, start ) )
@@ -176,6 +177,10 @@ bool SpaceBetweenLiteralHandler::is_exclusive( const std::wstring &s, const std:
 	return exclusive;
 }
 
+static std::wstring space2Pos( std::wstring::size_type pos, wchar_t mark_sign = L'^' )
+{
+	return fill_leading( L"", L" ", pos ) + mark_sign;
+}
 
 void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warning, std::wstring & content )
 {
@@ -206,6 +211,8 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 			break;
 		}
 
+		DEBUG( wformat( L"found \" at %d\n%s\n%s", pos1, line, space2Pos( pos1 ) ) );
+
 		if( is_exclusive( line, exclude, pos1 ) )
 		{
 			pos1++;
@@ -214,13 +221,48 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 
 		if( !string_started ) {
 			string_started = true;
-			res << line.substr( last_pos, pos1 - last_pos + 1);
+			res << line.substr( last_pos, pos1 - last_pos);
+
+			// TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+			//              ^---------- hier einen Space einbauen
+			if( pos1 > 0 && !isspace( line[pos1-1] ) ) {
+				res << L' ';
+			}
+
+			res << line.substr(pos1,1);
 			last_pos = pos1+1;
 		} else {
 			// jetzt einen space einbauen
-			res << line.substr( last_pos, pos1 - last_pos + 1)
-				<< L' ';
+			// TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+			// ---------- einen Space hier einbauen ^
+			res << line.substr( last_pos, pos1 - last_pos + 1);
+
+			bool append_space = true;
 			last_pos = pos1+1;
+
+			if( last_pos < line.size() ) {
+				DEBUG( wformat( L"last sign: '%s'", line[last_pos]) );
+
+				// TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+				// ---------------------------------------------- keinen Space hier einbauen ^
+				if( !isalnum( line[last_pos] ) ) {
+					append_space = false;
+				}
+
+				// wenn am Ende schon ein Leerzeichen ist, dann brauchts keine extra Leerzeichen
+				if( isspace( line[last_pos] ) ) {
+					append_space = false;
+				}
+
+			}
+
+			// Nur ein Leerzeichen anhängen, wenn es nicht das Ende der Zeile ist
+			if( last_pos < line.size() ) {
+				if(  append_space ) {
+					res << L' ';
+				}
+			}
+
 			string_started = false;
 		}
 
@@ -231,6 +273,9 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 	res << line.substr( last_pos );
 
 	std::wstring new_line = res.str();
+
+	DEBUG( wformat( L"old line: '%s'", line ) );
+	DEBUG( wformat( L"new line: '%s'", new_line ) );
 
 	UnusedVariableHandler::replace_line( content, pos, new_line );
 

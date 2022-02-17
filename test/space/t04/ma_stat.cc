@@ -1,0 +1,14 @@
+        LogPrintf( FAC_LIB,LT_NOTIFY, "ok: %d", ok );
+            if (ok)
+                ok = TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+                        SQLSTRING(makid),
+                        NULL)>0?1:0;
+
+            ok = TExecSql(tid, "update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+                    SQLSTRING(makid),
+                    NULL)>0?1:0;
+
+            ok = TExecSql(tid,"update map set status="
+                              " "STR_MASTAT_FERTIG" where parentid=:a",
+                              SQLSTRING(makid),
+                              NULL)>0?1:0;

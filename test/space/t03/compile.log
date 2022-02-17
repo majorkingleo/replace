@@ -1,0 +1,423 @@
+g++ -D_GNU_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -DTOOLS_VERSION=42 -DCODE_FINAL -DPLATFORM_X11 -DOWSTRICT -DOWIL_HOME="/tools/dist/unstable/toolsbox-2020/usr/share/owil" -DFALSE=0 -DTRUE=1 -pthread -ftemplate-depth-100 -Wall -Wextra -Wstrict-aliasing=2 -Wno-missing-field-initializers -Wno-unused-parameter -Weffc++ -Woverloaded-virtual -Wconditionally-supported -std=gnu++11 -I. -I../Linux/include -I/tools/dist/unstable/toolsbox-2020/usr/share/dcc/include -I/tools/dist/unstable/toolsbox-2020/usr/share/owil/include -I/tools/dist/unstable/toolsbox-2020/usr/share/tools/include    -O2  -D_COMPILING_shared_=1 -o Linux/ma_stat.o -c ./ma_stat.cc
+./ma_stat.cc:86:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "ean.unit_artnr=art.artnr and ean.typ="STR_EANTYP_EVE,
+     ^
+./ma_stat.cc:262:11: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+           " rectyp="STR_RECTYP_TOUR
+           ^
+./ma_stat.cc:272:11: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+           " rectyp="STR_RECTYP_TOUR
+           ^
+./ma_stat.cc:427:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "rectyp="STR_RECTYP_TOUR
+       ^
+./ma_stat.cc:811:19: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+  ptr+=sprintf(ptr,"%s %s and ean.maetyp="STR_MAETYP_GP,sel,from);
+                   ^
+./ma_stat.cc:812:19: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+  ptr+=sprintf(ptr," union %s %s and ean.maetyp="STR_MAETYP_TT,sel,from);
+                   ^
+./ma_stat.cc:814:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and ean.maetyp="STR_MAETYP_PK,sel,from);
+       ^
+./ma_stat.cc:816:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and ean.maetyp="STR_MAETYP_PK
+       ^
+./ma_stat.cc:818:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and ean.typ="STR_EANTYP_LE2" and ean.maetyp="STR_MAETYP_PK")",sel,from);
+       ^
+./ma_stat.cc:818:36: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and ean.typ="STR_EANTYP_LE2" and ean.maetyp="STR_MAETYP_PK")",sel,from);
+                                    ^
+./ma_stat.cc:1126:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " where rectyp="STR_RECTYP_TOUR
+      ^
+./ma_stat.cc:1128:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and maetyp="STR_MAETYP_PK,
+      ^
+./ma_stat.cc:1157:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.rectyp="STR_RECTYP_MAK
+      ^
+./ma_stat.cc:1159:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.maetyp="STR_MAETYP_PK,
+      ^
+./ma_stat.cc:1190:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " where mam.rectyp="STR_RECTYP_TOUR
+      ^
+./ma_stat.cc:1192:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and maetyp="STR_MAETYP_GP,
+      ^
+./ma_stat.cc:1216:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.rectyp="STR_RECTYP_MAK
+      ^
+./ma_stat.cc:1217:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.parentid=mak.id and mam.maetyp="STR_MAETYP_GP,
+      ^
+./ma_stat.cc:1246:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " where rectyp="STR_RECTYP_TOUR
+      ^
+./ma_stat.cc:1248:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and maetyp="STR_MAETYP_TT,
+      ^
+./ma_stat.cc:1272:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.rectyp="STR_RECTYP_MAK
+      ^
+./ma_stat.cc:1273:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mam.parentid=mak.id and mam.maetyp="STR_MAETYP_TT,
+      ^
+./ma_stat.cc:1527:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_MAP
+      ^
+./ma_stat.cc:1544:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_MAP
+      ^
+./ma_stat.cc:1558:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_MAK
+      ^
+./ma_stat.cc:1591:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_KAK
+      ^
+./ma_stat.cc:1613:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_MAP
+      ^
+./ma_stat.cc:1629:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_MAK
+      ^
+./ma_stat.cc:1643:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_KAK
+      ^
+./ma_stat.cc:1657:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " rectyp="STR_RECTYP_TOUR
+      ^
+./ma_stat.cc:1834:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+        "(mak.bwart="STR_BWART_AKU" or "
+        ^
+./ma_stat.cc:1835:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+        " mak.bwart="STR_BWART_ALI" or "
+        ^
+./ma_stat.cc:1836:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+        " mak.bwart="STR_BWART_ASP") ",
+        ^
+./ma_stat.cc:1879:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+        "map.postyp<>"STR_ARTTYP_STD" and "
+        ^
+./ma_stat.cc:1893:9: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+         "map.postyp<>"STR_ARTTYP_STD
+         ^
+./ma_stat.cc:1961:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.postyp="STR_ARTTYP_STD" and"
+     ^
+./ma_stat.cc:1962:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (map.status="STR_MASTAT_FREIGABE" or"
+     ^
+./ma_stat.cc:1963:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.status="STR_MASTAT_FERTIG") and"
+     ^
+./ma_stat.cc:1965:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " ean.maetyp="STR_MAETYP_PK" and"
+     ^
+./ma_stat.cc:1966:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " ean.typ="STR_EANTYP_LE2
+     ^
+./ma_stat.cc:1970:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.postyp="STR_ARTTYP_STD" and"
+     ^
+./ma_stat.cc:1971:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (map.status="STR_MASTAT_FREIGABE" or"
+     ^
+./ma_stat.cc:1972:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.status="STR_MASTAT_FERTIG") and"
+     ^
+./ma_stat.cc:1976:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " maetyp="STR_MAETYP_PK" and"
+     ^
+./ma_stat.cc:1977:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " typ="STR_EANTYP_LE2")"
+     ^
+./ma_stat.cc:1994:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.postyp="STR_ARTTYP_STD" and"
+     ^
+./ma_stat.cc:1995:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (map.status="STR_MASTAT_FREIGABE" or"
+     ^
+./ma_stat.cc:1996:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.status="STR_MASTAT_FERTIG") and"
+     ^
+./ma_stat.cc:1998:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+     ^
+./ma_stat.cc:1998:33: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+                                 ^
+./ma_stat.cc:2002:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.postyp="STR_ARTTYP_STD" and"
+     ^
+./ma_stat.cc:2003:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (map.status="STR_MASTAT_FREIGABE" or"
+     ^
+./ma_stat.cc:2004:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " map.status="STR_MASTAT_FERTIG") and"
+     ^
+./ma_stat.cc:2008:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (maetyp="STR_MAETYP_GP" or maetyp="STR_MAETYP_TT"))"
+     ^
+./ma_stat.cc:2008:29: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     " (maetyp="STR_MAETYP_GP" or maetyp="STR_MAETYP_TT"))"
+                             ^
+./ma_stat.cc:2030:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "where mae.maetyp="STR_MAETYP_PK" and parentid=:b), "
+     ^
+./ma_stat.cc:2032:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "where mae.maetyp="STR_MAETYP_PK" and parentid=:c) "
+     ^
+./ma_stat.cc:2033:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "where maetyp="STR_MAETYP_PK" and parentid=:d",
+     ^
+./ma_stat.cc:2049:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+      ^
+./ma_stat.cc:2049:39: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+                                       ^
+./ma_stat.cc:2053:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+      ^
+./ma_stat.cc:2053:39: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+                                       ^
+./ma_stat.cc:2055:5: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "where (maetyp="STR_MAETYP_TT" or maetyp="STR_MAETYP_GP") "
+     ^
+./ma_stat.cc:2055:34: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     "where (maetyp="STR_MAETYP_TT" or maetyp="STR_MAETYP_GP") "
+                                  ^
+./ma_stat.cc:2073:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "where mae.maetyp="STR_MAETYP_PK" and parentid=:b), "
+       ^
+./ma_stat.cc:2075:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "where mae.maetyp="STR_MAETYP_PK" and parentid=:c) "
+       ^
+./ma_stat.cc:2076:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "where maetyp="STR_MAETYP_PK" and parentid=:d",
+       ^
+./ma_stat.cc:2094:12: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+            ^
+./ma_stat.cc:2094:45: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+                                             ^
+./ma_stat.cc:2098:12: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+            ^
+./ma_stat.cc:2098:45: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (mae.maetyp="STR_MAETYP_TT" or mae.maetyp="STR_MAETYP_GP") "
+                                             ^
+./ma_stat.cc:2100:12: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (maetyp="STR_MAETYP_TT" or maetyp="STR_MAETYP_GP") "
+            ^
+./ma_stat.cc:2100:41: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            "where (maetyp="STR_MAETYP_TT" or maetyp="STR_MAETYP_GP") "
+                                         ^
+./ma_stat.cc:2681:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "update mae set status="STR_MASTAT_FERTIG
+       ^
+./ma_stat.cc:2695:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       "update kak set status="STR_MASTAT_FERTIG
+       ^
+./ma_stat.cc:2862:9: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+         "map.postyp="STR_ARTTYP_STD" and map.status="STR_MASTAT_NEU);
+         ^
+./ma_stat.cc:2862:36: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+         "map.postyp="STR_ARTTYP_STD" and map.status="STR_MASTAT_NEU);
+                                    ^
+./ma_stat.cc:2902:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+        sprintf(sdummy,"mak.batchnr=%ld and mak.id<>'%s' and mak.status<>"STR_MASTAT_FREIGABE,mak->makBatchNr,mak->makId);
+                       ^
+./ma_stat.cc:2960:10: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+          "(select COUNT(id) from mak where tournr='%s' and batchnr=%ld and matyp="STR_ARTTYP_STD") "
+          ^
+./ma_stat.cc:3078:9: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+         "(map.postyp="STR_ARTTYP_STD" or map.splitnr=0)");
+         ^
+./ma_stat.cc:3158:12: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+            " WHERE RecTyp="STR_RECTYP_MAK
+            ^
+./ma_stat.cc:3221:60: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     maklist = _load_rec_list(tid, RECTYP_MAK, TRUE, recid, "mak.status<>"STR_MASTAT_FREIGABE);
+                                                            ^
+./ma_stat.cc:3240:61: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     maklist = _load_rec_list(tid, RECTYP_MAK, FALSE, recid, "mak.status<>"STR_MASTAT_FREIGABE);
+                                                             ^
+./ma_stat.cc:3383:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.bwart="STR_BWART_AKU
+      ^
+./ma_stat.cc:3384:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.status="STR_MASTAT_FREIGABE
+      ^
+./ma_stat.cc:3386:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3388:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and ean.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3389:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and ean.typ="STR_EANTYP_LE2
+      ^
+./ma_stat.cc:3391:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mae.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3397:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.bwart="STR_BWART_AKU
+      ^
+./ma_stat.cc:3398:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.status="STR_MASTAT_FREIGABE
+      ^
+./ma_stat.cc:3400:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3402:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mae.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3405:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  maetyp="STR_MAETYP_PK" and"
+      ^
+./ma_stat.cc:3406:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  typ="STR_EANTYP_LE2")"
+      ^
+./ma_stat.cc:3432:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.bwart="STR_BWART_AKU
+      ^
+./ma_stat.cc:3433:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.status="STR_MASTAT_FREIGABE
+      ^
+./ma_stat.cc:3435:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3437:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+      ^
+./ma_stat.cc:3437:38: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+                                      ^
+./ma_stat.cc:3440:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+ */     " and mae.maetyp<>"STR_MAETYP_PK
+        ^
+./ma_stat.cc:3446:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.bwart="STR_BWART_AKU
+      ^
+./ma_stat.cc:3447:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mak.status="STR_MASTAT_FREIGABE
+      ^
+./ma_stat.cc:3449:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3451:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (mae.maetyp="STR_MAETYP_GP" or mae.maetyp="STR_MAETYP_TT")"
+      ^
+./ma_stat.cc:3451:38: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (mae.maetyp="STR_MAETYP_GP" or mae.maetyp="STR_MAETYP_TT")"
+                                      ^
+./ma_stat.cc:3454:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT"))"
+      ^
+./ma_stat.cc:3454:39: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT"))"
+                                       ^
+./ma_stat.cc:3484:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and rectyp="STR_RECTYP_TOUR
+       ^
+./ma_stat.cc:3569:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3571:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and ean.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3572:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and ean.typ="STR_EANTYP_LE2
+      ^
+./ma_stat.cc:3574:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mae.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3580:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3582:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and mae.maetyp="STR_MAETYP_PK
+      ^
+./ma_stat.cc:3585:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  maetyp="STR_MAETYP_PK" and"
+      ^
+./ma_stat.cc:3586:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  typ="STR_EANTYP_LE2")"
+      ^
+./ma_stat.cc:3612:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3614:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+      ^
+./ma_stat.cc:3614:38: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT")"
+                                      ^
+./ma_stat.cc:3617:8: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+ */     " and mae.maetyp<>"STR_MAETYP_PK
+        ^
+./ma_stat.cc:3623:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and map.postyp="STR_ARTTYP_STD
+      ^
+./ma_stat.cc:3625:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (mae.maetyp="STR_MAETYP_GP" or mae.maetyp="STR_MAETYP_TT")"
+      ^
+./ma_stat.cc:3625:38: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      " and (mae.maetyp="STR_MAETYP_GP" or mae.maetyp="STR_MAETYP_TT")"
+                                      ^
+./ma_stat.cc:3628:6: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT"))"
+      ^
+./ma_stat.cc:3628:39: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+      "  and (ean.maetyp="STR_MAETYP_GP" or ean.maetyp="STR_MAETYP_TT"))"
+                                       ^
+./ma_stat.cc:3658:7: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+       " and rectyp="STR_RECTYP_MAK
+       ^
+./ma_stat.cc:3896:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     ok = TExecSql(tid,"update mak set status="STR_MASTAT_FERTIG" where id=:a",
+                       ^
+./ma_stat.cc:3901:23: warning: invalid suffix on literal; C++11 requires a space between literal and string macro [-Wliteral-suffix]
+     ok = TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
+                       ^
+./ma_stat.cc: In function ‘int _insert_mam(const string&, void*, const void*, int, const char*)’:
+./ma_stat.cc:1066:7: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+       if (user)
+       ^~
+./ma_stat.cc:1068:8: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+        rv = TExecStdSql(tid,StdNinsert,TN_MAM,&mam);
+        ^~
+./ma_stat.cc: In function ‘int TDB_SetMaStatus(const string&, void*, char*, void*, int, int, const char*, std::__cxx11::string*)’:
+./ma_stat.cc:3132:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+     if (usr)
+     ^~
+./ma_stat.cc:3135:6: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+      if (mak->makStatus==MASTAT_FERTIG&&mak->makBwArt!=BWART_AKU&&
+      ^~
+./ma_stat.cc:2728:4: warning: this statement may fall through [-Wimplicit-fallthrough=]
+    if (mak->makStatus<=MASTAT_NEU) {
+    ^~
+./ma_stat.cc:2807:3: note: here
+   case  MASTAT_NEUF:
+   ^~~~
+./ma_stat.cc:2412:25: warning: ‘__builtin___sprintf_chk’ may write a terminating nul past the end of the destination [-Wformat-overflow=]
+    sprintf(current_tour,"%s%c",akttour,'_');
+                         ^~~~~~
+In file included from /usr/include/stdio.h:867,
+                 from /tools/dist/unstable/toolsbox-2020/usr/include/base/bunicode.h:43,
+                 from /tools/dist/unstable/toolsbox-2020/usr/include/base/buser.h:18,
+                 from ./bgstd.h:12,
+                 from ./ma_stat.cc:6:
+/usr/include/bits/stdio2.h:36:34: note: ‘__builtin___sprintf_chk’ output between 2 and 16 bytes into a destination of size 15
+   return __builtin___sprintf_chk (__s, __USE_FORTIFY_LEVEL - 1,
+          ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       __bos (__s), __fmt, __va_arg_pack ());
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Loading ../Linux/lib/libshared.a ...
+r - Linux/ma_stat.o
