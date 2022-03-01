@@ -16,7 +16,7 @@ AC_DEFUN([CXX_FLAGS_CHECK],
 ])
 
 
-AC_INIT(replace, 0.33)
+AC_INIT(replace, 0.34)
 AM_INIT_AUTOMAKE([subdir-objects -Wall])
 AC_PROG_CC
 AC_CONFIG_FILES([
