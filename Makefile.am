@@ -53,7 +53,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \
 	-I$(top_srcdir)/cpputils/cpputilsshared/cpputilsformat \
 	-DNOWAMAS \
-	-std=c++11
+	-std=c++11 \
+	-D_XOPEN_SOURCE=700 # for cyggwin fileno()
 
 noinst_LIBRARIES=tools/libtools.a \
 	cpputils/cpputilsshared/libcpputilsshared.a \
@@ -105,3 +106,4 @@ cpputils_cpputilsshared_cpputilsformat_libcpputilsformat_a_SOURCES= \
 	cpputils/cpputilsshared/cpputilsformat/cwformat.cc
 
 replace_LDADD = tools/libtools.a cpputils/cpputilsshared/libcpputilsshared.a cpputils/cpputilsshared/cpputilsformat/libcpputilsformat.a
+

@@ -29,4 +29,7 @@ AC_LANG(C++)
 AC_PROG_INSTALL
 CXX_FLAGS_CHECK([-std=c++11])
 
+AC_SEARCH_LIBS( [libiconv_open], 'iconv' ) # for cygwin
+		
+
 AC_OUTPUT
