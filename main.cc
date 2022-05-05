@@ -457,7 +457,8 @@ int main( int argc, char **argv )
       oc_convnull.setContinueOnMatch(true);
 
       Arg::FlagOption o_convnull("convnull");
-      o_convnull.setDescription(co.bad("fix ArrCreate/ArrSort calls with NULL as last parameter (-Wconversion-null warning) in .c and .cc files"));
+      o_convnull.setDescription(co.good("fix ArrCreate/ArrSort/EfcbmInstByName "
+        "calls with NULL as last parameter (-Wconversion-null warning) in .c and .cc files"));
       o_convnull.setRequired(true);
       oc_convnull.addOptionR(&o_convnull);
 
@@ -752,8 +753,9 @@ int main( int argc, char **argv )
   }
 
   if (o_convnull.getState() ) {
-	  handlers.push_back ( new FixConversionNull() );
-	  handlers.push_back ( new FixConversionNull( L"ArrSort", 3) );
+    handlers.push_back ( new FixConversionNull() );
+    handlers.push_back ( new FixConversionNull( L"ArrSort", 3) );
+    handlers.push_back ( new FixConversionNull( L"EfcbmInstByName", 5) );
   }
 
   if( o_add_mlm.getState() ) {
