@@ -305,11 +305,11 @@ static int local_li_art (OWidget hParent, char *pcMtitle,
 	it_Colli[0].elBody.elaOffset = getFieldOffset (NULL,TN_ART, "Mngs");
 	it_Colli[1].elBody.elaOffset = getFieldOffset (NULL,TN_ART, "Mngs");
 
-	if ( VaMultipleMalloc( sizeof(ListTdialog),    &phListDialog, 
-                            sizeof(ListTXdialog),   &phListXDialog, 
-                            sizeof(ListTaction),    &phListAction, 
-                            sizeof(shSelector),     &phSelector, 
-                            iObjSize,               &phLiArt, 
+	if ( VaMultipleMalloc( (int)sizeof(ListTdialog),    (void**)&phListDialog, 
+                            (int)sizeof(ListTXdialog),   &phListXDialog, 
+                            (int)sizeof(ListTaction),    &phListAction, 
+                            (int)sizeof(shSelector),     &phSelector, 
+                            (int)iObjSize,               &phLiArt, 
                             (int)(-1)) == (void*)NULL )
 		return -1;
 

@@ -18,6 +18,9 @@ echo === test_restoreshell ===
 echo === test_vamultiplemalloc ===
 ./test_vamultiplemalloc.sh
 
+echo === test_vamultiplemalloc2015 ===
+./test_vamultiplemalloc2015.sh
+
 echo === test_genericpointer ===
 ./test_genericpointer.sh
 
