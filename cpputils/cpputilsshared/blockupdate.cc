@@ -90,14 +90,15 @@ extern "C" {
          1 ... OK
 -*--------------------------------------------------------------------------*/
 int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
-					  const char *pcTableName, void *pvData, long lEle) 
+					  const char *pcTableName, void *pvData, size_t nEle)
 {       
-  int  nI = 0;
-  int iDbRv, iDbRv2 = 0, iStructSize;
+
+  int  iDbRv2 = 0, iStructSize;
+  size_t nAnz = 0, nI = 0;
 #if (defined TOOLS_VERSION && TOOLS_VERSION < 37)
-  const int MAX_BLOCKSIZE=5000;	
+  const size_t MAX_BLOCKSIZE=5000;
 #else 
-  const int MAX_BLOCKSIZE=SqlModuleGetMaxBlockSize(
+  const size_t MAX_BLOCKSIZE=SqlModuleGetMaxBlockSize(
 							SqlIfGetModule(DbSqlNameGetSqlIf (NULL)));
 #endif
 
@@ -113,7 +114,7 @@ int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
 	return -1;
   }
   
-  if (lEle < 1 || pvData == NULL || pcTableName == NULL) {
+  if (nEle < 1 || pvData == NULL || pcTableName == NULL) {
 	LogPrintf(pcFac, LT_ALERT, "BlockTExecStdSqlX: ERROR wrong data!!!");
 	return -1;
   }
@@ -128,14 +129,14 @@ int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
   
   do {
 	
-	if ((lEle - nI) > MAX_BLOCKSIZE) {
-	  iDbRv = MAX_BLOCKSIZE;
+	if ((nEle - nI) > MAX_BLOCKSIZE) {
+		nAnz = MAX_BLOCKSIZE;
 	} else {
-	  iDbRv = lEle - nI;
+		nAnz = nEle - nI;
 	}
 	
 	/* --- 10000, 15000, 20000, ... --- */
-	if (iDbRv <= 0) {
+	if (nAnz <= 0) {
 	  break;
 	}
 	
@@ -146,30 +147,34 @@ int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
 	
 	iDbRv2 = TExecStdSqlX(pvTid, NULL, iReason, (char*)pcTableName,
 						  pvData,
-						  iDbRv,
+						  (unsigned int)nAnz,
 						  NULL,
 						  NULL);
 	
-	if (iDbRv != iDbRv2) {
+	if ((int)nAnz != iDbRv2) {
 	  LogPrintf(pcFac, LT_ALERT,
-				"BlockTExecStdSqlX: Error ins/upd/del %s. "
-				"[iDbRv=%d <> iDbRv2=%d] [SqlErrTxt:%s] ",
-				pcTableName, iDbRv, iDbRv2, TSqlErrTxt (pvTid));
+			"BlockTExecStdSqlX: Error ins/upd/del %s. "
+			"[nAnz=%u <> iDbRv2=%d] [SqlErrTxt:%s] ",
+			pcTableName,
+			(unsigned int)nAnz,
+			iDbRv2,
+			TSqlErrTxt (pvTid));
 	  return (-1);
 	}
 	
 	LogPrintf (pcFac, LT_ALERT,
-			   "BlockTExecStdSqlX: %d %s ins/upd/del",
-			   iDbRv, pcTableName);
+			   "BlockTExecStdSqlX: %u %s ins/upd/del",
+			   (unsigned int)nAnz,
+			   pcTableName);
 	
 	/* --- 5000 --- */
-	if (lEle == MAX_BLOCKSIZE) {
+	if (nEle == MAX_BLOCKSIZE) {
 	  break;
 	}
 	
 	nI += MAX_BLOCKSIZE;
 	
-  } while (iDbRv2 == MAX_BLOCKSIZE);
+  } while (iDbRv2 == (int)MAX_BLOCKSIZE);
   
   return (1);
 }

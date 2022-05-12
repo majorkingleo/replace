@@ -56,7 +56,7 @@ extern "C" {
 #endif
 
 int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
-					  const char *pcTableName, void *pvData, long lEle);
+					  const char *pcTableName, void *pvData, size_t nEle);
 
 #if (defined TOOLS_VERSION && TOOLS_VERSION <= 33)
 int getStructSize(char *pcTable);

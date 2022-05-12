@@ -264,22 +264,30 @@ template <class T> std::string IterableToFormattedString (
 
 		if (!res.empty()) {
 			res += eleSep;
-			if (cnt % lineEle == 0) {
-				res += lineSep;
+			if( lineEle != static_cast<unsigned int>(-1) )  {
+				if (cnt % lineEle == 0) {
+					res += lineSep;
+				}
 			}
 		}
 		res += x2s(*it);
 		cnt++;
 
-		if (cnt >= maxEle) {
-			res += strFurtherEle;
-			break;
+		if( maxEle != static_cast<unsigned int>(-1) ) {
+			if (cnt >= maxEle) {
+				res += strFurtherEle;
+				break;
+			}
 		}
 
 	}
 	return res;
 }
 
+template <class T> std::string IterableToCommaSeparatedString( const T & list, 
+															 const std::string &eleSep = ", " ) {
+	return IterableToFormattedString<T>( list, eleSep, "", static_cast<unsigned int>(-1), static_cast<unsigned int>(-1), "" );
+}															 
 
 
 std::string fill_leading( std::string s, const std::string fill_sign, unsigned int len );
