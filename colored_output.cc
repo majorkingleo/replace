@@ -17,20 +17,16 @@ ColoredOutput::ColoredOutput()
 {
 	char *pcTerm =  getenv( "TERM");
 
-	if( pcTerm == NULL || !isatty(fileno(stdout)) )
-	{
+	if( pcTerm == NULL || !isatty(fileno(stdout)) ) {
 		colored_output = false;
-	}
-	else
-	{
-		// std::cout << "TERM: " << pcTerm << std::endl;
 	}
 }
 
 std::string ColoredOutput::color_output( Color color, const std::string & text ) const
 {
-	if( !colored_output )
+	if( !colored_output ) {
 		return text;
+	}
 
 	std::stringstream str;
 
@@ -52,6 +48,9 @@ std::string ColoredOutput::color_output( Color color, const std::string & text )
 	case BRIGHT_MAGENTA:     str << "\033[1;35m"; break;
 	case BRIGHT_CYAN:        str << "\033[1;36m"; break;
 	case BRIGHT_WHITE:		 str << "\033[1;37m"; break;
+
+	default:
+		return text;
 	}
 
 	str << text;

@@ -5,55 +5,34 @@
 #include <unistd.h>
 #include <DetectLocale.h>
 
-OutDebug::OutDebug()
+OutDebug::OutDebug(  ColoredOutput::Color color_ )
 : Debug(),
-  colored_output(true)
+  ColoredOutput(),
+  color( color_ ),
+  prefix(),
+  print_line_and_file_info( true )
 {
-	char *pcTerm =  getenv( "TERM");
 
-	if( pcTerm == NULL || !isatty(fileno(stdout)))
-	{
-		colored_output = false;
-	}
 }
 
 
 void OutDebug::add( const char *file, unsigned line, const char *function, const std::string & s )
 {
-	if( colored_output )
-	{
-		std::cout << "\033[1;33m";
+	if( print_line_and_file_info ) {
+		std::cout << color_output( color, file );
+		std::cout << ':' << line
+				  << " ";
 	}
 
-	std::cout << file;
-
-	if( colored_output )
-	{
-		std::cout << "\033[0m";
+	if( !prefix.empty() ) {
+		 std::cout << color_output( color, DetectLocale::w2out(prefix) );
+		 std::cout << " ";
 	}
 
-	std::cout << ':' << line
-			<< " " // << function
-			<< s
-			<< '\n';
+	std::cout << s << '\n';
 }
 
 void OutDebug::add( const char *file, unsigned line, const char *function, const std::wstring & s )
 {
-	if( colored_output )
-	{
-		std::cout << "\033[1;33m";
-	}
-
-	std::cout << file;
-
-	if( colored_output )
-	{
-		std::cout << "\033[0m";
-	}
-
-	std::cout << ':' << line
-			<< " " // << function
-			<< DetectLocale::w2out(s)
-			<< '\n';
+	add( file, line, function,  DetectLocale::w2out(s) );
 }
