@@ -30,6 +30,6 @@ AC_PROG_INSTALL
 CXX_FLAGS_CHECK([-std=c++11])
 
 AC_SEARCH_LIBS( [libiconv_open], 'iconv' ) # for cygwin
-		
+AC_SEARCH_LIBS( [regexecA], 'boost_regex' )
 
 AC_OUTPUT
