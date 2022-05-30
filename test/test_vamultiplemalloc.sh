@@ -19,8 +19,8 @@ for i in vamultiplemalloc/* ; do
 	rm -rf work
 	mkdir work
 	cp -f $FILE work	
-	../replace work -vamulmalloc -doit 2>&1 > /dev/null
-	res=`diff work/${FILENAME} ${FILE}.erg`
+	../replace work -doit -vamulmalloc 2>&1 > /dev/null
+	res=`diff -u work/${FILENAME} ${FILE}.erg`
 	
      if ! test -z "$res" ; then
             echo "DIFFER in $i:"

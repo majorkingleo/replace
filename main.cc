@@ -313,6 +313,17 @@ int main( int argc, char **argv )
      o_assign.setRequired(true);
      oc_assign.addOptionR(&o_assign);
 
+     Arg::OptionChain oc_correct_va_multiple_malloc_2015;
+     arg.addChainR(&oc_correct_va_multiple_malloc_2015);
+     oc_correct_va_multiple_malloc_2015.setMinMatch(1);
+     oc_correct_va_multiple_malloc_2015.setContinueOnFail(true);
+     oc_correct_va_multiple_malloc_2015.setContinueOnMatch(true);
+
+     Arg::FlagOption o_correct_va_multiple_malloc_2015("vamulmalloc2015");
+     o_correct_va_multiple_malloc_2015.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings (pre-TB2020 syntax)"));
+     o_correct_va_multiple_malloc_2015.setRequired(true);
+     oc_correct_va_multiple_malloc_2015.addOptionR(&o_correct_va_multiple_malloc_2015);
+
      Arg::OptionChain oc_correct_va_multiple_malloc;
      arg.addChainR(&oc_correct_va_multiple_malloc);
      oc_correct_va_multiple_malloc.setMinMatch(1);
@@ -320,7 +331,7 @@ int main( int argc, char **argv )
      oc_correct_va_multiple_malloc.setContinueOnMatch(true);
 
      Arg::FlagOption o_correct_va_multiple_malloc("vamulmalloc");
-     o_correct_va_multiple_malloc.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings"));
+     o_correct_va_multiple_malloc.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings (TB2020 syntax)"));
      o_correct_va_multiple_malloc.setRequired(true);
      oc_correct_va_multiple_malloc.addOptionR(&o_correct_va_multiple_malloc);
 
@@ -590,6 +601,7 @@ int main( int argc, char **argv )
 	  !o_primanlist.isSet() &&
 	  !o_mlm.isSet() &&
 	  !o_restoreshell.isSet() &&
+	  !o_correct_va_multiple_malloc_2015.isSet() &&
 	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_remove_generic_cast.isSet() &&
 	  !o_addcast.isSet() &&
@@ -723,8 +735,12 @@ int main( int argc, char **argv )
   }
 
 
+  if( o_correct_va_multiple_malloc_2015.getState() ) {
+	  handlers.push_back( new CorrectVaMultipleMalloc( false) );
+  }
+
   if( o_correct_va_multiple_malloc.getState() ) {
-	  handlers.push_back( new CorrectVaMultipleMalloc() );
+	  handlers.push_back( new CorrectVaMultipleMalloc( true ) );
   }
 
   if( o_remove_generic_cast.getState() ) {

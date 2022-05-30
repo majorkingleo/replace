@@ -16,8 +16,10 @@ class CorrectVaMultipleMalloc : public HandleFile
 	static const std::wstring KEY_WORD;
 	static const std::wstring VA_MALLOC;
 
+	bool isTB2020;
+
 public:
-	CorrectVaMultipleMalloc();
+	CorrectVaMultipleMalloc( bool isTB2020_ = true);
 
 
 	std::wstring patch_file( const std::wstring & file ) override;
