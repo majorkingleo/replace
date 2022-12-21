@@ -14,7 +14,22 @@ struct EnumFile {
       RC_FILE,
       PDL_FILE,
       PDS_FILE,
+	  PDR_FILE,
+	  CFG_FILE,
+	  PMM_FILE,
+	  PRC_FILE,
       PL_FILE,
+	  ML_FILE,
+	  SQL_FILE,
+	  JAVA_FILE,
+	  WSDD_FILE,
+	  PY_FILE,
+	  HTML_FILE,
+	  SAP2WAMAS_FILE,
+	  JSP_FILE,
+	  LLR_FILE,
+	  TSSIZE_FILE,
+	  CMD_FILE,
       LAST__
     };
 };

@@ -1,0 +1,368 @@
+##########################################################################
+#
+#  VERSID:    "%Z% @(#)$Header: /cvsrootb/SPAR-AT/WAMAS-M/wmllr/src/menurc/me_findkompos.rc,v 1.7 2015/07/02 11:22:11 ahostni Exp $";
+#  PACKAGE:   WAMAS-M
+#  FILENAME:  me_findkompos.rc  
+#  CONTENTS: 
+#  PURPOSE:
+#  NOTES:
+#  COPYRIGHT NOTICE:
+#          (c) Copyright 2002 by
+#                  Salomon Automationstechnik Ges.m.b.H
+#                  Friesachstrasse 15
+#                  A-8114 Friesach bei Graz
+#                  Tel.: ++43 3127 200-0
+#                  Fax.: ++43 3127 200-22
+#  REVISION HISTORY:
+#  $Log: me_findkompos.rc,v $
+#  Revision 1.7  2015/07/02 11:22:11  ahostni
+#  Erweiterung Mandantentrennung
+#
+#  Revision 1.6  2006/10/18 13:22:19  mmovia
+#  delete LB_AUTO
+#
+#  Revision 1.5  2006/10/11 12:34:32  mmovia
+#  Updated spreadsheets to Owil 5
+#
+#  Revision 1.4  2004/04/30 12:01:09  mmovia
+#  *** empty log message ***
+#
+#  Revision 1.3  2003/08/21 17:11:48  apichler
+#  bugfix LAZ.LazBez ->LAZK.LazBez
+#
+#  Revision 1.2  2003/06/05 11:29:48  mmovia
+#  *** empty log message ***
+#
+#  Revision 1.5  2003/02/26 10:41:49  wamas
+#  SucheNach added.
+#
+#  Revision 1.4  2002/09/02 11:46:08  ulli
+#  delete DfPignoreReason
+#
+#  Revision 1.3  2002/06/25 18:28:19  wamas
+#  change order fields
+#
+#  Revision 1.2  2002/05/23 09:34:02  ulli
+#  add DfPignoreReason
+#
+#  Revision 1.1.1.1  2002/04/07 15:31:16  mmovia
+#  Spar-Version
+#
+##########################################################################
+
+MSKRADIOLABEL SucheNach_sr [
+	Label = "Suche nach"
+    MSKBUTTON [
+	  Label = "Feldsperrgrund KOMPOS"
+	  Value = 0
+    ]
+    MSKBUTTON [
+	  Label = "Feldattribut Kommissionierort"
+	  Value = 1
+    ]
+]
+
+MSKRADIOLABEL LockPos_sr [
+    MSKBUTTON [
+      Label = "Nur freie Felder anzeigen"
+      Value = 0
+    ]
+    MSKBUTTON [
+      Label = "Auch gesperrte Felder anzeigen"
+      Value = 1
+    ]
+]
+
+
+OWSSCDTABLE SS_FINDKOMPOS [
+  OWSSCDCOL Position [
+    Label="Position"
+    Width=16
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=findkompos_Pos
+    ]
+  ]
+  OWSSCDCOL FetId [
+    Label="Feldtype"
+    Width=8
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=findkompos_fesFetId
+    ]
+  ]
+  OWSSCDCOL LpTyp [
+    Label="LpTyp"
+    Width=8
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_char|ODT_FLAG_PTR
+      VOffset=findkompos_ftsLpTyp
+      Transformer=CbX_lo2str_s_ftsLpType
+    ]
+  ]
+  OWSSCDCOL GangNr [
+    Label="GangNr"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long
+      VOffset=findkompos_fesGangNr
+    ]
+  ]
+  OWSSCDCOL Regal [
+    Label="Regal"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long
+      VOffset=findkompos_fesRegal
+    ]
+  ]
+  OWSSCDCOL Spalte [
+    Label="Spalte"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long
+      VOffset=findkompos_fesSpalte
+    ]
+  ]
+  OWSSCDCOL Ebene [
+    Label="Ebene"
+    Width=5
+    Flags=SSCD_FLAG_NONE
+    OWSSCDDATA Data [
+      ODT=ODT_long
+      VOffset=findkompos_fesEbene
+    ]
+  ]
+]
+
+MSKSPREADSHEET SpSFindKompos [
+  HScroll=AP_SCROLLBAR_RIGHT
+  VScroll=AP_SCROLLBAR_BOTTOM
+  Callback=OwCallbackHandler
+  MSKATOM [
+    OwCallback1=OwCbSpreadsheetLb
+    OwCallbackLayout=CbDbLayout
+    OwSsLayout=SS_FINDKOMPOS
+    LB_ActionCallback=CbLbFindKompos
+    LB_ElementSize=findkompos_sizeofLbEntry
+    LB_Policy=POLICY_SINGLESELECT
+    LB_Display=10
+    LB_Width=60
+    LB_SelectColor=Inverse
+  ]
+]
+
+
+MSKDIALOG ME_FINDKOMPOS [
+  Unique = 1
+  ShellRealize = 1
+  KeepPos = 0
+  KeepSize = 0
+  SuOnly = 0
+  NoTopPlate = 1
+  Title = "Kommissionierplatz suche"
+  MSKATOM [
+    Version = "$Header: /cvsrootb/SPAR-AT/WAMAS-M/wmllr/src/menurc/me_findkompos.rc,v 1.7 2015/07/02 11:22:11 ahostni Exp $"
+  ]
+  
+  MSKDESCR GrpVert [
+    MSKDESCR GrpFrame [
+      MSKDESCR Marker-1 []
+      MSKDESCR GrpHoriz [
+        MSKDESCR Label_Artikel_l []
+        
+        MSKDESCR Marker-1 []
+        MSKDESCR ART_AId_Mand_t [
+          Attr = EF_ATTR_INACTIVE+EF_ATTR_NOLABEL
+          MSKATOM [
+            DfPattr1 = "ART_Tet_t,0,0"
+            DfPselValue1 = "ART.ArtBez,ART_ArtBez_t,0,ART,art.AId_Mand"
+            DfPselValue2 = "ART.Tet_TetId,ART_Tet_t,0,ART,art.AId_Mand"
+            DfPjoinedEf1 = "ART_ArtBez_t,0,ART.AId_ArtNr,ART_AId_ArtNr_t,0"
+            DfPjoinedEf2 = "ART_Tet_t,0,ART.AId_ArtNr,ART_AId_ArtNr_t,0"
+            DfPjoinedEf3 = "ART_ArtBez_t,0,ART.AId_Var,ART_AId_Var_t,0"
+            DfPjoinedEf4 = "ART_Tet_t,0,ART.AId_Var,ART_AId_Var_t,0"
+            OpmEfDbName = "MST.Mand"
+            OpmPorderBy1 = "MST.Mand"
+            OpmTable = "MST"
+            OwCallback1 = CbSqlDf
+            OwCallback2 = CbSqlOm
+          ]
+        ]
+        MSKDESCR ART_AId_ArtNr_t [
+          Attr = EF_ATTR_INACTIVE+EF_ATTR_NOLABEL
+          MSKATOM [
+            DfPattr1 = "ART_Tet_t,0,0"
+            DfPselValue1 = "ART.ArtBez,ART_ArtBez_t,0,ART,art.AId_ArtNr"
+            DfPselValue2 = "ART.Tet_TetId,ART_Tet_t,0,ART,art.AId_ArtNr"
+            DfPjoinedEf1 = "ART_ArtBez_t,0,ART.AId_Var,ART_AId_Var_t,0"
+            DfPjoinedEf2 = "ART_Tet_t,0,ART.AId_Var,ART_AId_Var_t,0"
+            DfPjoinedEf3 = "ART_ArtBez_t,0,ART.AId_Mand,ART_AId_Mand_t,0"
+            DfPjoinedEf4 = "ART_Tet_t,0,ART.AId_Mand,ART_AId_Mand_t,0"
+            OpmEfDbName = "ART.AId_ArtNr"
+            OpmPorderBy1 = "ART.AId_ArtNr"
+            OpmPjoinedEditFieldX1 = "AId_Mand,ART_AId_Mand_t,0"
+            OpmTable = "ART"
+            OwCallback1 = CbSqlDf
+            OwCallback2 = CbSqlOm
+          ]
+        ]
+        MSKDESCR ART_AId_Var_t [
+          Attr = EF_ATTR_INACTIVE+EF_ATTR_NOLABEL
+          MSKATOM [
+            DfPattr1 = "ART_Tet_t,0,0"
+            DfPselValue1 = "ART.ArtBez,ART_ArtBez_t,0,ART,art.AId_Var"
+            DfPselValue2 = "ART.Tet_TetId,ART_Tet_t,0,ART,art.AId_Var"
+            DfPjoinedEf1 = "ART_ArtBez_t,0,ART.AId_ArtNr,ART_AId_ArtNr_t,0"
+            DfPjoinedEf2 = "ART_Tet_t,0,ART.AId_ArtNr,ART_AId_ArtNr_t,0"
+            DfPjoinedEf3 = "ART_ArtBez_t,0,ART.AId_Mand,ART_AId_Mand_t,0"
+            DfPjoinedEf4 = "ART_Tet_t,0,ART.AId_Mand,ART_AId_Mand_t,0"
+            OpmEfDbName = "ART.AId_Var"
+            OpmPorderBy1 = "ART.AId_Var"
+            OpmPjoinedEditFieldX1 = "AId_Mand,ART_AId_Mand_t,0"
+            OpmPjoinedEditFieldX2 = "AId_ArtNr,ART_AId_ArtNr_t,0"
+            OpmTable = "ART"
+            OwCallback1 = CbSqlDf
+            OwCallback2 = CbSqlOm
+          ]
+        ]
+      ]
+      MSKDESCR GrpHoriz [
+        MSKDESCR ART_ArtBez_t [
+          Attr = EF_ATTR_INACTIVE+EF_ATTR_NOLABEL
+        ]
+        MSKDESCR Filler []
+        MSKDESCR ART_Tet_t [
+          MSKATOM [
+            OpmEfDbName = "TTS.Tet_TetId"
+            OpmPorderBy1 = "TTS.Tet_TetId"
+            OpmTable = "TTS"
+            OpmPcheck = 1
+            OwCallback1 = CbSqlOm
+          ]
+        ]
+      ]
+    ]
+    MSKDESCR GrpFrameFilter [
+      MSKDESCR Marker-1 []
+	  MSKDESCR FES_Mand_t [
+	    MSKATOM [
+		  OpmEfDbName = "FES.Mand"
+          OpmPorderBy1 = "FES.Mand"
+          OpmTable = "FES"
+		  OwCallback1 = CbSqlOm
+		  OwCallback2 = CbExtendedClient
+		]
+	  ]
+      MSKDESCR FES_LagId_t [
+        MSKATOM [
+          OpmPoptionArg1="LAS.LagBez, 20"
+          OpmEfDbName  = "LAS.LagId"
+          OpmPorderBy1 = "LAS.LagId"
+          OpmTable     = "LAS"
+          OwCallback1  = CbSqlOm
+        ]
+      ]
+      MSKDESCR FES_LazNrKom_t [
+        MSKATOM [
+          OpmPoptionArg1="LAZK.LazBez, 20"
+          OpmEfDbName = "LAZK.LazId_LazNr"
+          OpmPsqlFilterPart1 = "LAZK.LazId_LazTyp = 'KOM'"
+          OpmPorderBy1 = "LAZK.LazId_LazNr"
+          OpmTable = "LAZK"
+          OwCallback1 = CbSqlOm
+        ]
+      ]
+      MSKDESCR FES_Fet_t [
+        MSKATOM [
+          OpmEfDbName = "FTS.Fet_FetId"
+          OpmPorderBy1 = "FTS.Fet_FetId"
+          OpmTable = "FTS"
+          OwCallback1 = CbSqlOm
+        ]
+      ]
+      MSKDESCR GrpHoriz [
+        MSKDESCR FTS_LpTyp_sh_sc []
+      ]
+      
+      MSKDESCR SepHoriz []
+      
+      MSKDESCR GrpVert [
+        MSKDESCR GrpHoriz [
+          MSKDESCR FES_GangNr_t []
+          MSKDESCR FES_GangNr_t [
+            Key = 1
+            Attr = EF_ATTR_NOLABEL
+          ]
+        ]
+        MSKDESCR GrpHoriz [
+          MSKDESCR FES_Regal_t []
+          MSKDESCR FES_Regal_t [
+            Key = 1
+            Attr = EF_ATTR_NOLABEL
+          ]
+        ]
+        MSKDESCR GrpHoriz [
+          MSKDESCR FES_Spalte_t []
+          MSKDESCR FES_Spalte_t [
+            Key = 1
+            Attr = EF_ATTR_NOLABEL
+          ]
+        ]
+        MSKDESCR GrpHoriz [
+          MSKDESCR FES_Ebene_t []
+          MSKDESCR FES_Ebene_t [
+            Key = 1
+            Attr = EF_ATTR_NOLABEL
+          ]
+        ]
+      ]
+      
+      MSKDESCR SepHoriz []
+	  MSKDESCR GrpHoriz [
+	  	MSKDESCR LockPos_sr []
+	  ]
+	  MSKDESCR GrpHoriz [ 
+	  MSKDESCR SucheNach_sr []
+      MSKDESCR GrpHorizRight [
+        MSKDESCR Read_F [
+          IsDefault = TRUE
+        ]
+      ]
+	]	
+    ]
+    
+    MSKDESCR Filler []
+    
+    MSKDESCR GrpFrame [
+      MSKDESCR SpSFindKompos []
+      MSKDESCR GrpHorizRight [
+        MSKDESCR CntField_t [
+          Attr = EF_ATTR_INACTIVE
+        ]
+      ]
+    ]
+  ]
+  
+  MSKDESCR Filler []
+  
+  MSKDESCR SepHoriz []
+  
+  MSKDESCR GrpHoriz [
+    MSKDESCR GrpHorizRight [
+      MSKDESCR GrpRow [
+        MSKDESCR ClrFld_F []
+        MSKDESCR Ok_F []
+        MSKDESCR Close_F [
+          IsCancel = TRUE
+        ]
+      ]
+    ]
+  ]
+]

@@ -1,0 +1,103 @@
+/*****************************************************************************
+ *  PRJOECT:  WAMAST40
+ *  PACKAGE:  com.wamas.wamast.jts.commands
+ *  FILE:     CommandFactory.java
+ *  CONTENTS: command class factory
+ *  COPYRIGHT NOTICE:
+ *         (c) Copyright 2006 by
+ *                 Salomon Automationstechnik Ges.m.b.H
+ *                 Friesachstrasse 15
+ *                 A-8114 Friesach bei Graz
+ *                 Tel.: ++43 3127 200-0
+ *                 Fax.: ++43 3127 200-22
+ * REVISION HISTORY:
+ *  01-Dec-2006 09:18:39 Created by Rastislav Krist
+ *	$Log: CommandFactory.java,v $
+ *	Revision 1.2  2009/10/28 12:56:20  tpichle
+ *	Refactoring of generating and storing reports
+ *	stdfix#:sasrvb_20091028134002_23385
+ *	
+ *	Revision 1.1  2008/04/30 11:52:16  wamas
+ *	init
+ *	
+ *	Revision 1.8  2007/10/31 15:00:38  tpichle
+ *	included new command TourRepGenCmd
+ *	
+ *	Revision 1.7  2007/09/25 13:11:15  tpichle
+ *	added InterfaceCmd
+ *	
+ *	Revision 1.6  2007/05/31 14:55:11  tgergel
+ *	extend with ProtocolCleanerCmd
+ *	
+ *	Revision 1.5  2007/03/21 16:37:42  tgergel
+ *	add new command: TourProcessCmd
+ *	
+ *	Revision 1.4  2007/03/19 11:59:32  tgergel
+ *	new commands implemented
+ *	
+ *	Revision 1.3  2007/02/07 08:48:00  tgergel
+ *	implement new commands
+ *	
+ *	Revision 1.2  2006/12/05 18:18:16  tgergel
+ *	implement new command type for process controller
+ *	
+ *	Revision 1.1  2006/12/01 09:19:43  rkrist
+ *	created & added into cvs
+ *	
+ *	
+ *****************************************************************************/
+
+package com.wamas.wamast.jts.commands;
+
+import java.util.Scanner;
+
+/**
+ * @author rkrist
+ * 
+ */
+public final class CommandFactory
+{
+	/**
+	 * create a command instance from the first token of the command line
+	 * 
+	 * @param sCommandLine
+	 *            command line to parse
+	 * @return valid command instance
+	 * @throws Exception
+	 *             if the command is not recognized
+	 */
+	public static AbstractCommand CreateCommand ( String sCommandLine )
+		throws Exception
+	{
+		String sCommand = "??";
+		Scanner oScanner = new Scanner ( sCommandLine );
+
+		try
+		{
+			sCommand = oScanner.next ( "\\S+" );
+
+			if ( QuitAppCommand.isCommand ( sCommand ) )
+				return new QuitAppCommand ();
+			if ( XmlDataCmd.isCommand ( sCommand ) )
+				return new XmlDataCmd ();
+			if ( HelpCommand.isCommand ( sCommand ) )
+				return new HelpCommand ();
+			if ( ProcInfoCmd.isCommand ( sCommand ) )
+				return new ProcInfoCmd ();
+			if ( ShutdownCmd.isCommand ( sCommand ) )
+				return new ShutdownCmd ();
+			if ( TourProcessCmd.isCommand ( sCommand ) )
+				return new TourProcessCmd ();
+			if ( ProtocolCleanerCmd.isCommand ( sCommand ) )
+				return new ProtocolCleanerCmd ();
+			if ( TourRepGenCmd.isCommand ( sCommand ) )
+				return new TourRepGenCmd ();
+		}
+		catch ( Exception eExc )
+		{
+			throw new Exception ( "ERROR: " + eExc.getMessage () );
+		}
+
+		throw new Exception ( "invalid/unknown command: \"" + sCommand + "\"" );
+	}
+}

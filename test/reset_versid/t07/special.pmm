@@ -1,0 +1,918 @@
+#$Header: /cvsrootb/SPAR-AT/WAMAS-M/wmllr/src/interface/src/special.pmm,v 1.1.1.1 2003/02/07 12:01:58 mmovia Exp $
+#$Locker:  $
+#$Log: special.pmm,v $
+#Revision 1.1.1.1  2003/02/07 12:01:58  mmovia
+#New Version for SPAR AUSTRIA
+#
+#Revision 1.1.1.1  2002/04/07 15:28:33  mmovia
+#Spar-Version
+#
+#Revision 1.2  2001/10/15 12:41:12  abo
+#filenames with prefix can be created
+#
+#Revision 40.17  2001/10/01 14:47:20  haubi
+#ESQL_DATABASE added, bugfix at multifiles (PDL)
+#
+#Revision 40.16  2001/09/27 14:02:17  haubi
+#PDLDEFS-macro added to PDL-commandline
+#
+#Revision 40.15  2001/09/26 06:35:47  haubi
+#better handling of vshm.xh and lock/multi.lck
+#
+#Revision 40.14  2001/09/24 06:52:57  haubi
+#mark dbcfg/shared/xx.h to include owil's base/buser.h
+#
+#Revision 40.13  2001/09/06 09:48:24  haubi
+#bugfix with LOCKFILES and multi.lck: macro ALLLOCKFILES added
+#
+#Revision 40.12  2001/08/22 12:07:55  haubi
+#on ReliantUNIX: prewmp-libs must not be linked twice,
+#dbshare/dbterm/shared-libs too
+#
+#Revision 40.11  2001/08/21 09:51:25  haubi
+#defining TOOLS_VERSION into pdl now
+#
+#Revision 40.10  2001/08/20 07:41:43  haubi
+#pmm-call UseRcStrip() does work again
+#
+#Revision 40.9  2001/06/19 13:56:37  haubi
+#setting libname for dbcfg/{shared,term} only if not set previously
+#(needed for WAMAS-M.IG2)
+#
+#Revision 40.8  2001/06/11 13:15:43  haubi
+#deleting subdirs at aclobber, not subclobber
+#
+#Revision 40.7  2001/05/28 09:26:41  haubi
+#bugfix at aclobber-rule in pdl-dir
+#
+#Revision 40.6  2001/05/21 14:17:49  haubi
+#CXXFLAGS/CXXFLAGSPLAT[12] splitted down from CFLAGS/CFLAGSPLAT[12]
+#
+#Revision 40.5  2001/05/21 12:35:57  haubi
+#working C++ application on Linux
+#
+#Revision 40.4  2001/05/09 11:54:32  haubi
+#more depencies between pdl-outputfiles added
+#
+#Revision 40.3  2001/05/09 07:22:06  haubi
+#project is working now, using fast PDL,
+#.env, .sh-files are automatically detected to be scripts to be installed
+#
+#Revision 40.2  2001/01/18 10:48:36  haubi
+#if _owudb-lib is needed, so tsql-lib is linked, this needs also tgen-lib
+#
+#Revision 40.1  2000/09/12 12:50:28  haubi
+#prepared for tools_4-import
+#
+#Revision 33.23  2000/07/18 11:30:17  haubi
+#_udb needs tsql-lib
+#
+#Revision 33.22  2000/07/06 16:33:55  haubi
+#bugfix bei WMP-Libnamen
+#
+#Revision 33.21  2000/07/05 14:56:21  haubi
+#using $incpathopt, &mkuselibs(), &mkuseslibs() now
+#
+#Revision 33.20  1999/06/01 14:09:36  haubi
+#using tdh.pdr for dbcfg-shared-headerfile to complete tdc.pdr
+#
+# Revision 33.19  99/04/26  08:29:47  08:29:47  haubi (Michael Haubenwallner)
+# dbcfg/shared,term needing sql now
+# 
+# Revision 33.18  99/04/07  20:07:08  20:07:08  haubi (Michael Haubenwallner)
+# using all needed DebugFlags TD/WD/OD/RD at debug-rules if needed
+# 
+# Revision 33.17  99/04/06  14:06:56  14:06:56  haubi (Michael Haubenwallner)
+# prefix of WMP-libraries is wmp, not wmpt now
+# 
+# Revision 33.16  99/03/24  11:14:44  11:14:44  haubi (Michael Haubenwallner)
+# Bugfix at UseRcStrip, debug-levels interpreted from pmm
+# 
+#Revision 33.15  1999/03/23 20:11:58  ali
+#linking ow/owsql-libs only if path needs owil
+#
+# Revision 33.14  99/03/11  17:22:24  17:22:24  haubi (Michael Haubenwallner)
+# linking prewmp-libs with ID, only wmpt-libs with WD-flag
+# 
+# Revision 33.13  99/02/24  15:12:08  15:12:08  haubi (Michael Haubenwallner)
+# csv-files are in subdir csv, not in tex now
+# 
+# Revision 33.12  99/01/28  14:34:30  14:34:30  haubi (Michael Haubenwallner)
+# mcreate.sql, csvsplit activated on NT
+# 
+#Revision 33.11  1999/01/28 13:15:17  haubi
+#PREWMPROOTDIR/lib, OWIL/include/module added to PDLINCLUDE
+#
+# Revision 33.10  99/01/26  12:47:12  12:47:12  haubi (Michael Haubenwallner)
+# bugfix at setting global:RCSTRIP-data
+# 
+# Revision 33.9  99/01/22  10:16:10  10:16:10  haubi (Michael Haubenwallner)
+# doing chmod +w after installing some files
+# rcstrip can be activated by Makefile.pl
+# 
+# Revision 33.8  99/01/15  16:44:37  16:44:37  haubi (Michael Haubenwallner)
+# doing rpcgen into OBJDIR, keeping x_file.x in shared
+# pdl-driver csv and csvsplit added, output into tex-dir
+# function added to enable rcstrip with any menufile-path
+# 
+# Revision 33.7  98/12/01  19:33:07  19:33:07  haubi (Michael Haubenwallner)
+# new methode, first full tested
+# 
+# Revision 33.6  98/11/18  14:35:22  14:35:22  haubi (Michael Haubenwallner)
+# first tested version with new methode
+# 
+# Revision 33.5  98/11/02  09:32:11  09:32:11  haubi (Michael Haubenwallner)
+# Macros TD, TDDBG, RD, RDDBG, WD, WDDBG added
+# 
+# Revision 33.4  98/10/30  10:47:31  10:47:31  haubi (Michael Haubenwallner)
+# using $(MAKEFILE) in dbcfg/subdirs now, means Makefile.`uname`
+# 
+#Revision 33.3  1998/10/20 10:14:21  haubi
+#creating tex/tables.csv using pdl-driver csv and csvsplit after
+#
+# Revision 33.2  98/09/25  06:40:26  06:40:26  haubi (Michael Haubenwallner)
+# Also using PREWMP/WMP-Libraries now if ...ROOTDIR defined
+# 
+# Revision 33.1  98/08/28  10:48:50  10:48:50  haubi (Michael Haubenwallner)
+# rule Clobber added, clobber doesn't remove Makefile now
+# rcstrip inserted again, but left in comments
+# 
+# Revision 32.1  98/08/28  08:14:26  08:14:26  haubi (Michael Haubenwallner)
+# rcstrip wieder raus
+# 
+# Revision 1.29  98/08/24  13:56:39  13:56:39  haubi (Michael Haubenwallner)
+# CLI-drivers added, output of pdl goes into cli-directory
+# 
+# Revision 1.28  98/08/21  10:42:02  10:42:02  haubi (Michael Haubenwallner)
+# Bugfix rcstrip - args on NT
+# 
+# Revision 1.27  98/08/21  08:00:56  08:00:56  haubi (Michael Haubenwallner)
+# rcstrip at install of dbcfg/owilrc/ added
+# 
+# Revision 1.26  98/07/27  16:43:24  16:43:24  haubi (Michael Haubenwallner)
+# Bugfix make clean
+# 
+# Revision 1.25  98/07/02  12:40:25  12:40:25  haubi (Michael Haubenwallner)
+# Bugfix $(TD), $(RD)
+# 
+# Revision 1.24  98/06/30  16:55:49  16:55:49  haubi (Michael Haubenwallner)
+# LIBSAUX: $(TD) fuer tools, $(RD) fuer pretools-libs added
+# 
+# Revision 1.23  98/06/10  16:01:03  16:01:03  haubi (Michael Haubenwallner)
+# some tricky warnings elliminated
+# 
+# Revision 1.22  98/06/02  19:48:00  19:48:00  haubi (Michael Haubenwallner)
+# rpcgen auf WINNT: Client-File, kein Server-File
+# 
+# Revision 1.21  98/06/02  11:10:11  11:10:11  haubi (Michael Haubenwallner)
+# RPX-Treiber, wenn vshm.x (anstatt vglobal.pdl) existiert
+# 
+# Revision 1.20  98/06/02  09:08:23  09:08:23  haubi (Michael Haubenwallner)
+# wenn dbcfg/vglobal.pdl existiert, dann wird der treiber rpx.pdr eingehaengt
+# 
+# Revision 1.19  98/04/08  18:57:15  18:57:15  ali (Albert Barmettler)
+# *** empty log message ***
+# 
+# Revision 1.18  98/04/07  23:06:01  23:06:01  ali (Albert Barmettler)
+# *** empty log message ***
+# 
+# Revision 1.17  98/04/07  22:40:30  22:40:30  ali (Albert Barmettler)
+# *** empty log message ***
+# 
+# Revision 1.16  98/02/04  10:58:28  10:58:28  zsolt (Zsolt Kovacs)
+# WriteDummy function added
+# 
+# Revision 1.15  98/02/04  09:30:08  09:30:08  zsolt (Zsolt Kovacs)
+# order of pdl drivers corrected
+# 
+# Revision 1.14  98/02/02  14:17:21  14:17:21  carlo (Carlo Jennetten)
+# order of dbcfg/shared C drivers modified
+# 
+# Revision 1.13  98/02/02  13:52:12  13:52:12  carlo (Carlo Jennetten)
+# order of drivers changed
+# 
+# Revision 1.12  98/01/30  11:23:50  11:23:50  haubi (Michael Haubenwallner)
+# Die Listenbeschreibungen ins dbcfg/shared-File
+# 
+# Revision 1.11  98/01/23  13:21:23  13:21:23  zsolt (Zsolt Kovacs)
+# install_preamble instead of test_$standard::envrootdir
+# 
+# Revision 1.10  97/12/05  09:27:12  09:27:12  chris (Christian Pongratz)
+# bugfix ; in pdlinclude
+# 
+# Revision 1.9  97/12/02  16:47:25  16:47:25  zsolt (Zsolt Kovacs)
+# elsif bug fixed
+# 
+# Revision 1.8  97/12/02  09:47:53  09:47:53  zsolt (Zsolt Kovacs)
+# environment PRETROOTDIR and TROOTDIR tested
+# 
+# Revision 1.7  97/11/13  14:17:54  14:17:54  zsolt (Zsolt Kovacs)
+# drop, create,forkey etc. instead of dropcre
+# 
+# Revision 1.6  97/08/26  07:18:24  07:18:24  zsolt (Zsolt Kovacs)
+# bugfix: not to create include and lib install directory
+# 
+# Revision 1.5  97/08/25  14:19:02  14:19:02  zsolt (Zsolt Kovacs)
+# XMV support
+# 
+# Revision 1.4  97/08/12  15:50:36  15:50:36  zsolt (Zsolt Kovacs)
+# bugfixes, sec drivor for pdl
+# 
+# Revision 1.3  97/08/05  08:53:48  08:53:48  zsolt (Zsolt Kovacs)
+# package for globals
+# 
+# Revision 1.2  97/08/05  07:36:50  07:36:50  zsolt (Zsolt Kovacs)
+# AddXxx functions, CompleteData instead of WriteMakefilePdl...
+# 
+# Revision 1.1  97/07/14  18:42:33  18:42:33  zsolt (Zsolt Kovacs)
+# Initial revision
+# 
+
+package special;
+
+&standard::SetEnvRootdir('ROOTDIR');
+
+sub AddSubdir
+{
+	my($path, $file, $ishardlink) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	$global::PATHisHARDLINK{"$path/$file"} = $ishardlink;
+	&global::AddSubdir($path, $file);
+	1;
+}
+
+sub AddCFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddCFile($path, $file);
+	1;
+}
+
+sub AddCXXFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddCXXFile($path, $file);
+	1;
+}
+
+sub AddHFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddHFile($path, $file);
+	1;
+}
+
+sub AddXFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddXFile($path, $file);
+	1;
+}
+
+sub AddTexFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddTexFile($path, $file);
+	1;
+}
+
+sub AddRcFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddRcFile($path, $file);
+	1;
+}
+
+sub AddPrcFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddPrcFile($path, $file);
+	1;
+}
+
+sub AddBmpFile
+{
+	my($path, $file) = @_;
+	push @{ $global::FILESofPATH{$path} }, $file;
+	&global::AddBmpFile($path, $file);
+	1;
+}
+
+sub CompleteData
+{
+	my($actpath) = @_;
+
+	if ($global::MAINofPATHseen{$actpath}) {
+		my(@pathparts) = split /\//, $actpath;
+		if ($pathparts[$#pathparts] eq 'term') {
+			for ($i = 1; $i < @pathparts; ++$i) {
+				if ($pathparts[$i] =~ /^src/) {
+					$global::PROGNAMEofPATH{$actpath} = $pathparts[$i-1];
+					last;
+				}
+			}
+		}
+		elsif ($pathparts[$#pathparts] eq 'kernel') {
+			for ($i = 1; $i < @pathparts; ++$i) {
+				if ($pathparts[$i] =~ /^src/) {
+					$global::PROGNAMEofPATH{$actpath} = $pathparts[$i-1].'_bg';
+					last;
+				}
+			}
+		}
+	}
+	elsif ($#{ $global::PDLFILESofPATH{$actpath} } >= 0) {
+		if( -f "$actpath/vshm.xh" ) {
+			$use_rpc = 1;
+			&AddXFile("$actpath/shared", "vshm.x");
+		}
+
+		if (! -d "$actpath/shared") {
+			mkdir "$actpath/shared", 0777 or
+								die "Can't mkdir $$actpath/shared: $!";
+		}
+
+		my($PDLNAMESPACEprefix) = $ENV{'PDLNAMESPACEprefix'};
+
+		&AddSubdir($actpath, 'shared', $global::PATHisHARDLINK{$actpath});
+
+		&AddCFile("$actpath/shared", $PDLNAMESPACEprefix . "dbdesc.c");
+		&AddHFile("$actpath/shared", $PDLNAMESPACEprefix . "dbdesc.h");
+		&global'AddIncfileOfFile("$actpath/shared",
+			$PDLNAMESPACEprefix . "dbdesc.c",
+			$PDLNAMESPACEprefix . "dbdesc.h");
+
+
+		my($pdlfile, $basename);
+		foreach $pdlfile (@{ $global::PDLFILESofPATH{$actpath} }) {
+			$pdlfile =~ /(.*)\.pdl/o;
+			$basename = $PDLNAMESPACEprefix . $1;
+
+			&AddCXXFile("$actpath/shared", "$basename.c");
+			&AddHFile("$actpath/shared", "$basename.h");
+
+			&global'AddIncfileOfFile("$actpath/shared",
+				"$basename.c", "$basename.h");
+
+			&global'AddIncfileOfFile("$actpath/shared",
+				"$basename.h", 'dbsql.h');
+			&global'AddIncfileOfFile("$actpath/shared",
+				"$basename.h", "base/buser.h");
+
+			&global'AddIncfileOfFile("$actpath/shared",
+				$PDLNAMESPACEprefix . "dbdesc.h", "$basename.h");
+
+			if( $use_rpc == 1 ) {
+				&AddXFile("$actpath/shared", "x_$basename.x");
+				&global'AddIncfileOfFile("$actpath/shared",
+					"x_$basename.x", "vshm.x");
+				&global'AddIncfileOfFile("$actpath/shared",
+					"$basename.h", "x_$basename.h");
+			}
+
+			foreach (
+				keys %{ $global::INCFILEofFILEofPATHseen{$actpath}{$pdlfile} }
+			) {
+				next if $_ eq $pdlfile;
+				/^(.*)\.pd[ls]$/;
+				&global'AddIncfileOfFile("$actpath/shared",
+					"$basename.h", $PDLNAMESPACEprefix . "$1.h");
+			}
+		}
+
+		$global::LIBNAMEofPATH{"$actpath/shared"} = 'dbshare'
+			if $global::LIBNAMEofPATH{"$actpath/shared"} eq '';
+
+		++$global::PATHneedSQL{"$actpath/shared"};
+
+	}
+	elsif ($#{ $global::INPFILESofPATH{$actpath} } >= 0) {
+		if (! -d "$actpath/dlg") {
+			mkdir "$actpath/dlg", 0777 or
+								die "Can't mkdir $$actpath/shared: $!";
+		}
+
+		&AddSubdir($actpath, 'dlg', $global::PATHisHARDLINK{$actpath});
+
+		foreach $inpfile (@{ $global::INPFILESofPATH{$actpath} }) {
+			$inpfile =~ /(.*)\.inp/o;
+
+			&AddHFile("$actpath/dlg", "va_$1.h");
+			&AddHFile("$actpath/dlg", "vd_$1.h");
+			&AddHFile("$actpath/dlg", "vl_$1.h");
+			&AddHFile("$actpath/dlg", "vn_$1.h");
+		}
+	}
+
+	1;
+}
+
+sub MakeMakefile
+{
+	my($actpath) = @_;
+	my(@pathparts) = split/\//, $actpath;
+	my($toinstall) = ($pathparts[$#pathparts] !~ /^_.*/) ? 1 : 0;
+
+	for ($global::MAKETYPEofPATH{$actpath}) {
+		&standard::MakePreamble ($actpath, $toinstall);
+		/-PDX-/ and do {
+			&standard::MakePdx      ($actpath, 0);
+		};
+		/-PDL-/ and do {
+			&MakePdl                ($actpath, $toinstall);
+		};
+		/-YACC-/ and do {
+			&standard::MakeYacc     ($actpath, $toinstall);
+		};
+		/-RPCGEN-/ and do {
+			&standard::MakeRpcgen   ($actpath, $toinstall);
+		};
+		/-CC-/ and do {
+			&MakeAuxCC              ($actpath, $toinstall);
+			&standard::MakeCC       ($actpath, $toinstall);
+		};
+		/-PROGRAM-/ and do {
+			&MakeAuxProgram         ($actpath, $toinstall);
+			&standard::MakeProgram  ($actpath, $toinstall);
+		};
+		/-LIBRARY-/ and do {
+			&standard::MakeLibrary  ($actpath, 0);
+		};
+		/-HEADERS-/ and do {
+			&standard::MakeHeaders  ($actpath, 0);
+		};
+		/-PRC-/ and do {
+			&standard::MakePrc      ($actpath, $toinstall);
+		};
+		/-RC-/ and do {
+			if ($global::RCSTRIP{$actpath}{use} > 0) {
+				&standard::MakeStripRc($actpath, $toinstall);
+			} else {
+				&standard::MakeRc   ($actpath, $toinstall);
+			}
+		};
+		/-PIC-/ and do {
+			&standard::MakePic      ($actpath, $toinstall);
+		};
+		/-DLG-/ and do {
+		};
+		/-BMP-/ and do {
+			&standard::MakeBmp      ($actpath, $toinstall);
+		};
+		/-SCRIPTS-/ and do {
+			&standard::MakeScripts  ($actpath, $toinstall);
+		};
+		/-PACKAGES-/ and do {
+			&standard::MakePackages ($actpath, $toinstall);
+		};
+		/-HTML-/ and do {
+			&standard::MakeHtml     ($actpath, $toinstall);
+		};
+		/-CGI-/ and do {
+			&standard::MakeCgi      ($actpath, $toinstall);
+		};
+		/-GIF-/ and do {
+			&standard::MakeGif      ($actpath, $toinstall);
+		};
+		/-TEX-/ and do {
+			&standard::MakeTex      ($actpath, $toinstall);
+		};
+		/-SUBDIRS-/ and do {
+			&standard::MakeSubdirs  ($actpath, $toinstall);
+		};
+		/-DUMMY-/ and do {
+			&standard::MakeDummy    ($actpath, $toinstall);
+		};
+	}
+
+	1;
+}
+
+sub MakeAuxCC
+{
+	my($actpath, $toinstall) = @_;
+
+	my($cflagsaux, $ldflagsaux, $libsaux);
+
+	&main'Macro('CFLAGSAUX');
+
+	if ($'ENV{'PREWMPROOTDIR'} ne '') {
+		&main'Macromore('CFLAGSAUX',  'DEFAULT',
+			$main::incpathopt . '$(PREWMPROOTDIR)/include');
+	}
+	if ($'ENV{'WMPROOTDIR'} ne '') {
+		&main'Macromore('CFLAGSAUX',  'DEFAULT',
+			$main::incpathopt . '$(WMPROOTDIR)/include');
+	}
+	if ($'ENV{'PRETROOTDIR'} ne '') {
+		&main'Macromore('CFLAGSAUX',  'DEFAULT',
+			$main::incpathopt . '$(PRETROOTDIR)/include');
+	}
+	if ($'ENV{'TROOTDIR'} ne '') {
+		&main'Macromore('CFLAGSAUX',  'DEFAULT',
+			$main::incpathopt . '$(TROOTDIR)/include');
+	}
+
+	&main'Macrolast('CFLAGS',   '$(CFLAGSAUX)');
+	&main'Macrolast('CXXFLAGS', '$(CFLAGSAUX)');
+
+	1;
+}
+
+sub MakeAuxProgram
+{
+	my($actpath, $toinstall) = @_;
+
+	&main'Macro('LDFLAGSAUX');
+	&main'Macro('LIBSAUX');
+
+	if ($'ENV{'PREWMPROOTDIR'} ne '') {
+		&main'Macro('PREWMPLIBSAUX', &main'mkuselibs(
+			($global::PATHneedOWWDG{$actpath} ? ' $(ID)prewmpowsql' : '')
+		  . ($global::PATHneedOWWDG{$actpath} ? ' $(ID)prewmpow' : '')
+		  . ' $(ID)prewmpsql'
+		  . ' $(ID)prewmpgen'
+		  .	(($main::uname !~ /^ReliantUNIX/)
+			? ( ' $(ID)shared'
+			  . ($global::PATHneedOWWDG{$actpath} ? ' $(ID)dbterm' : '')
+			  . ' $(ID)dbshare'
+			)
+			: "")
+		));
+		&main'Macromore('LDFLAGSAUX', 'DEFAULT',
+			$main::libpathopt . '$(PREWMPROOTDIR)/lib');
+		&main'Macromore('LIBSAUX',    'DEFAULT', '$(PREWMPLIBSAUX)');
+	}
+	if ($'ENV{'WMPROOTDIR'} ne '') {
+		&main'Macro('WMPLIBSAUX', &main'mkuselibs(
+			($global::PATHneedOWWDG{$actpath} ? ' $(WD)wmpowsql' : '')
+		  . ($global::PATHneedOWWDG{$actpath} ? ' $(WD)wmpow' : '')
+		  . ' $(WD)wmpsql'
+		  . ' $(WD)wmpgen'
+		));
+		&main'Macromore('LDFLAGSAUX', 'DEFAULT',
+			$main::libpathopt . '$(WMPROOTDIR)/lib');
+		&main'Macromore('LIBSAUX',    'DEFAULT', '$(WMPLIBSAUX)');
+	}
+	if ($'ENV{'PRETROOTDIR'} ne '') {
+		&main'Macro('PRETLIBSAUX', &main'mkuselibs(
+			($global::PATHneedOWWDG{$actpath} ? ' $(RD)pretowsql' : '')
+		  . ($global::PATHneedOWWDG{$actpath} ? ' $(RD)pretow' : '')
+		  . ' $(RD)pretsql'
+		  . ' $(RD)pretgen'
+		));
+		&main'Macromore('LDFLAGSAUX', 'DEFAULT',
+			$main::libpathopt . '$(PRETROOTDIR)/lib');
+		&main'Macromore('LIBSAUX',    'DEFAULT', '$(PRETLIBSAUX)');
+	}
+	if ($'ENV{'TROOTDIR'} ne '') {
+		&main'Macro('TLIBSAUX', &main'mkuselibs(
+			($global::PATHneedOWWDG{$actpath} ? ' $(TD)towsql' : '')
+		  . ($global::PATHneedOWWDG{$actpath} ? ' $(TD)tow' : '')
+		  . ' $(TD)tsql'
+		  . ' $(TD)tgen'
+		));
+		&main'Macromore('LDFLAGSAUX', 'DEFAULT',
+			$main::libpathopt . '$(TROOTDIR)/lib');
+		&main'Macromore('LIBSAUX',    'DEFAULT', '$(TLIBSAUX)');
+		
+		if ($global::PATHneed_OWUDB{$actpath}
+		 || $global::PATHneedOWUDB{$actpath}
+		) {
+			&main'Macrolast('OWLIBS', '$(TLIBSAUX)');
+		}
+	}
+
+	&main'Macrolast('LDFLAGS',  '$(LDFLAGSAUX)');
+	&main'Macrolast('LIBS',     '$(LIBSAUX)');
+
+	1;
+}
+
+sub MakePdlUX
+{
+	my($actpath, $toinstall) = @_;
+
+	$use_rpc = 0;
+	my(@subdirs) = ('lock', 'sql', 'shared');
+
+	if ($ENV{CLI_DATABASE} ne '' || $ENV{ESQL_DATABASE} ne '') {
+		push @subdirs, 'cli';
+	}
+
+	if( -f "$actpath/vshm.xh" ) {
+		print STDERR "$actpath/vshm.xh found\n";
+		$use_rpc = 1;
+	}
+
+	foreach $subdir (@subdirs) {
+		if (! -d "$actpath/$subdir") {
+			mkdir "$actpath/$subdir", 0777 or
+						die "Can't mkdir $$actpath/$subdir: $!";
+		}
+	}
+
+	my($pdlinclude);
+
+	if ($'ENV{'PREWMPROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(PREWMPROOTDIR)/lib";
+	}
+	if ($'ENV{'WMPROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(WMPROOTDIR)/lib";
+	}
+	if ($'ENV{'PRETROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(PRETROOTDIR)/lib";
+	}
+	if ($'ENV{'TROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(TROOTDIR)/lib";
+	}
+	if ($'ENV{'OWIL'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(OWIL)/include"
+			. " $main::incpathopt\$(OWIL)/include/module";
+	}
+
+	my($PDLNAMESPACEprefix) = $ENV{'PDLNAMESPACEprefix'};
+
+	&main'Macro('PDL', '$(TROOTDIR)/bin/pdl');
+	&main'Macro('PDLINCLUDE', $pdlinclude);
+	&main'Macro('PDLDEFS', "-DTOOLS_VERSION=$main::TOOLS_VERSION");
+	if($PDLNAMESPACEprefix ne '') {
+		&main'Macromore('PDLDEFS', 'NAMESPACE',
+			"-DPDLNAMESPACEprefix=$PDLNAMESPACEprefix");
+	}
+
+	&main'Macro('LOCKFILES');
+
+	foreach $pdlfile (@{ $global::PDLFILESofPATH{$actpath} }) {
+		$pdlfile =~ /(.*)\.pdl/o;
+		&main'Macromore('LOCKFILES', "DEFAULT $1", "lock/$1.lck");
+	}
+
+	&main'Macro('PDLFILES');
+
+	my($cnt) = 0;
+
+	foreach $pdlfile (sort @{ $global::PDLFILESofPATH{$actpath} }) {
+		&main'Macromore('PDLFILES', sprintf('DEFAULT%03d', $cnt++), $pdlfile);
+	}
+
+	&main'Rule('$(LOCKFILES) lock/multi.lck', '$(PDLFILES)',
+		"\@\$(ECHO) pdl multifiles
+	\@\$(PDL) \$(PDLDEFS) \$(PDLINCLUDE) \\
+		-c dbcfg.cfg \\
+		-o sql/drop.sql -d drp \\
+		-o sql/create.sql -d cre \\
+		-o sql/forkey.sql -d fky"
+	. (($ENV{CLI_DATABASE} ne '' || $ENV{ESQL_DATABASE} ne '') ? " \\
+		-o cli/drop.sql -d drpcli \\
+		-o cli/create.sql -d crecli \\
+		-o cli/forkey.sql -d fkycli" : ""
+	)
+	. " \\
+		-o sql/comment.sql -d com \\
+		-o sql/pl_sql.sql -d pls \\
+		-O shared/$PDLNAMESPACEprefix" . "dbdesc.h -d dbh \\
+		-o shared/$PDLNAMESPACEprefix" . "dbdesc.c -d dbc"
+		. (($use_rpc == 1) ? " \\
+			-O shared/x_$PDLNAMESPACEprefix,\\(.*\\).pdl,.x -d rpx " : ""
+		)
+		. " \\
+		-O shared/$PDLNAMESPACEprefix,\\(.*\\).pdl,.h -d tch -d nmh -d dmh -d shh -d sth -d bdh -d tdh -d lih \\
+		-O shared/$PDLNAMESPACEprefix,\\(.*\\).pdl,.c -d shc -d tcc -d dmc -d stc -d bdc -d tdc -d lic \\
+		-l lock/,\\(.*\\).pdl,.lck \\
+		-l lock/multi.lck \\
+		\$(PDLFILES)");
+
+	&main'Rule('multifiles', '$(LOCKFILES) lock/multi.lck');
+
+	&main'Rulemore('multifiles', 'MCREATE', '',
+	"\@rm -f sql/mcreate.sql
+	\@sed -e 's/\\(STORAGE([^)]*)\\)/\\/* \\1 *\\//g' sql/create.sql"
+		." > sql/mcreate.sql");
+
+	if ($use_rpc == 1) {
+		&main'Rule('shared/vshm.x', 'vshm.xh',
+			"\@rm -f shared/vshm.x
+	\@cp -f vshm.xh shared/vshm.x");
+
+		&main'Multirulemore('files all install', 'DEFAULT', 'shared/vshm.x');
+	}
+
+	&main'Multirulemore('files all install', 'DEFAULT', 'multifiles');
+
+	&main'Rulemore('selfclobber', 'DEFAULT', '',
+		'@$(RMDIR) ' . join(' ', @subdirs));
+
+	&main'Rulemore('clobber', 'DEFAULT', '',
+		'@$(RM) $(LOCKFILES) lock/multi.lck');
+
+	1;
+}
+sub MakePdlNT
+{
+	my($actpath, $toinstall) = @_;
+
+	$use_rpc = 0;
+	my(@subdirs) = ('lock', 'sql', 'shared');
+
+	&main'Rulemore('dall', 'DEFAULT.DEBUG', '',
+		'CF="$(CFDBG)" LF="$(LFDBG)" ID="$(IDDBG)"');
+
+	&main'Rulemore('dinstall', 'DEFAULT.DEBUG', '',
+		'CF="$(CFDBG)" LF="$(LFDBG)" ID="$(IDDBG)"');
+
+	&main'Rulemore('dclean', 'DEFAULT.DEBUG', '',
+		'CF="$(CFDBG)" LF="$(LFDBG)" ID="$(IDDBG)"');
+
+	&main'Rulemore('dclobber', 'DEFAULT.DEBUG', '',
+		'CF="$(CFDBG)" LF="$(LFDBG)" ID="$(IDDBG)"');
+
+	if ($ENV{CLI_DATABASE} ne '' || $ENV{ESQL_DATABASE} ne '') {
+		push @subdirs, 'cli';
+	}
+
+	if( -f "$actpath/vshm.xh" ) {
+		print STDERR "$actpath/vshm.xh found\n";
+		$use_rpc = 1;
+	}
+
+	foreach $subdir (@subdirs) {
+		if (! -d "$actpath/$subdir") {
+			mkdir "$actpath/$subdir", 0777 or
+						die "Can't mkdir $$actpath/$subdir: $!";
+		}
+	}
+
+	my($pdlinclude);
+
+	if ($'ENV{'PREWMPROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(PREWMPROOTDIR)/lib";
+	}
+	if ($'ENV{'WMPROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(WMPROOTDIR)/lib";
+	}
+	if ($'ENV{'PRETROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(PRETROOTDIR)/lib";
+	}
+	if ($'ENV{'TROOTDIR'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(TROOTDIR)/lib";
+	}
+	if ($'ENV{'OWIL'} ne '') {
+		$pdlinclude	.= " $main::incpathopt\$(OWIL)/include/module";
+	}
+
+	&main'Macro('PDLINCLUDE', $pdlinclude);
+	&main'Macro('LOCKFILES');
+
+	foreach $pdlfile (@{ $global::PDLFILESofPATH{$actpath} }) {
+		$pdlfile =~ /(.*)\.pdl/o;
+		&main'Macromore('LOCKFILES', "DEFAULT $1", "lock\\$1.lck");
+	}
+
+	foreach $pdlfile (@{ $global::PDLFILESofPATH{$actpath} }) {
+		$pdlfile =~ /(.*)\.pdl/o;
+
+		&main'Rule("lock\\$1.lck", "$1.pdl",
+	"\@\$(ECHO) pdl $pdlfile
+	\@\$(TROOTDIR)\\bin\\pdl \$(PDLDEFS) \$(PDLINCLUDE) \\
+		-c dbcfg.cfg"
+	. (($use_rpc == 1) ? " \\
+		-O shared/x_$1.x -d rpx" : ""
+	)
+	. " \\
+		-O shared\\$1.h -d tch -d nmh -d dmh -d shh -d sth -d bdh -d tdh -d lih \\
+		-O shared\\$1.c -d shc -d tcc -d dmc -d stc -d bdc -d tdc -d lic \\
+		-l lock\\$1.lck \\
+		$1.pdl");
+	}
+
+	my($pdlfiles);
+
+	$sep = '';
+	foreach $pdlfile (@{ $global::PDLFILESofPATH{$actpath} }) {
+		$pdlfiles .= "$sep$pdlfile";
+		$sep = " \\\n\t\t";
+	}
+	&main'Rule("lock\\multi.lck", '$(LOCKFILES)',
+	"\@\$(ECHO) pdl multifiles
+	\@\$(TROOTDIR)\\bin\\pdl \$(PDLINCLUDE) \\
+		-c dbcfg.cfg \\
+		-o sql\\drop.sql -d drp \\
+		-o sql\\create.sql -d cre \\
+		-o sql\\forkey.sql -d fky"
+	. (($ENV{CLI_DATABASE} ne '' || $ENV{ESQL_DATABASE} ne '') ? " \\
+		-o cli/drop.sql -d drpcli \\
+		-o cli/create.sql -d crecli \\
+		-o cli/forkey.sql -d fkycli" : ""
+	)
+	. " \\
+		-o sql\\comment.sql -d com \\
+		-o sql\\pl_sql.sql -d pls \\
+		-O shared\\$PDLNAMESPACEprefix.dbdesc.h -d dbh \\
+		-O shared\\$PDLNAMESPACEprefix.dbdesc.c -d dbc \\
+		-l lock\\multi.lck \\
+		$pdlfiles");
+
+	&main'Rulemore("lock\\multi.lck", 'MCREATE', '',
+	"\@rm -f sql/mcreate.sql
+	\@sed -e \"s/\\(STORAGE([^)]*)\\)//g\" sql\\create.sql > sql\\mcreate.sql
+	\@\$(TROOTDIR)\\bin\\csvsplit -d csv csv\\tables.csv");
+
+	if ($use_rpc == 1) {
+		&main'Rule('shared\\vshm.x', 'vshm.xh',
+			"\@rm -f shared/vshm.x
+	\@cp -f vshm.xh shared/vshm.x");
+		&main'Multirulemore('all install', 'DEFAULT', 'shared\\vshm.x');
+	}
+
+	&main'Macro('SUBDIRS', '(');
+	&main'Macrolast('SUBDIRS', ')');
+
+	foreach $subdir (@subdirs) {
+		&main'Macromore('SUBDIRS', 'DEFAULT', $subdir);
+	}
+
+	&main'Multirulemore('all install', 'DEFAULT', "lock\\multi.lck");
+
+	&main'Multirulemore('all install clean clobber', 'DEFAULT', '',
+		"\@for \%j in \$(SUBDIRS) do \@( \\
+		\@if exist \%j ( \\
+			\@if exist \%j\\\$(MAKEFILE) ( \\
+				\@\$(ECHO) Making \$\@ in %j & \\
+				cmd /c \"cd \%j & \$(MAKE) -f \$(MAKEFILE) \$\@\" \\
+			) \\
+		) \\
+	) 
+	\@\$(ECHO) done");
+
+	&main'Rulemore('aclobber', 'DEFAULT', '',
+		'@$(RMDIR) ' . join(' ', @subdirs));
+
+	1;
+}
+sub MakePdl
+{
+	my($actpath, $toinstall) = @_;
+
+	if ($main::uname ne 'WINNT') {
+		&MakePdlUX($actpath, $toinstall);
+	} else {
+		&MakePdlNT($actpath, $toinstall);
+	}
+}
+
+sub MakeDlg
+{
+	my($actpath, $toinstall) = @_;
+
+	my(@subdirs) = ('dlg');
+
+	foreach $subdir (@subdirs) {
+		if (! -d "$actpath/$subdir") {
+			mkdir "$actpath/$subdir", 0777 or
+						die "Can't mkdir $$actpath/$subdir: $!";
+		}
+	}
+
+	&main'Macro('DLG', '$(TROOTDIR)/bin/dlg');
+
+	&main'Macro('VAFILES');
+
+	foreach $inpfile (@{ $global::INPFILESofPATH{$actpath} }) {
+		$inpfile =~ /(.*)\.inp/o;
+		&main'Macromore('VAFILES', 'DEFAULT', "dlg/va_$1.h");
+		&main'Rule("dlg/va_$1.h", "$1.inp",
+			"\@\$(ECHO) dlg $inpfile
+		\@\$(DLG) $1.inp dlg");
+	}
+
+	&main'Rule("dlg/vacts.h", '$(VAFILES)');
+	&main'Rulemore('files',   'DEFAULT', '$(VAFILES)');
+	&main'Rulemore('all',     'DEFAULT', '$(VAFILES)');
+	&main'Rulemore('install', 'DEFAULT', '$(VAFILES)');
+
+	&main'Multirulemore('clean clobber', 'DEFAULT', '',
+		"\@for subdir in \$(SUBDIRS) ; \\
+	do \\
+		if [ -d \$\$subdir ] && [ -f \$\$subdir/\$(MAKEFILE) ] ; \\
+		then \\
+			(cd \$\$subdir ; \$(ECHO) Making \$\@ in \$\$subdir ; \\
+			\$(MAKE) -f \$(MAKEFILE) \$\@ ; ) ; \\
+		fi ; \\
+	done ; \\
+	\$(ECHO) done ; \$(ECHO) ;");
+
+	&main'Rulemore('aclobber', 'DEFAULT', '',
+		'@$(RMDIR) ' . join(' ', @subdirs));
+
+	1;
+}
+
+1;

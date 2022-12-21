@@ -40,6 +40,8 @@
 #include "read_file.h"
 #include "utf8_util.h"
 #include "test_wformat.h"
+#include "reset_versid.h"
+#include <sys/stat.h>
 
 using namespace Tools;
 
@@ -547,6 +549,19 @@ int main( int argc, char **argv )
       o_fix_long_function_arg.setMaxValues(1);
       oc_fix_long.addOptionR(&o_fix_long_function_arg);
 
+
+
+      Arg::OptionChain oc_reset_versid;
+      arg.addChainR(&oc_reset_versid);
+      oc_reset_versid.setMinMatch(1);
+      oc_reset_versid.setContinueOnFail(true);
+      oc_reset_versid.setContinueOnMatch(true);
+
+      Arg::FlagOption o_reset_versid("reset-versid");
+      o_reset_versid.setDescription(co.good("resets versids to $Header$, like it is in cvs repo"));
+      o_reset_versid.setRequired(true);
+      oc_reset_versid.addOptionR( &o_reset_versid );
+
   DetectLocale dl;
 
   const unsigned int console_width = 80;
@@ -598,6 +613,7 @@ int main( int argc, char **argv )
 
   if( !o_replace.isSet() &&
 	  !o_versid_remove.isSet() &&
+	  !o_reset_versid.isSet() &&
 	  !o_primanlist.isSet() &&
 	  !o_mlm.isSet() &&
 	  !o_restoreshell.isSet() &&
@@ -697,6 +713,10 @@ int main( int argc, char **argv )
 	  handlers.push_back( new RemoveVersidCh(o_noheader.getState()) );
       handlers.push_back( new RemoveVersidPl() );
 
+  }
+
+  if( o_reset_versid.getState() ) {
+	  handlers.push_back( new ResetVersid() );
   }
 
   if( o_primanlist.getState() ) {
@@ -878,6 +898,12 @@ int main( int argc, char **argv )
 
 	  if( doit )
 		{
+		  // keep file mode
+		  struct stat stat_buf = {};
+		  if( stat( it->getPath().c_str(), &stat_buf ) == -1 ) {
+			  std::cerr << "cannot stat file " << it->getPath() << " error: " << strerror(errno) << std::endl;
+		  }
+
 		  if( rename( it->getPath().c_str(), TO_CHAR(it->getPath() + ".save") ) != 0 )
 			{
 			  std::cerr << strerror(errno) << std::endl;
@@ -895,6 +921,10 @@ int main( int argc, char **argv )
 		  out << READ_FILE.convert( utf8_result, "UTF-8", encoding );
 
 		  out.close();
+
+		  if( chmod(  it->getPath().c_str(), stat_buf.st_mode ) == -1 ) {
+			  std::cerr << "cannot chmod of file " << it->getPath() << " error: " << strerror(errno) << std::endl;
+		  }
 		}
 	}	  
 

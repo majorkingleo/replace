@@ -1,0 +1,24 @@
+<!--**************************************************************************
++* PROJECT:   WAMAST40
++* PACKAGE:   WAMAS.WebServices-Java
++* FILE:      undeployProtocol.wsdd
++* CONTENTS:  undeployment descriptor for java web services
++* COPYRIGHT NOTICE:
++*         (c) Copyright 2004 by
++*                 Salomon Automationstechnik Ges.m.b.H
++*                 Friesachstrasse 15
++*                 A-8114 Friesach bei Graz
++*                 Tel.: ++43 3127 200-0
++*                 Fax.: ++43 3127 200-22
++* REVISION HISTORY:
++*	20.12.2007  CREATED BY tpichle
++*
++*   $Log$
++*
++*
++**************************************************************************-->
+
+
+<undeployment xmlns="http://xml.apache.org/axis/wsdd/">
+ <service name="wt_protocol_webserv" />
+</undeployment>

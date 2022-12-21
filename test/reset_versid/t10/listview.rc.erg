@@ -1,0 +1,193 @@
+##############################################################################
+## VERSID:   "$Header$$Locker$";
+## PROJECT:  TOOLS
+## PACKAGE:  Listen
+## FILE:     listview.rc
+## CONTENTS: Viewelement zum Anzeigen der Liste
+## NOTES:      
+## COPYRIGHT NOTICE:
+##          (c) Copyright 1998 by
+##                  Salomon Automationstechnik Ges.m.b.H
+##                  Friesachstrasse 15
+##                  A-8114 Stuebing
+##                  Tel.: ++43 3127 200-0
+##                  Fax.: ++43 3127 200-22
+## REVISION HISTORY:
+##   $Log$
+##   Revision 40.4  2002/10/11 14:48:49  erudig
+##   bugzilla#57: length of list now changeable
+##
+##   Revision 40.3  2002/05/29 11:55:24  haubi
+##   setting PDF-Level works in tools_35 too now.
+##
+##   Revision 40.2  2001/09/05 11:57:14  haubi
+##   PDF-lists merged up from after tools_34_3,
+##   with C++ port and some cleanups, warnings removed
+##
+##   Revision 40.1  2000/09/12 12:50:39  haubi
+##   prepared for tools_4-import
+##
+##   Revision 1.3  1999/04/26 08:17:02  haubi
+##   bugfix at GrphorizRight => GrpHorizRight
+##
+##Revision 1.2  99/04/01  13:34:28  13:34:28  ali (Albert Barmettler)
+##Maskengestaltung
+##
+##   Revision 1.1  1999/03/31 19:21:31  ali
+##   Initial revision
+##
+##############################################################################
+
+MSKCANVAS ToCanvasView [
+  Callback=OwCallbackHandler
+  Width=600
+  Height=300
+  HScroll=AP_SCROLLBAR_RIGHT
+  VScroll=AP_SCROLLBAR_BOTTOM
+  ReasonMask=MSK_CANVAS_ALL_KEY
+  Font=LFEdit
+  BackColor=CHelpBack
+  SelectColor=CSelection
+  FrameColor=Black
+  TextColor=CText
+  MSKATOM [
+	OwCallback1=OwView
+  ]
+]
+MSKGROUP ToGrpHorizRightBottom [
+  Align=GEOM_H_ALIGN
+  HJoin=GEOM_H_RJOINED
+  VJoin=GEOM_V_BJOINED
+  HSize=AP_EXPAND
+  VSize=AP_EXPAND
+]
+
+MSKEDITFIELD ToViewSearchPattern [
+  Callback=OwCallbackHandler
+  DataType=EFT_STRG
+  Label="Suchen"
+  EditLength=20
+  FieldLength=20
+]
+
+MSKBUTTONLABEL ToButViewSearchBackward [
+  Label="~Rückwärts"
+  Callback=CbViewSearchBackward
+]
+
+MSKBUTTONLABEL ToButViewSearchForward [
+  Label="~Vorwärts"
+  Callback=CbViewSearchForward
+]
+
+MSKBUTTONLABEL ToButPreview [
+  Label="Preview"
+]
+
+MSKBUTTONLABEL ToButPrintPDF [
+  Label="PrintPDF"
+]
+
+MSKDIALOG ToListView [
+  NoTopPlate=1
+  NoConfig=1
+  
+  MSKDESCR GrpFrame [
+    MSKDESCR ToCanvasView [
+	  MSKATOM [
+		OwCallbackBefore1=CbCanvasViewUser
+	  ]
+    ]
+    
+    MSKDESCR GrpHorizVShrink [
+      MSKDESCR GrpHoriz [
+        MSKDESCR ToViewSearchPattern [
+          MSKATOM [
+            OwViewElement=ToCanvasView
+          ]
+        ]
+        MSKDESCR GrpRow [
+          MSKDESCR ToButViewSearchForward [
+            MSKATOM [
+              OwViewElement=ToCanvasView
+            ]
+          ]
+          MSKDESCR ToButViewSearchBackward [
+            MSKATOM [
+              OwViewElement=ToCanvasView
+            ]
+          ]
+        ]
+      ]
+      
+      MSKDESCR GrpHorizRight [
+        MSKDESCR Print_F []
+      ]
+    ]
+  ]
+  
+  
+  MSKDESCR GrpHorizVShrink [
+    MSKDESCR ToGrpHorizRightBottom [
+      MSKDESCR GrpRow [
+        MSKDESCR Close_F [
+          Callback=OwClose
+          IsCancel=True
+        ]
+      ]
+    ]
+  ]
+]
+
+MSKDIALOG ToListViewPdf [
+  NoTopPlate=1
+  NoConfig=1
+  
+  MSKDESCR GrpFrame [
+    MSKDESCR ToCanvasView [
+	  MSKATOM [
+		OwCallbackBefore1=CbCanvasViewUser
+	  ]
+    ]
+    
+    MSKDESCR GrpHorizVShrink [
+      MSKDESCR GrpHoriz [
+        MSKDESCR ToViewSearchPattern [
+          MSKATOM [
+            OwViewElement=ToCanvasView
+          ]
+        ]
+        MSKDESCR GrpRow [
+          MSKDESCR ToButViewSearchForward [
+            MSKATOM [
+              OwViewElement=ToCanvasView
+            ]
+          ]
+          MSKDESCR ToButViewSearchBackward [
+            MSKATOM [
+              OwViewElement=ToCanvasView
+            ]
+          ]
+        ]
+      ]
+      
+      MSKDESCR GrpHorizRight [
+        MSKDESCR Print_F []
+#MSKDESCR ToButPreview []
+#        MSKDESCR ToButPrintPDF []
+      ]
+    ]
+  ]
+  
+  
+  MSKDESCR GrpHorizVShrink [
+    MSKDESCR ToGrpHorizRightBottom [
+      MSKDESCR GrpRow [
+        MSKDESCR Close_F [
+          Callback=OwClose
+          IsCancel=True
+        ]
+      ]
+    ]
+  ]
+]

@@ -49,7 +49,9 @@ replace_SOURCES=\
 		test_wformat.cc \
 		test_wformat.h \
 		regex_match.h \
-		regex_match.cc
+		regex_match.cc \
+		reset_versid.cc \
+		reset_versid.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/tools \
 	-I$(top_srcdir)/cpputils/cpputilsshared  \

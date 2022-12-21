@@ -1,0 +1,363 @@
+/*****************************************************************************
+ +* PROJECT:   WAMAST40
+ +* PACKAGE:   com.wamas.wamast.business
+ +* FILE:      TuAcTmp.java
+ +* CONTENTS:  Implement tuaccount-template type related logic.
+ +* COPYRIGHT NOTICE:
+ +*         (c) Copyright 2007 by
+ +*                 Salomon Automationstechnik Ges.m.b.H
+ +*                 Friesachstrasse 15
+ +*                 A-8114 Friesach bei Graz
+ +*                 Tel.: ++43 3127 200-0
+ +*                 Fax.: ++43 3127 200-22
+ +* REVISION HISTORY:
+ +*  26.04.2007  CREATED BY rkrist
+ +*
+ +*  $Log: TuAcTmp.java,v $
+ +*  Revision 1.3  2010/07/19 07:31:19  tpichle
+ +*  Implemented database trigger and package functionality
+ +*  stdfix:[HEAD] Implemented database trigger and package functionality
+ +*  stdfix#:sasrvb_20100719093113_03615
+ +*
+ +*  Revision 1.2  2008/09/09 13:52:54  tpichle
+ +*  merged from SPAR_PROD_01 (AA-0186-000002 Überarbeiten Logging)
+ +*  feature:none
+ +*
+ +*  Revision 1.1.4.1  2008/09/03 11:27:29  tpichle
+ +*  AA-0186-000002 Logging überarbeiten
+ +*  feature:logreview
+ +*
+ +*  Revision 1.1  2008/04/30 09:42:59  wamas
+ +*  init
+ +*
+ +*  Revision 1.2  2007/11/29 07:29:52  tpichle
+ +*  functions getPKValue and setPKValue are public now
+ +*
+ +*  Revision 1.1  2007/08/20 08:51:52  mknoll
+ +*  Initial to new location
+ +*
+ +*  Revision 1.1  2007/05/08 16:24:12  rkrist
+ +*  created & added into the CVS
+ +*
+ +*
+ +****************************************************************************/
+
+package com.wamas.wamast.business;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.wamas.wamast.DbInterface;
+import com.wamas.wamast.ExecutionFailedException;
+import com.wamas.wamast.SqlNotFoundException;
+import com.wamas.wamast.logging.LogManager;
+import com.wamas.wamast.logging.Loglevel;
+
+/**
+ * @author rkrist
+ * 
+ */
+public class TuAcTmp extends
+	PersistentObject < com.wamas.wamast.ws_types.TuAcTmp >
+{
+	/**
+	 * 
+	 */
+	public TuAcTmp ()
+	{
+		super ();
+	}
+
+	/**
+	 * @param oRes
+	 * @throws SQLException
+	 */
+	public TuAcTmp ( ResultSet oRes ) throws SQLException
+	{
+		super ( oRes );
+	}
+
+	public TuAcTmp ( com.wamas.wamast.ws_types.TuAcTmp oObject )
+	{
+		super ();
+		this.oInnerObject = oObject;
+	}
+
+	public TuAcTmp ( long lPkValue ) throws ExecutionFailedException
+	{
+		super ();
+		this.oInnerObject.setTuAcTmpId ( lPkValue );
+		this.Load ();
+	}
+
+	public TuAcTmp ( long lPkValue , DbInterface oDbi , boolean bLockForUpdate )
+		throws SqlNotFoundException, ExecutionFailedException
+	{
+		super ();
+		this.oInnerObject.setTuAcTmpId ( lPkValue );
+		this.Load ( oDbi, bLockForUpdate );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#AddParameters(java.sql.PreparedStatement)
+	 */
+	@Override
+	protected void AddParameters ( PreparedStatement oStatement )
+		throws SQLException
+	{
+		this.AddParameters ( oStatement, true );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#AddParameters(java.sql.PreparedStatement, boolean)
+	 */
+	@Override
+	protected void AddParameters ( PreparedStatement oStatement,
+		boolean bAddEmpties ) throws SQLException
+	{
+		Wrapper wiPrmIndex = new Wrapper ( 1 );
+
+		addParameter ( oStatement, wiPrmIndex,
+			this.oInnerObject.getDescr (), bAddEmpties );
+		addParameter ( oStatement, wiPrmIndex,
+			this.oInnerObject.getTuAcTmpId (), bAddEmpties );
+		
+		LogManager.getInstance ().logPrint ( Loglevel.DebugLevel,
+			this.getClass ().getSimpleName (), "AddParameters",
+			this.sTableName () + ": added  " + ( wiPrmIndex.Value - 1 ) + " parameters" );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#ReadData(java.sql.ResultSet)
+	 */
+	@Override
+	protected void ReadData ( ResultSet oRes ) throws SQLException
+	{
+		this.oInnerObject.setDescr ( DbInterface.ReadString ( oRes, "DESCR" ) );
+		this.oInnerObject.setTuAcTmpId ( DbInterface.ReadLong ( oRes,
+			"TUACTMPID" ) );
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#getPKValue()
+	 */
+	@Override
+	public Object getPKValue ( )
+	{
+		return this.oInnerObject.getTuAcTmpId ();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#getSearchStatement()
+	 */
+	@Override
+	protected String getSearchStatement ( )
+	{
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#instantiateInnerObject()
+	 */
+	@Override
+	protected void instantiateInnerObject ( )
+	{
+		this.oInnerObject = new com.wamas.wamast.ws_types.TuAcTmp ();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#sInsertRow()
+	 */
+	@Override
+	protected String sInsertRow ( )
+	{
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#sPKField()
+	 */
+	@Override
+	protected String sPKField ( )
+	{
+		return "TUACTMPID";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#sSelectByPK()
+	 */
+	@Override
+	protected String sSelectByPK ( )
+	{
+		return "SELECT * FROM TUACTMP WHERE TUACTMPID = ?";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#sTableName()
+	 */
+	@Override
+	protected String sLiveTableName ( )
+	{
+		return "TUACTMP";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#sUpdateByPK()
+	 */
+	@Override
+	protected String sUpdateByPK ( )
+	{
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.wamas.wamast.business.PersistentObject#setPKValue(long)
+	 */
+	@Override
+	public void setPKValue ( long lNewValue )
+	{
+		this.oInnerObject.setTuAcTmpId ( lNewValue );
+	}
+
+	/**
+	 * returns an array of THM types included in this account template
+	 * 
+	 * @param oDbi
+	 * @param bLockForUpdate
+	 * @return null if template is empty
+	 * @throws ExecutionFailedException
+	 * @throws SQLException
+	 */
+	@SuppressWarnings ("unchecked" )
+	public ThmType [ ] getTemplateThmTypes ( DbInterface oDbi,
+		boolean bLockForUpdate ) throws ExecutionFailedException, SQLException
+	{
+		ArrayList atTmpItems;
+		TuAcTmpItem tItem;
+		ThmType [ ] atResult = null;
+		int iPos, iSize;
+
+		atTmpItems = TuAcTmpItem.getItemsForAcTmp ( this.oInnerObject
+			.getTuAcTmpId (), oDbi, false );
+
+		iSize = atTmpItems.size ();
+		if ( iSize > 0 )
+		{
+			atResult = new ThmType [ iSize ];
+
+			for ( iPos = 0; iPos < iSize; iPos++ )
+			{
+				tItem = ( TuAcTmpItem ) atTmpItems.get ( iPos );
+				atResult [ iPos ] = new ThmType ( tItem.oInnerObject
+					.getThmTypeId (), oDbi, bLockForUpdate );
+			}
+			;
+		}
+		;
+
+		return atResult;
+	}
+
+	/**
+	 * returns an array of THM types included in this account template
+	 * 
+	 * @return
+	 * @throws ExecutionFailedException
+	 */
+	public ThmType [ ] getTemplateThmTypes ( ) throws ExecutionFailedException
+	{
+		DbInterface oDbi = null;
+		try
+		{
+			oDbi = DbInterface.ConnectionPool ().getInterface ();
+			return this.getTemplateThmTypes ( oDbi, false );
+		}
+		catch ( SQLException eExc )
+		{
+			throw new ExecutionFailedException ( "getTemplateThmTypes: "
+				+ eExc.getMessage () );
+		}
+		finally
+		{
+			DbInterface.reuseInterface ( oDbi );
+		}
+	}
+
+	/**
+	 * save the information in this object into an Xml Element
+	 * 
+	 * @param dDoc
+	 * @param sTagName
+	 * @return
+	 */
+	public Element createXmlElement ( Document dDoc, String sTagName )
+	{
+		Element eTuAccount;
+
+		eTuAccount = dDoc.createElement ( sTagName );
+		eTuAccount.setAttribute ( "DESCR", this.oInnerObject.getDescr () );
+
+		return eTuAccount;
+	}
+
+	/**
+	 * create an xml element containing data from this record including specified thmtypes
+	 * 
+	 * @param dDoc
+	 * @param sTagName
+	 * @param atThmTypes
+	 * @return
+	 * @throws ExecutionFailedException
+	 */
+	public Element createXmlElementWithThmTypes ( Document dDoc,
+		String sTagName, ThmType [ ] atThmTypes )
+		throws ExecutionFailedException
+	{
+		Element eTuAccount;
+		int iPos, iCount;
+
+		if ( atThmTypes == null )
+			atThmTypes = this.getTemplateThmTypes ();
+
+		eTuAccount = this.createXmlElement ( dDoc, sTagName );
+
+		iCount = atThmTypes.length;
+		for ( iPos = 0; iPos < iCount; iPos++ )
+		{
+			eTuAccount.appendChild ( atThmTypes [ iPos ].createThmTypeElement (
+				dDoc, "THMTYPE" ) );
+		}
+		;
+
+		return eTuAccount;
+	}
+}

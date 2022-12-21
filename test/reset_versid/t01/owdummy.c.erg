@@ -1,0 +1,10 @@
+/* Only needed for WIN32 */
+/* $Header$ */
+
+#include <owil.h>
+
+void OwMakeDummyAction(void)
+{
+	return;
+}
+

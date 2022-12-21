@@ -60,3 +60,6 @@ echo === test_add_mlm ===
 echo === test_fix_long ===
 ./test_fix_long.sh
 
+echo === test_reset_versid ===
+./test_reset_versid.sh
+
