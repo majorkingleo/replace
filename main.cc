@@ -234,6 +234,12 @@ int main( int argc, char **argv )
   o_ignore_directories.setRequired(false);
   arg.addOptionR( &o_ignore_directories );
 
+  Arg::StringOption o_backup_file_suffix("backup-file-suffix");
+  o_backup_file_suffix.setDescription("default: .save");
+  o_backup_file_suffix.setRequired(false);
+  arg.addOptionR( &o_backup_file_suffix );
+
+
   // REPLACE CHAIN
 
   Arg::OptionChain oc_replace;
@@ -677,6 +683,12 @@ int main( int argc, char **argv )
 	  }
   }
 
+  std::wstring backup_suffix = L".save";
+
+  if( o_backup_file_suffix.isSet() ) {
+	  backup_suffix = dl.inputString2wString( o_backup_file_suffix.getValues()->at(0) );
+  }
+
   std::wstring search = L"";
   std::wstring replace = L"";
   bool doit =  o_doit.getState();
@@ -695,7 +707,8 @@ int main( int argc, char **argv )
 				  o_format_string.isSet(),
 				  o_implicit.isSet(),
 				  o_space_between_literal.isSet(),
-				  directories_to_ignore );
+				  directories_to_ignore,
+				  backup_suffix );
 
 		  fix_from_log.run();
 
@@ -943,10 +956,14 @@ int main( int argc, char **argv )
 			  std::cerr << "cannot stat file " << it->getPath() << " error: " << strerror(errno) << std::endl;
 		  }
 
-		  if( rename( it->getPath().c_str(), TO_CHAR(it->getPath() + ".save") ) != 0 )
-			{
-			  std::cerr << strerror(errno) << std::endl;
-			}
+		  std::string backup_file = it->getPath() + dl.wString2output( backup_suffix );
+
+		  if( !backup_suffix.empty() ) {
+			  if( rename( it->getPath().c_str(), backup_file.c_str() ) != 0 ) {
+				  std::cerr << strerror(errno) << std::endl;
+			  }
+		  }
+
 		  std::ofstream out( it->getPath().c_str(), std::ios_base::trunc );
 		  
 		  if( !out )

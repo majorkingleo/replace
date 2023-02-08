@@ -70,7 +70,8 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  bool handle_format_strings,
 									  bool handle_implicit_,
 									  bool handle_space_between_literal,
-									  const std::set<std::string> & directories_to_ignore_ )
+									  const std::set<std::string> & directories_to_ignore_,
+									  const std::wstring & backup_suffix_ )
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
@@ -78,7 +79,8 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
   handlers(),
   files(),
   handle_implicit(handle_implicit_),
-  directories_to_ignore( directories_to_ignore_ )
+  directories_to_ignore( directories_to_ignore_ ),
+  backup_suffix( backup_suffix_ )
 {
 
 	if( remove_unused_variables_ ) {
@@ -237,9 +239,11 @@ void FixFromCompileLog::doit()
 	{
 		if( fit->content != fit->original_content ) {
 
-			if( rename(  HandleFile::w2out(fit->path_name).c_str(), TO_CHAR( HandleFile::w2out(fit->path_name + L".save")) ) != 0 )
-			{
-				std::cerr << strerror(errno) << std::endl;
+			if( !backup_suffix.empty() ) {
+				if( rename(  HandleFile::w2out(fit->path_name).c_str(),
+							 HandleFile::w2out(fit->path_name + backup_suffix ).c_str() ) != 0 ) {
+					std::cerr << strerror(errno) << std::endl;
+				}
 			}
 
 			std::ofstream out( HandleFile::w2out(fit->path_name).c_str(), std::ios_base::trunc );
