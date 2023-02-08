@@ -10,7 +10,7 @@
 #include "xml.h"
 #include "format.h"
 #include "find_files.h"
-#include "colored_output.h"
+#include "ColoredOutput.h"
 
 using namespace Tools;
 

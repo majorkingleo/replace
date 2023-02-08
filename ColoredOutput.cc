@@ -1,25 +1,50 @@
 /*
- * colored_output.cc
+ * ColoredOutput.cc
  *
- *  Created on: 04.05.2014
- *      Author: martin
+ *  Created on: 27.01.2023
+ *      Author: Martin Oberzalek <oberzalek@gmx.at>
  */
-
-#include "colored_output.h"
 #include <sstream>
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
-#include <unistd.h>
+#include "ColoredOutput.h"
+#ifdef _WIN32
+#	include <windows.h>
+#else
+#	include <unistd.h>
+#endif
 
 ColoredOutput::ColoredOutput()
-: colored_output( true )
+: colored_output( false )
 {
-	char *pcTerm =  getenv( "TERM");
+#ifdef _WIN32
+	// https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+	// Set output mode to handle virtual terminal sequences
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut == INVALID_HANDLE_VALUE) {
+		return;
+	}
 
+	DWORD dwMode = 0;
+	if (!GetConsoleMode(hOut, &dwMode)) {
+		return;
+	}
+
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	if (!SetConsoleMode(hOut, dwMode)) {
+		return;
+	}
+
+	colored_output = true;
+#else
+	colored_output = true;
+	char *pcTerm =  getenv( "TERM");
+	
 	if( pcTerm == NULL || !isatty(fileno(stdout)) ) {
 		colored_output = false;
 	}
+#endif
 }
 
 std::string ColoredOutput::color_output( Color color, const std::string & text ) const

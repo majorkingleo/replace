@@ -3,7 +3,8 @@ bin_PROGRAMS=replace
 replace_SOURCES=\
 		add_wdgassign.cc\
 		argenumtype.cc\
-		colored_output.cc\
+		ColoredOutput.cc\
+		ColoredOutput.h\
 		correct_va_multiple_malloc.cc\
 		file_option.cc\
 		find_decl.cc\

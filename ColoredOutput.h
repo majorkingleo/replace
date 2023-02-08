@@ -1,15 +1,19 @@
 /*
- * colored_output.h
+ * ColoredOutput.h
  *
- *  Created on: 04.05.2014
- *      Author: martin
+ *  Created on: 27.01.2023
+ *      Author: Martin Oberzalek <oberzalek@gmx.at>
  */
-
 #ifndef COLORED_OUTPUT_H_
 #define COLORED_OUTPUT_H_
 
 #include <string>
 
+/*
+ * class to color a string on the console.
+ * On windows it modifies the console, so cross check
+ * if you use this in any combination with a curses library
+ */
 class ColoredOutput
 {
 	bool colored_output;

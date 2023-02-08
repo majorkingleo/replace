@@ -2,7 +2,7 @@
 #define OUTDEBUG_H_
 
 #include "debug.h"
-#include "colored_output.h"
+#include "ColoredOutput.h"
 
 class OutDebug : public Tools::Debug, ColoredOutput
 {

@@ -26,7 +26,7 @@
 #include "correct_va_multiple_malloc.h"
 #include "remove_generic_cast.h"
 #include "fix_from_compile_log.h"
-#include "colored_output.h"
+#include "ColoredOutput.h"
 #include "add_wdgassign.h"
 #include "fix_sprintf.h"
 #include "fix_StrForm.h"
