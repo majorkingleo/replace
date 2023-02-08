@@ -1,3 +1,8 @@
+/**
+ * Cpp utilities and functions
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
+
 #ifndef CPP_UTIL_H
 #define CPP_UTIL_H
 

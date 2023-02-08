@@ -1,3 +1,7 @@
+/**
+ * class for reading XML like files
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
 #include "xml.h"
 #include "string_utils.h"
 #include <iostream>

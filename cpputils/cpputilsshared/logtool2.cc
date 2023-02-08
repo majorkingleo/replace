@@ -1,3 +1,7 @@
+/**
+ * Typesafe wrapper around classic LogPrintf()
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
 #include <logtool2.h>
 
 int _CPPLogPrintf( const std::string & fac, int level, std::string fs )

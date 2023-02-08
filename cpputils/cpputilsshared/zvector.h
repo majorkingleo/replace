@@ -1,7 +1,6 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2009 Salomon Automation GmbH
+ * vector that is initialized with zeros
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
 
 #ifndef _Tools_ZVECTOR_H

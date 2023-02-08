@@ -1,8 +1,7 @@
 /*
- * cwformat.cc
- *
- *  Created on: 14.02.2022
- *      Author: martin
+ * Class for formating iostream with printf style format strings.
+ * std::wstring version
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
  */
 #include "cwformat.h"
 #include <iomanip>

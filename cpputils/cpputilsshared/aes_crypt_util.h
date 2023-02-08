@@ -1,16 +1,13 @@
 #ifndef AES_CRYPT_UTIL_H_
 #define AES_CRYPT_UTIL_H_
+/*
+ * A simple wrapper class for Owil's crypto engine
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
 
 #include <base/buser.h> 
 
 #if (defined OWIL_VERSION && OWIL_VERSION >= 72)
-
-/*
- * aes_crypt_util.h
- *
- *  Created on: 28.10.2015
- *      Author: mmattl
- */
 
 #ifdef __cplusplus
 #include <string>

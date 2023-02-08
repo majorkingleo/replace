@@ -99,9 +99,8 @@ WamasExceptionDb::WamasExceptionDb (char const *file, const int line, const void
 	// next push the conrete DB failure
 //	_OpmsgSIf_ErrPush(GeneralTerrDb, dberror_.c_str());
 }
-#ifdef __NOT_USED_BY_FESTO
 WamasExceptionDb::WamasExceptionDb (char const *file, const int line, const void *tid, std::string const &fac)
- : WamasExceptionBase (file,line,fac.c_str(), TSqlPrettyErrTxt(tid), GeneralTerrDb), dberror_(TSqlPrettyErrTxt(tid))
+ : WamasExceptionBase (file,line,fac.c_str(), TSqlPrettyErrTxt(tid)), dberror_(TSqlPrettyErrTxt(tid))
 {
 	what_ = MLM ("Datenbankfehler!");
 
@@ -111,7 +110,6 @@ WamasExceptionDb::WamasExceptionDb (char const *file, const int line, const void
 	// next push the conrete DB failure
 //	_OpmsgSIf_ErrPush(GeneralTerrDb, dberror_.c_str());
 }
-#endif
 void WamasExceptionDb::log(const char* fac)
 {
 /*

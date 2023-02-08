@@ -1,11 +1,11 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2022 Martin Oberzalek
+ * Helper class for formating iostream with printf style format strings.
+ * std::wstring version
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
  */
 
-#ifndef _wamas_CWFORMAT_H
-#define _wamas_CWFORMAT_H
+#ifndef _TOOLS_CWFORMAT_H
+#define _TOOLS_CWFORMAT_H
 
 #include <string>
 
@@ -94,4 +94,4 @@ namespace Tools {
 
 } // /namespace Tools
 
-#endif  /* _wamas_CFORMAT_H */
+#endif  /* _TOOLS_CFORMAT_H */

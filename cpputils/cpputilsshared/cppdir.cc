@@ -1,7 +1,11 @@
+/**
+ * Simple C++ interface for getting informations about files and directories.
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
 
-#if (defined _WIN32 || defined WIN32)
-// Windows native  : Exclude file
-#else
+#if defined(_WIN32) || defined(WIN32)
+#include <windows.h>
+#endif
 
 #include "cppdir.h"
 
@@ -17,6 +21,7 @@ extern "C" {
 
 }
 
+#include <sys/types.h>
 #include <vector>
 #include <cstdlib>
 
@@ -284,19 +289,34 @@ CppDir::EFILE CppDir::File::get_type( const std::string& cname )
 
 #undef IS
 
+#if _MSC_VER+0 <= 1900 && !defined( S_ISREG ) // Visual Studio 2015
+# define S_ISDIR( x ) ( x & _S_IFDIR )
+# define S_ISCHR( x ) ( x & _S_IFCHR )
+# define S_ISFIFO( x ) ( x & _S_IFIFO )
+# define S_ISREG( x ) ( x & _S_IFREG )
+#endif
+
+#ifdef S_ISREG
  if( S_ISREG( stat_buf.st_mode ) )
     return EFILE::REGULAR;
+#endif	
 
-
+#ifdef S_ISDIR
   if( S_ISDIR( stat_buf.st_mode ) )
     return EFILE::DIR;
+#endif	
     
+#ifdef S_ISCHR
   if( S_ISCHR( stat_buf.st_mode ) )
     return EFILE::CHAR;
-#ifndef WIN32
+#endif	
+
+#ifdef S_ISBLK
   if( S_ISBLK( stat_buf.st_mode ) )
     return EFILE::BLOCK;
+#endif
 
+#ifdef S_ISFIFO
   if( S_ISFIFO( stat_buf.st_mode ) )
     return EFILE::FIFO;
 #endif	
@@ -807,4 +827,17 @@ bool CppDir::is_in_dir( const std::string &path, const std::string &dir )
   return false;
 }
 
-#endif // WIN32 && _MSC_VER_
+size_t CppDir::get_path_max()
+{
+#if defined WIN32 || defined _WIN32
+	return MAX_PATH;
+#else
+	long len = pathconf( pwd().c_str(), _PC_PATH_MAX );
+
+	if( len <= 0 ) {
+		return PATH_MAX;
+	}
+
+	return len;
+#endif
+}

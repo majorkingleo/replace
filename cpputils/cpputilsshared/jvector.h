@@ -1,3 +1,8 @@
+/**
+ * Wrapper around std::vector to get an interface like vector class from java
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
+
 #ifndef _tools_JVECTOR_H
 #define _tools_JVECTOR_H
 

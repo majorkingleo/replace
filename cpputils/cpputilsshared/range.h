@@ -1,3 +1,8 @@
+/**
+ * class for safer usage of enums, checks if an assigned
+ * integer value is in range, to avoid invalid enum states.
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
 #ifndef TOOLS_RANGE_H
 #define TOOLS_RANGE_H
 

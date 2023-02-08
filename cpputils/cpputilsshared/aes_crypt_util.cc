@@ -1,10 +1,7 @@
 /*
- * aes_crypt_utils.cc
- *
- *  Created on: 28.10.2015
- *  Author: mmattl
+ * A simple wrapper class for Owil's crypto engine
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
-
 /* ==========================================================================
  * INCLUDES
  * =========================================================================*/

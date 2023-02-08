@@ -12,7 +12,11 @@ if( $main::uname ne 'WINNT') {
 	}
 
 	
-	if( !defined ( $ENV{TOOLSBOXDIR} ) && ! ( $ENV{EPREFIX} =~ /2010/ )) {
+	if( !defined ( $ENV{TOOLSBOXDIR} ) &&  ( $ENV{EPREFIX} =~ /2015/ ) ) {
+
+		# on TB-2015 / GCC-4.8: enable C++11 
+		# <= TB-2010 : not possible
+		# TB-2020 / GCC-8 or GCC-10 : use higher standard
 
         &main'Macromore('CFLAGSAUX', 'c++11', "-std=gnu++11");
 

@@ -1,3 +1,8 @@
+/**
+ * std::string and std::wstring utilty functions
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
+
 #include "string_utils.h"
 #include "format.h"
 #include <cctype>
@@ -97,7 +102,7 @@ bool is_int( const std::wstring &s )
 }
 
 /*
-  Re: Trim Funktion fï¿½r Strings
+  Re: Trim Funktion für Strings
   Von: Hubert Schmid <h.schmid-usenet@gmx.de>
   Datum:  Sonntag, 10. Oktober 2004 14:13:35
   Gruppen:  de.comp.lang.iso-c++
@@ -709,7 +714,75 @@ std::vector<std::string> split_and_strip_simple( std::string str, const std::str
   return sl;
 }
 
+std::vector<std::wstring> split_and_strip_simple( std::wstring str, const std::wstring & sep , int max )
+{
+  str = strip( str, sep );
+
+  std::wstring::size_type start = 0, last = 0;
+  int count = 0;
+
+  std::vector<std::wstring> sl;
+
+  while( true )
+    {
+      if( max > 0 )
+		count++;
+
+      if( count >= max && max > 0 )
+		{
+		  sl.push_back( str.substr( last ) );
+		  break;
+		}
+
+      start = str.find_first_of( sep, last );
+
+      if( start == std::wstring::npos )
+		{
+		  sl.push_back( str.substr( last ) );
+		  break;
+		}
+
+      sl.push_back( str.substr( last, start - last ) );
+
+	  for( std::wstring::size_type pos = start + 1;
+		   pos < str.size(); pos++ )
+		{
+		  bool found = false;
+
+		  for( std::wstring::size_type i = 0; i < sep.size(); i++ )
+			{
+			  if( str[pos] == sep[i] )
+				{
+				  found = true;
+				  break;
+				}
+			}
+
+		  if( found == false )
+			{
+			  last = pos;
+			  break;
+			}
+		}
+
+	  //      last = start + 1;
+    }
+
+  return sl;
+}
+
 std::string fill_trailing( std::string s, const std::string fill_sign, unsigned int len )
+{
+	s.reserve(len);
+
+
+	while( s.size() < len )
+		s += fill_sign;
+
+	return s;
+}
+
+std::wstring fill_trailing( std::wstring s, const std::wstring fill_sign, unsigned int len )
 {
 	s.reserve(len);
 

@@ -1,17 +1,9 @@
 #ifndef NOWAMAS
-/*****************************************************************************
-+* PROJECT:   projectname
-+* PACKAGE:   package name
-+* FILE:      blockupdate.c
-+* CONTENTS:  overview description, list of functions, ...
-+* COPYRIGHT NOTICE:
-+*         (c) Copyright 2002 by
-+*                 Salomon Automationstechnik Ges.m.b.H
-+*                 Friesachstrasse 15
-+*                 A-8114 Friesach bei Graz
-+*                 Tel.: ++43 3127 200-0
-+*                 Fax.: ++43 3127 200-22
-+****************************************************************************/
+
+/*
+ * Blockupdate utility functions that will return a defined state
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
 
 /* ===========================================================================
  * INCLUDES
@@ -36,10 +28,6 @@
 #undef _BLOCKUPDATE_C
 
 using namespace Tools;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* ===========================================================================
  * LOCAL DEFINES AND MACROS
@@ -136,7 +124,7 @@ int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
 	}
 	
 	/* --- 10000, 15000, 20000, ... --- */
-	if (nAnz <= 0) {
+	if (nAnz == 0) {
 	  break;
 	}
 	
@@ -179,7 +167,4 @@ int BlockTExecStdSqlX(void *pvTid, const char *pcFac, SqlTstdStmtRes iReason,
   return (1);
 }
   
-#ifdef __cplusplus
-}
-#endif
 #endif /* NOWAMAS */

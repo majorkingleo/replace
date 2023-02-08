@@ -1,7 +1,13 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2019 Salomon Automation GmbH
+ * Classes for typesave versions of sprintf() that are returning a std::string
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ *
+ * C++-11 version with variadic templates
+ *
+ * Examples:
+ *    std::cout << format( "Hello %s, I have $05d$ in my pocket", "world", 5 ) << std::endl;
+ *    std::cout << format( "Do not try this with printf: %s", 10101 ) << std::endl;
+ *
  */
 
 #include "format2.h"
@@ -39,7 +45,7 @@ namespace Tools {
     Format2::Format2( const std::string &format_, std::vector<BaseArg*> & args_ )
     : args(args_),
       format(format_),
-      num_of_args(args.size()),
+      num_of_args((int)args.size()),
       s()
     {
       parse();
@@ -144,7 +150,7 @@ namespace Tools {
           if( pos < len )
             {
               // search for the $ digit
-              unsigned int dp = pos;
+              unsigned int dp = (int)pos;
 
               while( dp < len && isdigit( format[dp] ) )
                 dp++;
@@ -166,7 +172,7 @@ namespace Tools {
                   pos++;
 
                   // search for the $ digit
-                  unsigned int dp = pos;
+                  unsigned int dp = (int)pos;
 
                   while( dp < len && isdigit( format[dp] ) )
                     dp++;
@@ -214,7 +220,7 @@ namespace Tools {
 
 
                       // search for the $ digit
-                      unsigned int dp = pos;
+                      unsigned int dp = (int)pos;
 
                       while( dp < len && isdigit( format[dp] ) )
                         dp++;
@@ -390,7 +396,7 @@ namespace Tools {
                   CFormat f2;
                   f2.base = cf.base;
                   std::string ss = use_arg( upar, f2 );
-                  cf.strlength = ss.size();
+                  cf.strlength = (int)ss.size();
                   //        printf( "str: %s\n", s.c_str() );
                 }
 

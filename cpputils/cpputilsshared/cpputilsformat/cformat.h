@@ -1,11 +1,11 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2019 Salomon Automation GmbH
+ * Helper class for formating iostream with printf style format strings.
+ * std::string version
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
  */
 
-#ifndef _wamas_CFORMAT_H
-#define _wamas_CFORMAT_H
+#ifndef _TOOLS_CFORMAT_H
+#define _TOOLS_CFORMAT_H
 
 namespace Tools {
   namespace Format {
@@ -92,4 +92,4 @@ namespace Tools {
 
 } // /namespace Tools
 
-#endif  /* _wamas_CFORMAT_H */
+#endif  /* _TOOLS_CFORMAT_H */

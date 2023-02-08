@@ -1,3 +1,8 @@
+/**
+ * Typesafe wrapper around classic LogPrintf()
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
+
 #ifndef SCPP_LOGTOOL_HH
 #define SCPP_LOGTOOL_HH
 

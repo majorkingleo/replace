@@ -1,9 +1,10 @@
+/**
+ * Simple C++ interface for getting informations about files and directories.
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
+
 #ifndef TOOLS_cppdir_h
 #define TOOLS_cppdir_h
-
-#if (defined _WIN32 || defined WIN32)
-// Windows native  : Exclude file
-#else
 
 #include <string>
 #include <list>
@@ -198,10 +199,14 @@ namespace CppDir
 
   /// checks if dir is in path
   bool is_in_dir( const std::string &path, const std::string &dir );
+
+  // returns maximum path length for a buffer
+  // example how to create a char array buffer:
+  // std::vector<char> buf( CppDir::get_path_max(), 0 );
+  // will return 253 on Windows, 4096 usaly on a Linux system
+  size_t get_path_max();
 }
 
 } // namespace Tools
-
-#endif // WIN32 && _MSC_VER
 
 #endif

@@ -1,7 +1,13 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2019 Salomon Automation GmbH
+ * Classes for typesave versions of sprintf() that are returning a std::string
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ *
+ * C++-11 version with variadic templates
+ *
+ * Examples:
+ *    std::cout << format( "Hello %s, I have $05d$ in my pocket", "world", 5 ) << std::endl;
+ *    std::cout << format( "Do not try this with printf: %s", 10101 ) << std::endl;
+ *
  */
 
 #ifndef _wamas_FORMAT2_H
@@ -40,7 +46,7 @@ namespace Tools {
       bool _is_string;
 
     public:
-      BaseArg( bool is_int_, bool is_string_ )
+      BaseArg( bool is_int_ = false, bool is_string_  = false )
     : _is_int( is_int_ ),
       _is_string( is_string_ )
     {}
@@ -57,20 +63,20 @@ namespace Tools {
         return 0;
       }
 
-      template <class N> bool is_int( const N &n ) { return false; }
-      bool is_int( const int &n ) { return true; }
-      bool is_int( const unsigned int &n ) { return true; }
-      bool is_int( const short &n ) { return true; }
-      bool is_int( const unsigned short ) { return true; }
-      bool is_int( const unsigned long ) { return true; }
-      bool is_int( const unsigned long long ) { return true; }
-      bool is_int( const long long ) { return true; }
+      template <class N> bool is_int( const N &n ) const { return false; }
+      bool is_int( const int &n ) const { return true; }
+      bool is_int( const unsigned int &n ) const { return true; }
+      bool is_int( const short &n ) const { return true; }
+      bool is_int( const unsigned short ) const { return true; }
+      bool is_int( const unsigned long ) const { return true; }
+      bool is_int( const unsigned long long ) const { return true; }
+      bool is_int( const long long ) const { return true; }
 
-      template <class S> bool is_string( const S &s_ ) { return false; }
-      bool is_string( std::string& s_ ) { return true; }
-      bool is_string( const std::string& s_ ) { return true; }
-      bool is_string( char* ) { return true; }
-      bool is_string( const char* ) { return true; }
+      template <class S> bool is_string( const S &s_ ) const { return false; }
+      bool is_string( std::string& s_ ) const { return true; }
+      bool is_string( const std::string& s_ ) const { return true; }
+      bool is_string( char* ) const { return true; }
+      bool is_string( const char* ) const { return true; }
     };
 
     template<typename Arg> class RealArg : public BaseArg
@@ -111,14 +117,14 @@ namespace Tools {
       }
 
       template<class T> int get_int( const T &t ) { return 0; }
-      int get_int( int n ) { return n; }
-      int get_int( unsigned int n ) { return n; }
-      int get_int( short n ) { return n; }
-      int get_int( unsigned short n ) { return n; }
-      int get_int( long long n ) { return n; }
-      int get_int( unsigned long long n  ) { return n; }
-      int get_int( long n ) { return n; }
-      int get_int( unsigned long n ) { return n; }
+      int get_int( int n ) { return (int)n; }
+      int get_int( unsigned int n ) { return (int)n; }
+      int get_int( short n ) { return (int)n; }
+      int get_int( unsigned short n ) { return (int)n; }
+      int get_int( long long n ) { return (int)n; }
+      int get_int( unsigned long long n  ) { return (int)n; }
+      int get_int( long n ) { return (int)n; }
+      int get_int( unsigned long n ) { return (int)n; }
 
       virtual int get_int() {
         BaseArg::get_int();
@@ -273,14 +279,14 @@ namespace Tools {
       std::string use_arg( unsigned int i, const Format::CFormat &cf );
 
       template<class T> int get_int( const T &t ) { return 0; }
-      int get_int( int n ) { return n; }
-      int get_int( unsigned int n ) { return n; }
-      int get_int( short n ) { return n; }
-      int get_int( unsigned short n ) { return n; }
+      int get_int( int n ) { return (int)n; }
+      int get_int( unsigned int n ) { return (int)n; }
+      int get_int( short n ) { return (int)n; }
+      int get_int( unsigned short n ) { return (int)n; }
       int get_int( long long n ) { return (int)n; }
       int get_int( unsigned long long n  ) { return (int)n; }
-      int get_int( long n ) { return n; }
-      int get_int( unsigned long n ) { return n; }
+      int get_int( long n ) { return (int)n; }
+      int get_int( unsigned long n ) { return (int)n; }
 
 
       int skip_atoi( std::string s, std::string::size_type start, std::string::size_type & pos ) const;
@@ -288,7 +294,33 @@ namespace Tools {
     }; // class Format2
 
   } // namespace Format2
+} // /namespace Tools
 
+#if TOOLS_VERSION+0 >= 40
+
+// forward to tools implementation
+#include <sstring.h>
+
+namespace Tools {
+  template <typename... Args> std::string format( const std::string & format, Args... args )
+  {
+    std::vector<wamas::platform::format_2011::BaseArg*> v_args;
+
+    wamas::platform::format_2011::add_args( v_args, args... );
+
+    wamas::platform::format_2011::Format2011 f2( format, v_args );
+
+    for( auto x: v_args )
+      {
+        delete x;
+      }
+
+    return f2.get_string();
+  }
+} // /namespace Tools
+
+#else
+namespace Tools {
   template <typename... Args> std::string format( const std::string & format, Args... args )
   {
     std::vector<Format2::BaseArg*> v_args;
@@ -305,6 +337,7 @@ namespace Tools {
     return f2.get_string();
   }
 } // /namespace Tools
+#endif
 
 #endif
 #endif  /* _wamas_FORMAT2_H */

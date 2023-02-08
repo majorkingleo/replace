@@ -1,7 +1,6 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2019 Salomon Automation GmbH
+ * Classes for typesave versions of sprintf() that are returning a std::wstring
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
  */
 
 #include "wformat2.h"

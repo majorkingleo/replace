@@ -1,5 +1,10 @@
 #ifndef LOCKING_UTILS_H_
 #define LOCKING_UTILS_H_
+/*
+ * Lock data set with timeout
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
+ */
+
 
 
 #include <tsleep.h>
@@ -7,13 +12,6 @@
 #include <sqltable.h>
 #include <mlmsg.h>
 #include <cpp_util.h>
-
-/*
- * locking_utils.h
- *
- *  Created on: 11.06.2014
- *      Author: mmattl
- */
 
 #ifdef FIX_BUG_20809
 #  define WORKAROUND_BUG_20809_TExecSql _TExecSql

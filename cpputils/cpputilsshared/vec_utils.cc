@@ -1,7 +1,6 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2009 Salomon Automation GmbH
+ * vector utilities
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
 
 #include "vec_utils.h"

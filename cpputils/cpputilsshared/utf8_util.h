@@ -1,8 +1,6 @@
-/*
- * utf8_util.h
- *
- *  Created on: 10.02.2022
- *      Author: martin
+/**
+ * utf conversion utilities
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
  */
 
 #ifndef CPPUTILS_CPPUTILSSHARED_UTF8_UTIL_H_
@@ -32,7 +30,7 @@ public:
 	static std::string utf32toString( const std::wstring & text );
 };
 
-}
+} // namespace Tools
 
 #endif
 

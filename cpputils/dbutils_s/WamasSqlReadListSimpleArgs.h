@@ -61,7 +61,10 @@ template <typename thetype>
 void WamasSqlReadListSimpleArgs (const void *tid, const char *fac,
         const std::string& clname, std::vector<thetype>& outlist,
         const std::string& where = "",
-		// MSVC doesn't allow using a reference here (-> va_start)
+		// Must not use a reference here (-> va_start)
+		// unfortunately, old VC9 allowed compilation and 
+		// it led to the following runtime issue:
+		// "_SqlExecArgsVaAppend() failed"
 		const WamasSqlReadListSimpleArgs_OrderByType orderby="", ...)
 {
     WAMASSERT (fac != NULL, fac, "fac is NULL");

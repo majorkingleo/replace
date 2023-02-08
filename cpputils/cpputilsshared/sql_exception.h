@@ -1,11 +1,10 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2009 Salomon Automation GmbH
+ * sql exception class
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
 
-#ifndef _wamas_SQL_EXCEPTION_H
-#define _wamas_SQL_EXCEPTION_H
+#ifndef _TOOLS_SQL_EXCEPTION_H
+#define _TOOLS_SQL_EXCEPTION_H
 
 #include <iostream>
 
@@ -56,4 +55,4 @@ public:
 
 #endif // NOWAMAS
 
-#endif  /* _wamas_SQL_EXCEPTION_H */
+#endif  /* _TOOLS_SQL_EXCEPTION_H */

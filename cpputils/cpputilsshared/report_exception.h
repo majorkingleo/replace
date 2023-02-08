@@ -1,11 +1,10 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2009 Salomon Automation GmbH
+ * exception base class, writes the message also to stderr
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
 
-#ifndef _wamas_REPORT_EXCEPTION_H
-#define _wamas_REPORT_EXCEPTION_H
+#ifndef _TOOLS_REPORT_EXCEPTION_H
+#define _TOOLS_REPORT_EXCEPTION_H
 
 #include <iostream>
 
@@ -62,6 +61,9 @@ public:
 	  return err.c_str();
   }
   virtual const char *simple_what() const throw() {
+	  if( simple_err.empty() ) {
+		  return what();
+	  }
 	  return simple_err.c_str();
   }
 
@@ -88,14 +90,36 @@ protected:
 };
 
 /**
+ * usage:
+ * throw REPORT_EXCEPTION( "unknown error" )
+ *
+ * with C++11 you can optional add the simple error message by yourself
+ * throw REPORT_EXCEPTION( "unknown error", MlM("unknown error") )
+ *
  * instantiates a ReportException
  * err ... 		the user-text with back-trace
  * simple_err.. the user-text without back-trace
  */
-#define REPORT_EXCEPTION( what ) \
+#if __cplusplus < 201103
+# define REPORT_EXCEPTION( what ) \
 	ReportException( Tools::format( "Exception from: %s:%d:%s message: %s%s", \
 		__FILE__, __LINE__, __FUNCTION__, what, Tools::BackTraceHelper::bt.bt() ), \
 		Tools::format("%s", what ) )
+#else
+# define REPORT_EXCEPTION1( what ) \
+ReportException( Tools::format( "Exception from: %s:%d:%s message: %s%s", \
+	__FILE__, __LINE__, __FUNCTION__, what, Tools::BackTraceHelper::bt.bt() ), \
+	Tools::format("%s", what ) )
 
+# define REPORT_EXCEPTION2( what, simple_what ) \
+ReportException( Tools::format( "Exception from: %s:%d:%s message: %s (%s)%s", \
+	__FILE__, __LINE__, __FUNCTION__, what, simple_what, Tools::BackTraceHelper::bt.bt() ), \
+	Tools::format("%s", simple_what ) )
 
-#endif  /* _wamas_REPORT_EXCEPTION_H */
+// https://stackoverflow.com/questions/11761703/overloading-macro-on-number-of-arguments
+#define REPORT_EXCEPTION_EXPAND(x) x
+#define REPORT_EXCEPTION_GET_MACRO(_1, _2, NAME, ...) NAME
+#define REPORT_EXCEPTION(...) REPORT_EXCEPTION_EXPAND(REPORT_EXCEPTION_GET_MACRO(__VA_ARGS__, REPORT_EXCEPTION2, REPORT_EXCEPTION1)(__VA_ARGS__))
+#endif
+
+#endif  /* _TOOLS_REPORT_EXCEPTION_H */

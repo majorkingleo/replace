@@ -164,7 +164,7 @@ int StandardList::handleKeyCode( CbView  cbv )
   if (cbv->u.input.xreason==VI_MOUSE || cbv->u.input.xreason==VI_TRAVERSE) {
     MousePressed();
   } else if (cbv->u.input.xreason==VI_KEY) {
-    key = ((CharEvent *)cbv->u.input.sysinfo)->key;
+    key = (char)((CharEvent *)cbv->u.input.sysinfo)->key;
 
     setKeyCode(key);
     setKeyCodeUpper(toupper(key));
@@ -500,19 +500,26 @@ int StandardList::start( OWidget parent, Value data, MskDialog *pmask_rl )
 	}
 
 
-  	ListTdialog		*pListDialog;
+  ListTdialog		*pListDialog;
 	ListTXdialog	*pListXDialog;
 	ListTaction		*pListAction;
 	listSelItem		*pSelector;
 	MskDialog		mask_rl = 0;
 
-	if ( VaMultipleMalloc (	(int)sizeof(ListTdialog), (void**)&pListDialog,
-				(int)sizeof(ListTXdialog),&pListXDialog,
-				(int)sizeof(ListTaction), &pListAction,
-				(int)getSelectorSize(),	  &pSelector,
-				(int)-1 ) == (void*) NULL )
+#if TOOLS_VERSION < 40
+ #define AS_MUMALLOC_RESOURCE(x) (void**)x
+#else
+ #define AS_MUMALLOC_RESOURCE(x) x
+#endif // TOOLS_VERSION
+
+	if ( VaMultipleMalloc (	
+        sizeof(ListTdialog),  AS_MUMALLOC_RESOURCE(&pListDialog),
+				sizeof(ListTXdialog), &pListXDialog,
+				sizeof(ListTaction),  &pListAction,
+				getSelectorSize(),	  &pSelector,
+				(ssize_t)-1 ) == (void*)NULL )
 	  {
-		return -1;
+		  return -1;
 	  }
 
 	// fillSelector( p_selector );

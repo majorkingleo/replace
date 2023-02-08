@@ -1,7 +1,6 @@
 /**
- * @file
- * @todo describe file content
- * @author Copyright (c) 2009 Salomon Automation GmbH
+ * Alias for cpp_util.h
+ * @author Copyright (c) 2022 SSI Schaefer IT Solutions
  */
 
 #ifndef _wamas_CPP_UTILS_H

@@ -1,3 +1,8 @@
+/**
+ * std::string and std::wstring utilty functions
+ * @author Copyright (c) 2001 - 2022 Martin Oberzalek
+ */
+
 #ifndef TOOLS_string_utils_h
 #define TOOLS_string_utils_h
 
@@ -49,6 +54,7 @@ std::vector<std::string> split_string( std::string str, std::string seperator, i
 std::vector<std::wstring> split_string( std::wstring str, std::wstring seperator, int max = -1 );
 
 std::vector<std::string> split_and_strip_simple( std::string str, const std::string & sep = " \t\n", int max = -1 );
+std::vector<std::wstring> split_and_strip_simple( std::wstring str, const std::wstring & sep = L" \t\n", int max = -1 );
 
 inline bool is_bool( const bool &b ) { return true; }
 template<class T> bool is_bool( const T &t ) { return false; }
@@ -141,6 +147,18 @@ template<class T>std::string x2s( T what )
 
   return s;
 }
+
+#if __cplusplus >= 201103
+/// converts anything to a string
+template<class T>std::wstring x2ws( T what )
+{
+  std::wstringstream str;
+
+  str << what;
+
+  return str.str();
+}
+#endif
 
 std::string x2s( const bool b );
 
