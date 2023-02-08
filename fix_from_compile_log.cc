@@ -69,14 +69,16 @@ FixFromCompileLog::FixFromCompileLog( const std::string & path_,
 									  bool initialize_variables_,
 									  bool handle_format_strings,
 									  bool handle_implicit_,
-									  bool handle_space_between_literal )
+									  bool handle_space_between_literal,
+									  const std::set<std::string> & directories_to_ignore_ )
 : path( path_ ),
   compile_log( compile_log_ ),
   only_comment_out( only_comment_out_ ),
   remove_unused_variables(remove_unused_variables_),
   handlers(),
   files(),
-  handle_implicit(handle_implicit_)
+  handle_implicit(handle_implicit_),
+  directories_to_ignore( directories_to_ignore_ )
 {
 
 	if( remove_unused_variables_ ) {
@@ -108,7 +110,7 @@ void FixFromCompileLog::run()
 
 	FILE_SEARCH_LIST all_files;
 
-	if( !find_files( path, all_files ) )
+	if( !find_files( path, all_files, directories_to_ignore ) )
 	{
 		throw REPORT_EXCEPTION( format("no .c or .cc files found at %s", path ) );
 	}

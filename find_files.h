@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include "get_file_type.h"
+#include <set>
 
 class Files
 {
@@ -43,6 +44,8 @@ public:
 
 typedef std::list<Files> FILE_SEARCH_LIST;
 
-bool find_files( const std::string & path, FILE_SEARCH_LIST & files );
+bool find_files( const std::string & path,
+				 FILE_SEARCH_LIST & files,
+				 const std::set<std::string> & directories_to_ignore = std::set<std::string>() );
 
 #endif

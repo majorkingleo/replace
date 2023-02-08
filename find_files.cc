@@ -3,7 +3,9 @@
 
 using namespace Tools;
 
-bool find_files( const std::string & path, FILE_SEARCH_LIST & files )
+bool find_files( const std::string & path,
+				 FILE_SEARCH_LIST & files,
+				 const std::set<std::string> & directories_to_ignore )
 {
   CppDir::File file( path );
 
@@ -22,14 +24,17 @@ bool find_files( const std::string & path, FILE_SEARCH_LIST & files )
 
       for( CppDir::Directory::file_list_it it = fl.begin(); it != fl.end(); it++ )
         {
-          if( it->get_name() == "." ||
-        	   it->get_name() == ".." ||
-        	   it->get_name() == "CVS" ||
-        	   it->get_name() == ".svn")
+    	  if( directories_to_ignore.count( it->get_name() ) ) {
             continue;
+    	  }
+
+    	  if( it->get_name() == "." ||
+    		  it->get_name() == ".." ) {
+    		  continue;
+    	  }
 
           // std::cout << "path: " << it->get_path() << " name: " << it->get_name() << std::endl;
-          if( !find_files( CppDir::concat_dir( it->get_path(), it->get_name() ), files ) )
+          if( !find_files( CppDir::concat_dir( it->get_path(), it->get_name() ), files, directories_to_ignore ) )
             {
                 std::cerr << "cannot open file: "
                           << CppDir::concat_dir( it->get_path(), it->get_name() )

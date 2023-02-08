@@ -66,6 +66,7 @@ protected:
 	typedef std::list<File> FILE_LIST;
 	FILE_LIST files;
 	bool handle_implicit;
+	std::set<std::string> directories_to_ignore;
 
 public:
 	FixFromCompileLog( const std::string & path, // SRCDIR
@@ -75,7 +76,8 @@ public:
 				       bool initialize_variables_,
 				       bool handle_format_strings,
 				       bool handle_implicit,
-					   bool handle_space_between_literal );
+					   bool handle_space_between_literal,
+					   const std::set<std::string> & directories_to_ignore );
 
 	void run();
 	void doit();

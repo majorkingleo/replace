@@ -9,11 +9,12 @@
 #define FIX_C_HEADERS_H_
 
 #include <string>
+#include <set>
 
 class FixCHeaders
 {
 public:
-	int main( const std::string & path );
+	int main( const std::string & path, const std::set<std::string> & directories_to_ignore );
 
 private:
 	std::string build_func_name( const std::string & file );

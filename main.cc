@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <errno.h>
+#include <algorithm>
 
 #include "range.h"
 #include "string_utils.h"
@@ -226,6 +227,12 @@ int main( int argc, char **argv )
   o_diff.setDescription("show diff");
   o_diff.setRequired(false);
   arg.addOptionR( &o_diff );
+
+
+  Arg::StringOption o_ignore_directories("ignore-dirs");
+  o_ignore_directories.setDescription("ignore directories (default: prod CSV .svn .git)");
+  o_ignore_directories.setRequired(false);
+  arg.addOptionR( &o_ignore_directories );
 
   // REPLACE CHAIN
 
@@ -639,6 +646,37 @@ int main( int argc, char **argv )
 	  return 1;
   }
 
+  std::set<std::string> directories_to_ignore = {
+		  "CVS",
+		  ".svn",
+		  ".git",
+		  "prod"
+  };
+
+  if( o_ignore_directories.isSet() ) {
+	  directories_to_ignore.clear();
+
+	  std::copy_if( o_ignore_directories.getValues()->begin(),
+			  	    o_ignore_directories.getValues()->end(),
+					std::inserter(directories_to_ignore,directories_to_ignore.end()),
+					[]( std::string & val ) { return !val.empty(); } );
+
+	  if( directories_to_ignore.empty() ) {
+		  std::cout <<  co.color_output( co.YELLOW, dl.wString2output( L"searching in all directories" ) ) << std::endl;
+	  } else {
+		  std::wstring message = L"ignoring directories: ";
+
+		  if( directories_to_ignore.size() == 1 ) {
+			  message = L"ignoring directory: ";
+		  }
+
+		  std::string dirs = IterableToFormattedString( directories_to_ignore, ", ", "", -1, 10, "..." );
+		  message += dl.inputString2wString( dirs );
+
+		  std::cout << co.color_output( co.YELLOW, dl.wString2output( message ) ) << std::endl;
+	  }
+  }
+
   std::wstring search = L"";
   std::wstring replace = L"";
   bool doit =  o_doit.getState();
@@ -656,7 +694,8 @@ int main( int argc, char **argv )
 				  o_initialize_variables.isSet(),
 				  o_format_string.isSet(),
 				  o_implicit.isSet(),
-				  o_space_between_literal.isSet());
+				  o_space_between_literal.isSet(),
+				  directories_to_ignore );
 
 		  fix_from_log.run();
 
@@ -695,10 +734,10 @@ int main( int argc, char **argv )
   if( o_fix_c_header_file.isSet() )
   {
 	  FixCHeaders fix;
-	  return fix.main( o_path.getValues()->at(0) );
+	  return fix.main( o_path.getValues()->at(0), directories_to_ignore );
   }
 
-  if( !find_files( o_path.getValues()->at(0), files ) )
+  if( !find_files( o_path.getValues()->at(0), files, directories_to_ignore ) )
   {
 	  std::cerr << "nothing found" << std::endl;
 	  return 0;

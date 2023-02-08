@@ -231,12 +231,12 @@ std::string FixCHeaders::build_func_name( const std::string & file )
   return res;
 }
 
-int FixCHeaders::main( const std::string & path )
+int FixCHeaders::main( const std::string & path, const std::set<std::string> & directories_to_ignore )
 {
   ColoredOutput colored_output;
   FILE_SEARCH_LIST files;
  
-  if( !find_files( path, files ) )
+  if( !find_files( path, files, directories_to_ignore ) )
 	{
 	  std::cerr << "nothing found" << std::endl;
 	  return 0;
