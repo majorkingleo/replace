@@ -6,3 +6,5 @@ replace
 .cproject
 .settings
 .project
+Makefile.in
+configure
