@@ -6,7 +6,7 @@
 #include <format.h>
 #include <debug.h>
 #include <ctype.h>
-#include <cpp_util.h>
+#include "stderr_exception.h"
 
 using namespace Tools;
 
@@ -232,7 +232,7 @@ std::wstring PrimanList::add_selcallback_to_reasons( const std::wstring & file, 
 	DEBUG( wformat(L"function args: %d", func.args.size() ) );
 
 	if( func.args.size() != 5 ) {
-		throw REPORT_EXCEPTION( format("cannot find the correct number of arguments for function %s", w2out(func.name) ) );
+		throw STDERR_EXCEPTION( format("cannot find the correct number of arguments for function %s", w2out(func.name) ) );
 	}
 
 	strip_argtypes(func);

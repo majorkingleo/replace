@@ -11,7 +11,7 @@
 #include "utf8_util.h"
 #include "read_file.h"
 #include <format.h>
-#include <cpp_util.h>
+#include "stderr_exception.h"
 
 using namespace Tools;
 
@@ -112,7 +112,7 @@ std::wstring DetectLocale::inputString2wString( const std::string & str )
 		}
 	}
 
-	throw REPORT_EXCEPTION( format( "cannot convert %s to utf8 detected input encoding: %s", str, input_encoding ) );
+	throw STDERR_EXCEPTION( format( "cannot convert %s to utf8 detected input encoding: %s", str, input_encoding ) );
 
 	return std::wstring();
 }

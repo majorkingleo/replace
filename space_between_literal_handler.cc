@@ -9,7 +9,7 @@
 #include <string_utils.h>
 #include <debug.h>
 #include "getline.h"
-#include <cpp_util.h>
+#include "stderr_exception.h"
 #include "unused_variable_handler.h"
 #include "DetectLocale.h"
 
@@ -187,7 +187,7 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
 	if( pos == std::wstring::npos ) {
-		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", DetectLocale::w2out(warning.compile_log_line)));
+		throw STDERR_EXCEPTION( format( "can't get file position for warning %s", DetectLocale::w2out(warning.compile_log_line)));
 	}
 
 	std::wstring line = getline(content,  pos );

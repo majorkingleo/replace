@@ -8,7 +8,7 @@
 #include "string_utils.h"
 #include "xml.h"
 #include "format.h"
-#include "cpp_util.h"
+#include "stderr_exception.h"
 #include "find_files.h"
 #include "remove_versid_ch.h"
 #include <arg.h>
@@ -43,6 +43,7 @@
 #include "test_wformat.h"
 #include "reset_versid.h"
 #include <sys/stat.h>
+#include <string.h>
 
 using namespace Tools;
 
@@ -717,8 +718,8 @@ int main( int argc, char **argv )
 			  fix_from_log.doit();
 		  }
 
-	  } catch( ReportException & err ) {
-		  std::cerr << err.simple_what() << std::endl;
+	  } catch( const StderrException & err ) {
+		  std::cerr << err.get_simple_error() << std::endl;
 		  return 11;
 	  }
 
@@ -943,7 +944,7 @@ int main( int argc, char **argv )
 		  {
 			  continue;
 		  }
-	  } catch( ReportException & err ) {
+	  } catch( const StderrException & err ) {
 		  std::cerr << "error: " << err.what() << std::endl;
 		  continue;
 	  }

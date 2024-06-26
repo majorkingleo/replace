@@ -9,7 +9,7 @@
 #include <string_utils.h>
 #include <debug.h>
 #include "getline.h"
-#include <cpp_util.h>
+#include "stderr_exception.h"
 #include "DetectLocale.h"
 
 using namespace Tools;
@@ -89,7 +89,7 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::wstrin
 	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
 	if( pos == std::wstring::npos ) {
-		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", DetectLocale::w2out(warning.compile_log_line)));
+		throw STDERR_EXCEPTION( format( "can't get file position for warning %s", DetectLocale::w2out(warning.compile_log_line)));
 	}
 
 	std::wstring line = getline(content,  pos );

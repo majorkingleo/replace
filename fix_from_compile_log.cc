@@ -9,8 +9,8 @@
 #include "fix_from_compile_log.h"
 #include <iostream>
 #include <xml.h>
-#include <cpp_utils.h>
 #include <errno.h>
+#include <stderr_exception.h>
 #include "string_utils.h"
 #include "unused_variable_handler.h"
 #include <iterator.h>
@@ -29,6 +29,7 @@
 #include "HandleFile.h"
 #include "utf8_util.h"
 #include "read_file.h"
+#include <string.h>
 
 using namespace Tools;
 
@@ -42,7 +43,7 @@ FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_fr
 	std::vector<std::wstring> sl = split_simple( line, L":");
 
 	if( sl.size() < 2 ) {
-		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
+		throw STDERR_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
 	}
 
 	Location location;
@@ -51,7 +52,7 @@ FixFromCompileLog::Handler::Location FixFromCompileLog::Handler::get_location_fr
 	location.line = s2x<int>(sl[1],-1);
 
 	if( location.line == -1 ) {
-		throw REPORT_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
+		throw STDERR_EXCEPTION( format("cannot extract location from line: '%s'", HandleFile::w2out(line) ) );
 	}
 
 	CppDir::File file( Utf8Util::wStringToUtf8(location.file) );
@@ -114,7 +115,7 @@ void FixFromCompileLog::run()
 
 	if( !find_files( path, all_files, directories_to_ignore ) )
 	{
-		throw REPORT_EXCEPTION( format("no .c or .cc files found at %s", path ) );
+		throw STDERR_EXCEPTION( format("no .c or .cc files found at %s", path ) );
 	}
 
 	std::set<std::wstring> file_names;
@@ -169,7 +170,7 @@ void FixFromCompileLog::read_compile_log()
 
 	if( !read_file.read_file( compile_log, content ) )
 	{
-		throw REPORT_EXCEPTION( format("cannot open file %s for reading", compile_log, strerror(errno)) );
+		throw STDERR_EXCEPTION( format("cannot open file %s for reading", compile_log, strerror(errno)) );
 	}
 
 	DEBUG( format( "%s encoding: %s", compile_log, read_file.getFileEncoding()) );

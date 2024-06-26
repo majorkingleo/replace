@@ -6,7 +6,6 @@
  */
 
 #include "implicit_handler.h"
-#include "cpp_utils.h"
 #include "debug.h"
 #include "getline.h"
 #include "utils.h"

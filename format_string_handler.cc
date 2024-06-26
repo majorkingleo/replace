@@ -6,7 +6,7 @@
  */
 
 #include "format_string_handler.h"
-#include "cpp_utils.h"
+#include "stderr_exception.h"
 #include "debug.h"
 #include "getline.h"
 #include "utils.h"
@@ -179,7 +179,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
 	if( pos == std::string::npos ) {
-		throw REPORT_EXCEPTION( format( "can't get file position for warning %s", HandleFile::w2out(warning.compile_log_line)));
+		throw STDERR_EXCEPTION( format( "can't get file position for warning %s", HandleFile::w2out(warning.compile_log_line)));
 	}
 
 	std::wstring::size_type function_end = content.find( L")", pos );
