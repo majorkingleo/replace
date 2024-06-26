@@ -3,8 +3,6 @@ bin_PROGRAMS=replace
 replace_SOURCES=\
 		add_wdgassign.cc\
 		argenumtype.cc\
-		ColoredOutput.cc\
-		ColoredOutput.h\
 		correct_va_multiple_malloc.cc\
 		find_decl.cc\
 		find_files.cc\
@@ -23,7 +21,6 @@ replace_SOURCES=\
 		implicit_handler2.cc\
 		implicit_handler.cc\
 		main.cc\
-		OutDebug.cc\
 		OwCallback1.cc\
 		PrimanList.cc\
 		remove_generic_cast.cc\
@@ -44,8 +41,6 @@ replace_SOURCES=\
 		add_mlm_wbox.cc \
 		read_file.h \
 		read_file.cc \
-		test_wformat.cc \
-		test_wformat.h \
 		regex_match.h \
 		regex_match.cc \
 		reset_versid.cc \
