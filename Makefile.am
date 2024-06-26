@@ -39,8 +39,6 @@ replace_SOURCES=\
 		fix_conversion_null.cc \
 		add_mlm.cc \
 		add_mlm_wbox.cc \
-		read_file.h \
-		read_file.cc \
 		regex_match.h \
 		regex_match.cc \
 		reset_versid.cc \
