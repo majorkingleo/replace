@@ -4,7 +4,7 @@
 #include <string_utils.h>
 #include <ostream>
 #include <format.h>
-#include <debug.h>
+#include <CpputilsDebug.h>
 #include <ctype.h>
 #include "stderr_exception.h"
 
@@ -65,11 +65,11 @@ std::wstring PrimanList::include_primanlist( const std::wstring & file )
 		if( pos == 0 )
 			begin_of_line =  0;
 
-		DEBUG( get_whole_line(file,begin_of_line-1) );
+		CPPDEBUG( get_whole_line(file,begin_of_line-1) );
 
 		if( get_whole_line(file,begin_of_line-1).find(L"#ifdef") != std::wstring::npos )
 		{
-			DEBUG(format("#ifdef found at line %d",get_linenum(file,pos-1)));
+			CPPDEBUG(format("#ifdef found at line %d",get_linenum(file,pos-1)));
 			pos = file.find(L"#endif", pos+1)+6;
 			continue;
 		}
@@ -111,18 +111,18 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 		pos = file.find(function, start);
 
 		if( pos == std::wstring::npos ) {
-			DEBUG( "sel_callback not found");
+			CPPDEBUG( "sel_callback not found");
 			return SEL_CALLBACK::NOT_FOUND;
 		}
 
 		if( is_in_comment( file, pos ) ) {
-			DEBUG( "sel_callback is in comment");
+			CPPDEBUG( "sel_callback is in comment");
 			start = pos + function.size();
 			continue;
 		}
 
 		if( is_in_string( file, pos ) ) {
-			DEBUG( "sel_callback is in string");
+			CPPDEBUG( "sel_callback is in string");
 			start = pos + function.size();
 			continue;
 		}
@@ -151,7 +151,7 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 
 		std::wstring callback_name = strip(*sl.rbegin(), L";\t\r ");
 
-		DEBUG(wformat(L"try to find function: %s",callback_name));
+		CPPDEBUG(wformat(L"try to find function: %s",callback_name));
 
 		std::wstring::size_type pos2 = 0;
 
@@ -164,11 +164,11 @@ PrimanList::SEL_CALLBACK  PrimanList::detect_sel_callback(
 				std::wstring func_line = get_whole_line(file,pos2);
 
 				if( is_in_comment( file, pos2 ) ) {
-					DEBUG( wformat(L"line: >%s< is a comment", func_line));
+					CPPDEBUG( wformat(L"line: >%s< is a comment", func_line));
 					// comment line
 					pos2 += callback_name.size();
 				} else {
-					DEBUG( wformat(L"found %s call at line %d", func_line, get_linenum(file,pos2)));
+					CPPDEBUG( wformat(L"found %s call at line %d", func_line, get_linenum(file,pos2)));
 					break;
 				}
 			}
@@ -221,15 +221,15 @@ std::wstring PrimanList::add_selcallback_to_reasons( const std::wstring & file, 
 	Function func;
 	std::wstring::size_type start, end;
 
-	DEBUG( wformat(L"line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
+	CPPDEBUG( wformat(L"line %d: %s", get_linenum(file, pos ),get_whole_line(file,pos) ));
 
 
 	if( !get_function(file,pos,start,end,&func) ) {
-		DEBUG("unable to load callback function");
+		CPPDEBUG("unable to load callback function");
 		return file;
 	}
 
-	DEBUG( wformat(L"function args: %d", func.args.size() ) );
+	CPPDEBUG( wformat(L"function args: %d", func.args.size() ) );
 
 	if( func.args.size() != 5 ) {
 		throw STDERR_EXCEPTION( format("cannot find the correct number of arguments for function %s", w2out(func.name) ) );
@@ -237,12 +237,12 @@ std::wstring PrimanList::add_selcallback_to_reasons( const std::wstring & file, 
 
 	strip_argtypes(func);
 
-	DEBUG(wformat(L"found function %s at %d up to %d", func.name, pos, start, end));
+	CPPDEBUG(wformat(L"found function %s at %d up to %d", func.name, pos, start, end));
 
 	pos = file.find( L"case", start);
 
 	if( pos == std::string::npos ) {
-		DEBUG("cannot find position for inserting Priman Callback reason");
+		CPPDEBUG("cannot find position for inserting Priman Callback reason");
 		return file;
 	}
 
@@ -312,7 +312,7 @@ std::wstring PrimanList::insert_selcallback( const std::wstring & file )
 
 		if( !get_function(file, memset_pos, start, end, &func_memset) )
 		{
-			DEBUG("cannot load memset line");
+			CPPDEBUG("cannot load memset line");
 			pos += action_type.length();
 			continue;
 		}
@@ -360,7 +360,7 @@ std::wstring PrimanList::patch_file( const std::wstring & file )
 
 	SEL_CALLBACK sc_type = detect_sel_callback(file,pos);
 
-	DEBUG( wformat(L"ret: %s pos: %d", toString(sc_type), pos) );
+	CPPDEBUG( wformat(L"ret: %s pos: %d", toString(sc_type), pos) );
 
 	switch( sc_type )
 	{

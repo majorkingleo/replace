@@ -7,7 +7,7 @@
 
 #include "space_between_literal_handler.h"
 #include <string_utils.h>
-#include <debug.h>
+#include <CpputilsDebug.h>
 #include "getline.h"
 #include "stderr_exception.h"
 #include "unused_variable_handler.h"
@@ -46,7 +46,7 @@ void SpaceBetweenLiteralHandler::read_compile_log_line( const std::wstring & lin
 	location.var_name = strip( location.var_name, L"'‘’");
 	location.compile_log_line = line;
 
-	DEBUG( wformat( L"%s %s", location, location.var_name ) );
+	CPPDEBUG( wformat( L"%s %s", location, location.var_name ) );
 
 	locations.push_back( location );
 }
@@ -192,7 +192,7 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 
 	std::wstring line = getline(content,  pos );
 
-	DEBUG( line );
+	CPPDEBUG( line );
 
 	std::vector<Pair> exclude = find_exclusive( line );
 
@@ -211,7 +211,7 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 			break;
 		}
 
-		DEBUG( wformat( L"found \" at %d\n%s\n%s", pos1, line, space2Pos( pos1 ) ) );
+		CPPDEBUG( wformat( L"found \" at %d\n%s\n%s", pos1, line, space2Pos( pos1 ) ) );
 
 		if( is_exclusive( line, exclude, pos1 ) )
 		{
@@ -241,7 +241,7 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 			last_pos = pos1+1;
 
 			if( last_pos < line.size() ) {
-				DEBUG( wformat( L"last sign: '%s'", line[last_pos]) );
+				CPPDEBUG( wformat( L"last sign: '%s'", line[last_pos]) );
 
 				// TExecSql(tid,"update map set status="STR_MASTAT_FERTIG" where parentid=:a",
 				// ---------------------------------------------- keinen Space hier einbauen ^
@@ -274,8 +274,8 @@ void SpaceBetweenLiteralHandler::fix_warning( SpaceBetweenLiteralWarnings & warn
 
 	std::wstring new_line = res.str();
 
-	DEBUG( wformat( L"old line: '%s'", line ) );
-	DEBUG( wformat( L"new line: '%s'", new_line ) );
+	CPPDEBUG( wformat( L"old line: '%s'", line ) );
+	CPPDEBUG( wformat( L"new line: '%s'", new_line ) );
 
 	UnusedVariableHandler::replace_line( content, pos, new_line );
 

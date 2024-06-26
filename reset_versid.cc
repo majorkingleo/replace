@@ -7,8 +7,9 @@
 #include "reset_versid.h"
 #include "find_first_of.h"
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include "string_utils.h"
+#include <format.h>
 
 using namespace Tools;
 
@@ -54,7 +55,7 @@ std::wstring ResetVersid::reset_versid_once(  const std::wstring & file, const s
 	std::wstring::size_type pos = find_first_of( file, 0, KEYWORD );
 
 	if( pos == std::wstring::npos ) {
-		DEBUG( wformat( L"keyword '%s' not found", KEYWORD ) );
+		CPPDEBUG( wformat( L"keyword '%s' not found", KEYWORD ) );
 		return file;
 	}
 /*
@@ -67,7 +68,7 @@ std::wstring ResetVersid::reset_versid_once(  const std::wstring & file, const s
 	std::wstring line = get_whole_line( file, pos );
 
 	if( line.find( KEYWORD ) == std::wstring::npos ) {
-		DEBUG( wformat( L"keyword '%s' not found", KEYWORD ) );
+		CPPDEBUG( wformat( L"keyword '%s' not found", KEYWORD ) );
 		return file;
 	}
 
@@ -113,7 +114,7 @@ std::wstring ResetVersid::reset_versid_log( const std::wstring & file )
 	std::wstring::size_type pos = file.find( KEYWORD_LOG );
 
 	if( pos == std::wstring::npos ) {
-		DEBUG( L"keyword $Log$ not found" );
+		CPPDEBUG( L"keyword $Log$ not found" );
 		// std::wcout << file << std::endl;
 		return file;
 	}
@@ -129,7 +130,7 @@ std::wstring ResetVersid::reset_versid_log( const std::wstring & file )
 	std::wstring::size_type next_log_pos = file.find( next_log, pos + KEYWORD_LOG.size() + 1 + KEYWORD_REVISION.size() );
 
 	if( next_log_pos == std::wstring::npos ) {
-		DEBUG( wformat( L"next log pos '%s' not found", next_log ) );
+		CPPDEBUG( wformat( L"next log pos '%s' not found", next_log ) );
 
 		std::wstring comment_prefix = line.substr( 0, pos_of_log );
 		comment_prefix = strip_trailing( comment_prefix, L" " );
@@ -138,7 +139,7 @@ std::wstring ResetVersid::reset_versid_log( const std::wstring & file )
 		next_log_pos = file.find( empty_line, pos + KEYWORD_LOG.size() );
 
 		if( next_log_pos == std::wstring::npos ) {
-			DEBUG( wformat( L"empty line pos '%s' not found", empty_line ) );
+			CPPDEBUG( wformat( L"empty line pos '%s' not found", empty_line ) );
 			return file;
 		} else {
 			// remove also this empty line
@@ -146,12 +147,12 @@ std::wstring ResetVersid::reset_versid_log( const std::wstring & file )
 		}
 	}
 
-	DEBUG( wformat( L"found next log '%s' at line: %d", next_log, get_linenum( file, next_log_pos ) ) );
+	CPPDEBUG( wformat( L"found next log '%s' at line: %d", next_log, get_linenum( file, next_log_pos ) ) );
 
 	std::wstring::size_type start_of_log = file.find( L'\n', pos );
 
 	if( start_of_log == std::wstring::npos ) {
-		DEBUG( L"start of log not found" );
+		CPPDEBUG( L"start of log not found" );
 		return file;
 	}
 

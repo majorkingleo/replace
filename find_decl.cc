@@ -7,7 +7,7 @@
 #include "find_decl.h"
 #include <string_utils.h>
 #include <format.h>
-#include <debug.h>
+#include <CpputilsDebug.h>
 #include "utils.h"
 
 using namespace Tools;
@@ -19,7 +19,7 @@ std::wstring find_decl( const std::wstring &s,
 				      std::wstring & decl,
 				      std::wstring::size_type & at_pos )
 {
-	DEBUG( wformat( L"trying to find decl for '%s'", name));
+	CPPDEBUG( wformat( L"trying to find decl for '%s'", name));
 
 	std::wstring ret;
 
@@ -95,7 +95,7 @@ std::wstring find_decl( const std::wstring &s,
 		if( pos > start_ )
 		  {
 			start = start_;
-			DEBUG( wformat( L"cannot find type of %s", name ) );
+			CPPDEBUG( wformat( L"cannot find type of %s", name ) );
 			return ret; // hat keinen Sinn mehr weiterzusuchen
 			// continue;
 		  }
@@ -114,7 +114,7 @@ std::wstring find_decl( const std::wstring &s,
 		if( pos > start_ )
 		  {
 			start = start_;
-			DEBUG( wformat( L"cannot find type of %s", name ) );
+			CPPDEBUG( wformat( L"cannot find type of %s", name ) );
 			return ret; // hat keinen Sinn mehr weiterzusuchen
 			// continue;
 		  }
@@ -124,7 +124,7 @@ std::wstring find_decl( const std::wstring &s,
 
 		if( end == std::string::npos )
 		{
-		  DEBUG( wformat( L"cannot find type of %s", name )  );
+			CPPDEBUG( wformat( L"cannot find type of %s", name )  );
 			return ret;
 		}
 
@@ -138,7 +138,7 @@ std::wstring find_decl( const std::wstring &s,
 
 	if( cast.size() && cast[0] == L'(' && cast[cast.size()-1] == L')' )
 	  {
-		DEBUG( wformat( L"ignoring cast type: %s for var %s", cast, name ) );
+		CPPDEBUG( wformat( L"ignoring cast type: %s for var %s", cast, name ) );
 		start--;
 		continue;
 	  }
@@ -173,7 +173,7 @@ std::wstring find_decl( const std::wstring &s,
 	  }
 
 	if( f.find(L"const") == 0 ) {
-		DEBUG( wformat( L"const format detected: '%s'", f ) );
+		CPPDEBUG( wformat( L"const format detected: '%s'", f ) );
 
 		if( f.size() > 6 ) {
 			std::wstring::size_type pp = skip_spaces( f, 5 );
@@ -181,7 +181,7 @@ std::wstring find_decl( const std::wstring &s,
 			if( pp != std::wstring::npos )
 			{
 				f = f.substr( pp);
-				DEBUG( wformat( L"removed const: '%s'", f ) );
+				CPPDEBUG( wformat( L"removed const: '%s'", f ) );
 			}
 		}
 	}
@@ -218,7 +218,7 @@ std::wstring find_decl( const std::wstring &s,
 
 	} // for
 
-	DEBUG( wformat( L"cannot find type of %s", name ) );
+	CPPDEBUG( wformat( L"cannot find type of %s", name ) );
 
 	return ret;
 }

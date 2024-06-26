@@ -8,7 +8,7 @@
 #include <format.h>
 #include "utils.h"
 #include "find_decl.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 #include "find_decl.h"
@@ -58,13 +58,13 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
+			CPPDEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -73,7 +73,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( wformat(L"function name is '%s'", func.name) );
+			CPPDEBUG( wformat(L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -93,7 +93,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 			std::wstring sstring_arg = strip( func.args[idx+1] );
 
-			DEBUG( wformat(L"processing: '%s'", sstring_arg ) );
+			CPPDEBUG( wformat(L"processing: '%s'", sstring_arg ) );
 
 			// we found a C string, just do normal replacement
 			if( sstring_arg.find( L"\"" ) == 0 ) {
@@ -121,7 +121,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 			} else if( sstring_arg.find( STRFORM ) == 0 ) {
 
-				DEBUG(wformat(L"%s found", STRFORM ));
+				CPPDEBUG(wformat(L"%s found", STRFORM ));
 
 				std::wstring::size_type strform_start = 0;
 				std::wstring::size_type strform_end = 0;
@@ -130,7 +130,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 				Function f_strform;
 
 				if( !get_function(sstring_arg,strform_pos,strform_start,strform_end,&f_strform, false) ) {
-					DEBUG(wformat(L"unable to load %s function. get_function() failed", STRFORM) );
+					CPPDEBUG(wformat(L"unable to load %s function. get_function() failed", STRFORM) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
@@ -139,13 +139,13 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 				strform_end += 1;
 
 				if( f_strform.name != STRFORM ) {
-					DEBUG(wformat(L"unable to load %s function. Name is: '%s' instead of '%s'", STRFORM, f_strform.name, STRFORM ) );
+					CPPDEBUG(wformat(L"unable to load %s function. Name is: '%s' instead of '%s'", STRFORM, f_strform.name, STRFORM ) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
 
 				if( f_strform.args.size() == 0 ) {
-					DEBUG(wformat(L"unable to load %s function. Invalid number of arguments: %d", STRFORM, f_strform.args.size() ) );
+					CPPDEBUG(wformat(L"unable to load %s function. Invalid number of arguments: %d", STRFORM, f_strform.args.size() ) );
 					start_in_file = pos + FUNCTION_NAME.size();
 					continue;
 				}
@@ -154,7 +154,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 				if( strform_sstring_arg.find( L"\"" ) == 0 && !isNotTranslatable(strform_sstring_arg) ) {
 
-					DEBUG( wformat( L"pure C-string processing for '%s'", strform_sstring_arg ));
+					CPPDEBUG( wformat( L"pure C-string processing for '%s'", strform_sstring_arg ));
 
 					std::wstring & format_arg = f_strform.args[0];
 
@@ -173,12 +173,12 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 					strform_pos = arg_before.find( STRFORM );
 
-					DEBUG( format( "strform_pos: %d", strform_pos ));
+					CPPDEBUG( format( "strform_pos: %d", strform_pos ));
 
 					s_res = function_to_string( arg_before, f_strform,  strform_pos, strform_end + strform_pos );
 
-					DEBUG( wformat( L"arg_before: '%s'", arg_before ));
-					DEBUG( wformat( L"s_res: '%s'", s_res ));
+					CPPDEBUG( wformat( L"arg_before: '%s'", arg_before ));
+					CPPDEBUG( wformat( L"s_res: '%s'", s_res ));
 
 					/*
 					if( s_res.size() > arg_before.size() ) {
@@ -206,7 +206,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 					continue;
 				}
 
-				DEBUG( wformat( L"'%s' decl: '%s' line: %d", sstring_arg, decl, get_linenum(res,decl_pos)) );
+				CPPDEBUG( wformat( L"'%s' decl: '%s' line: %d", sstring_arg, decl, get_linenum(res,decl_pos)) );
 
 				std::wstring sub_file_start_till_decl = res.substr( 0, decl_pos );
 				std::wstring sub_file_middle = res.substr( decl_pos, pos - decl_pos );
@@ -224,7 +224,7 @@ std::wstring AddMlMWBox::patch_file( const std::wstring & file )
 
 				// alle unsere offsets stimmen nicht mehr, daher zueruck zum Start
 				if( new_sub_file_middle != sub_file_middle ) {
-					DEBUG( "restart" );
+					CPPDEBUG( "restart" );
 					res = sub_file_start_till_decl + new_sub_file_middle + sub_file_end;
 					restart_file_patching = true;
 					break;

@@ -5,7 +5,7 @@
  *      Author: martin
  */
 #include "uninitialized_variable_handler.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <string_utils.h>
 #include <getline.h>
 #include "stderr_exception.h"
@@ -42,7 +42,7 @@ void UninitializedVariableHandler::read_compile_log_line( const std::wstring & l
 			location.var_name = strip( location.var_name, L"'‘’");
 			location.compile_log_line = line;
 
-			DEBUG( wformat( L"%s %s", location, location.var_name ) );
+			CPPDEBUG( wformat( L"%s %s", location, location.var_name ) );
 
 			unused_variables_locations.push_back( location );
 			break;
@@ -60,14 +60,14 @@ void UninitializedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std:
 
 	std::wstring line = getline(content,  pos );
 
-	DEBUG( line );
+	CPPDEBUG( line );
 
 
 	// 1st find starting pos
 
 	std::wstring::size_type var_start = find_var_name( line, warning.var_name );
 
-	DEBUG( wformat( L"%s var_start: %d", warning.var_name, var_start) );
+	CPPDEBUG( wformat( L"%s var_start: %d", warning.var_name, var_start) );
 
 	if( var_start == std::string::npos )
 		return;

@@ -6,7 +6,7 @@
  */
 
 #include "implicit_handler.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include "getline.h"
 #include "utils.h"
 #include "string_utils.h"
@@ -15,6 +15,7 @@
 #include "xml.h"
 #include "read_file.h"
 #include "HandleFile.h"
+#include <format.h>
 
 using namespace Tools;
 
@@ -202,7 +203,7 @@ void ImplicitHandler::fix_warning( ImplicitWarnigs & warning, std::wstring & con
 				warning.fixed = true;
 				break;
 			} else {
-				DEBUG( wformat( L"can't insert include for header '%s' for symbol '%s'", it->name, warning.symbol ) );
+				CPPDEBUG( wformat( L"can't insert include for header '%s' for symbol '%s'", it->name, warning.symbol ) );
 			}
 		} else {
 			// DEBUG( format( "symbol: '%s' not found in header: '%s'", warning.symbol, it->name ));
@@ -278,7 +279,7 @@ bool ImplicitHandler::insert_include_for( const ImplicitWarnigs & warning, const
 
 	const std::wstring include_string = wformat(L"#include \"%s\"", file_name);
 
-	DEBUG( wformat( L"%s %s %s", warning, warning.symbol, include_string ) );
+	CPPDEBUG( wformat( L"%s %s %s", warning, warning.symbol, include_string ) );
 
 	std::string::size_type pos = content.rfind( L"#include" );
 

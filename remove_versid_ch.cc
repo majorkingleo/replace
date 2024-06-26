@@ -3,7 +3,7 @@
 #include "getline.h"
 #include "find_first_of.h"
 #include "utils.h"
-#include <debug.h>
+#include <CpputilsDebug.h>
 
 using namespace Tools;
 
@@ -160,12 +160,12 @@ std::wstring RemoveVersidCh::cut_static_versid( const std::wstring & file ) cons
 	std::wstring line = get_whole_line( file, pos );
 
 	if( line.find( L"static" ) == std::wstring::npos ) {
-		DEBUG("no static found");
+		CPPDEBUG("no static found");
 		return file;
 	}
 
 	if( line.find( L"char" ) == std::wstring::npos ) {
-		DEBUG("no char found");
+		CPPDEBUG("no char found");
 		return file;
 	}
 
@@ -177,7 +177,7 @@ std::wstring RemoveVersidCh::cut_static_versid( const std::wstring & file ) cons
 
 	if( line.find(L"defined") == std::wstring::npos ||
 	    line.find(L"__GNUC__") == std::wstring::npos ) {
-		DEBUG("defined(__GNUC__) not found");
+		CPPDEBUG("defined(__GNUC__) not found");
 		return file;
 	}
 
@@ -186,21 +186,21 @@ std::wstring RemoveVersidCh::cut_static_versid( const std::wstring & file ) cons
 	line = get_line( file, pos );
 
 	if( line.find(L"__attribute__ ((unused))") == std::wstring::npos ) {
-		DEBUG( "__attribute__ ((unused)) not found");
+		CPPDEBUG( "__attribute__ ((unused)) not found");
 		return file;
 	}
 
 	pos = file.find(L';', pos);
 
 	if( pos == std::wstring::npos ) {
-		DEBUG( "; not found");
+		CPPDEBUG( "; not found");
 		return file;
 	}
 
 	std::wstring result = file.substr(0,start);
 	result += file.substr(pos+1);
 
-	DEBUG( wformat(L"cutting: >>%s<<",  file.substr(start,pos-start)) );
+	CPPDEBUG( wformat(L"cutting: >>%s<<",  file.substr(start,pos-start)) );
 
 	return result;
 }

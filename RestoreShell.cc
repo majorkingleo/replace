@@ -7,7 +7,7 @@
 #include "RestoreShell.h"
 #include <format.h>
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 
 RestoreShell::RestoreShell()
 {
@@ -44,7 +44,7 @@ std::wstring RestoreShell::patch_file( const std::wstring & file )
 	std::wstring::size_type start, end;
 
 	if( !get_function(file,wgd_set_pos,start,end,&func) ) {
-		DEBUG("unable to load WdgGuiSet function");
+		CPPDEBUG("unable to load WdgGuiSet function");
 		return file;
 	}
 

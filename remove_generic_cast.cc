@@ -7,7 +7,7 @@
 #include "remove_generic_cast.h"
 #include <format.h>
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 
@@ -44,20 +44,20 @@ std::wstring RemoveGenericCast::patch_file( const std::wstring & file )
 		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::string::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG("unable to load MskVaAssign function");
+			CPPDEBUG("unable to load MskVaAssign function");
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG(L"function name is " + func.name);
+			CPPDEBUG(L"function name is " + func.name);
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -101,9 +101,9 @@ std::wstring RemoveGenericCast::patch_file( const std::wstring & file )
 			str << func.args[i];
 		}
 
-		DEBUG( str.str() );
+		CPPDEBUG( str.str() );
 
-		DEBUG( getline( res, end ));
+		CPPDEBUG( getline( res, end ));
 
 		std::wstring second_part_of_file = res.substr(end);
 

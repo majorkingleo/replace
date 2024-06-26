@@ -8,7 +8,7 @@
 #include <format.h>
 #include "utils.h"
 #include "find_decl.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 #include "find_decl.h"
@@ -45,7 +45,7 @@ std::wstring AddCast::patch_file( const std::wstring & file )
 		if( pos == std::string::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
@@ -81,7 +81,7 @@ std::wstring AddCast::patch_file( const std::wstring & file )
 			continue;
 		}
 
-		DEBUG( wformat( L"'%s' decl: '%s' line: %d", var, decl, get_linenum(res,decl_pos)) );
+		CPPDEBUG( wformat( L"'%s' decl: '%s' line: %d", var, decl, get_linenum(res,decl_pos)) );
 
 		std::wstring line = get_whole_line( res, decl_pos );
 		size_t zStartDecl = line.find_first_of(L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -90,7 +90,7 @@ std::wstring AddCast::patch_file( const std::wstring & file )
 		line = line.substr(0, zEndDecl);
 
 		if (line.find (L"void") != std::wstring::npos) {
-			DEBUG( "Do not cast to void");
+			CPPDEBUG( "Do not cast to void");
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -98,17 +98,17 @@ std::wstring AddCast::patch_file( const std::wstring & file )
 		std::wstring sCast = L"(" + line + L"*)";
 		std::wstring sTypeId = line;
 
-		DEBUG( wformat( L"CAST:  '%s' var: '%s' decl: '%s' line: %d", sCast, var, decl, get_linenum(res,decl_pos)) );
+		CPPDEBUG( wformat( L"CAST:  '%s' var: '%s' decl: '%s' line: %d", sCast, var, decl, get_linenum(res,decl_pos)) );
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
+			CPPDEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( wformat( L"function name is '%s'", func.name) );
+			CPPDEBUG( wformat( L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -123,7 +123,7 @@ std::wstring AddCast::patch_file( const std::wstring & file )
 			start_in_file = pos+FUNCTION_NAME.size();
 			continue;
 		}
-		DEBUG( format( "found Cast at line: %d", get_linenum(res,pos-1)) );
+		CPPDEBUG( format( "found Cast at line: %d", get_linenum(res,pos-1)) );
 
 		std::wstring new_line = substitude( line, FUNCTION_NAME, sCast+FUNCTION_NAME );
 

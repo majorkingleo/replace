@@ -1,7 +1,7 @@
 #ifndef OUTDEBUG_H_
 #define OUTDEBUG_H_
 
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include "ColoredOutput.h"
 
 class OutDebug : public Tools::Debug, ColoredOutput

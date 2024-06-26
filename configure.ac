@@ -27,7 +27,7 @@ AM_PROG_AR
 AC_PROG_CXX
 AC_LANG(C++)
 AC_PROG_INSTALL
-CXX_FLAGS_CHECK([-std=c++11])
+CXX_FLAGS_CHECK([-std=c++20])
 
 AC_SEARCH_LIBS( [libiconv_open], 'iconv' ) # for cygwin
 AC_SEARCH_LIBS( [regexecA], 'boost_regex' )

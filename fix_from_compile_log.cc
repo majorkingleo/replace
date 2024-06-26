@@ -18,7 +18,7 @@
 #include "getline.h"
 #include <stdio.h>
 #include <fstream>
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <set>
 #include "uninitialized_variable_handler.h"
 #include "format_string_handler.h"
@@ -173,7 +173,7 @@ void FixFromCompileLog::read_compile_log()
 		throw STDERR_EXCEPTION( format("cannot open file %s for reading", compile_log, strerror(errno)) );
 	}
 
-	DEBUG( format( "%s encoding: %s", compile_log, read_file.getFileEncoding()) );
+	CPPDEBUG( format( "%s encoding: %s", compile_log, read_file.getFileEncoding()) );
 
 	std::vector<std::wstring> lines = split_simple( content, L"\n");
 
@@ -229,7 +229,7 @@ void FixFromCompileLog::show_diffs()
 		if( fit->content != fit->original_content ) {
 
 			std::cout << "patching file " << HandleFile::w2out(fit->path_name) << std::endl;
-			DEBUG( diff_lines( fit->original_content,  fit->content  ) );
+			CPPDEBUG( diff_lines( fit->original_content,  fit->content  ) );
 		}
 	}
 }

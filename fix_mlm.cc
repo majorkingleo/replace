@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "fix_mlm.h"
 #include <format.h>
-#include "debug.h"
+#include "CpputilsDebug.h"
 
 using namespace Tools;
 
@@ -30,7 +30,7 @@ std::wstring FixMlM::patch_file( const std::wstring & file )
 		if( pos == std::string::npos )
 			return res;
 
-		DEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
+		CPPDEBUG( format( "found MLM at line %d", get_linenum(res,pos) ));
 
 
 		std::wstring line_before = get_whole_line( res, pos );
@@ -67,7 +67,7 @@ std::wstring FixMlM::patch_file( const std::wstring & file )
 
 							std::wstring after = get_whole_line( res, pos );
 
-							DEBUG( format( "line %d\n- %s\n+ %s",
+							CPPDEBUG( format( "line %d\n- %s\n+ %s",
 									get_linenum(res,pos),
 									w2out(line_before), w2out(after)) );
 						}

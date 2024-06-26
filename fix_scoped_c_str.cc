@@ -8,7 +8,7 @@
 #include "fix_scoped_c_str.h"
 #include <format.h>
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 
 using namespace Tools;
@@ -41,13 +41,13 @@ std::wstring FixScopedCStr::patch_file( const std::wstring & file )
 		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", KEY_WORD, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", KEY_WORD, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG("unable to load scoped_cstr::form function");
+			CPPDEBUG("unable to load scoped_cstr::form function");
 			start_in_file = pos + KEY_WORD.size();
 			continue;
 		}
@@ -108,7 +108,7 @@ std::wstring FixScopedCStr::patch_file( const std::wstring & file )
 			str << func.args[i];
 		}
 
-		DEBUG( str.str() );
+		CPPDEBUG( str.str() );
 
 		if( !found_std_string ) {
 			end += 1; // ) weglassen

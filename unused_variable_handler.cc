@@ -7,7 +7,7 @@
 
 #include "unused_variable_handler.h"
 #include <string_utils.h>
-#include <debug.h>
+#include <CpputilsDebug.h>
 #include "getline.h"
 #include "stderr_exception.h"
 #include "DetectLocale.h"
@@ -46,7 +46,7 @@ void UnusedVariableHandler::read_compile_log_line( const std::wstring & line )
 	location.var_name = strip( location.var_name, L"'‘’");
 	location.compile_log_line = line;
 
-	DEBUG( wformat( L"%s %s", location, location.var_name ) );
+	CPPDEBUG( wformat( L"%s %s", location, location.var_name ) );
 
 	unused_variables_locations.push_back( location );
 }
@@ -94,14 +94,14 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::wstrin
 
 	std::wstring line = getline(content,  pos );
 
-	DEBUG( line );
+	CPPDEBUG( line );
 
 
 	// 1st find starting pos
 
 	std::wstring::size_type var_start = find_var_name( line, warning.var_name );
 
-	DEBUG( wformat( L"%s var_start: %d", warning.var_name, var_start) );
+	CPPDEBUG( wformat( L"%s var_start: %d", warning.var_name, var_start) );
 
 	if( var_start == std::wstring::npos )
 		return;
@@ -137,7 +137,7 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::wstrin
 				}
 			}
 
-			DEBUG( new_line );
+			CPPDEBUG( new_line );
 
 			replace_line( content, pos, new_line );
 
@@ -145,7 +145,7 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::wstrin
 
 			return;
 		} else {
-			DEBUG( wformat( L"start: %d var_start: %d for '%s'", start, var_start, warning.var_name) );
+			CPPDEBUG( wformat( L"start: %d var_start: %d for '%s'", start, var_start, warning.var_name) );
 		}
 	}
 
@@ -174,7 +174,7 @@ void UnusedVariableHandler::fix_warning( UnusedVarWarnigs & warning, std::wstrin
 	{
 		new_line = left + L" /* " + middle + L" */ " + right;
 
-		DEBUG( new_line );
+		CPPDEBUG( new_line );
 	} else {
 
 		new_line = left;
@@ -224,7 +224,7 @@ std::wstring::size_type UnusedVariableHandler::find_var_name( const std::wstring
 			 case L';': break;
 			 case L'*': break;
 			 default:
-				 DEBUG( wformat( L"prevsign: %c Dec: %d", line[pos-1], (int)line[pos-1] ) );
+				 CPPDEBUG( wformat( L"prevsign: %c Dec: %d", line[pos-1], (int)line[pos-1] ) );
 				 failed = true;
 				 break;
 			 }
@@ -245,7 +245,7 @@ std::wstring::size_type UnusedVariableHandler::find_var_name( const std::wstring
 			 case L',': break;
 			 case L';': break;
 			 default:
-				 DEBUG( wformat( L"nextsign: '%c' Dec: %d", line[pos+1], (int)line[pos+1] ) );
+				 CPPDEBUG( wformat( L"nextsign: '%c' Dec: %d", line[pos+1], (int)line[pos+1] ) );
 				 failed = true;
 				 break;
 			 }

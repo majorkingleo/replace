@@ -8,7 +8,7 @@
 #include "correct_va_multiple_malloc.h"
 #include <format.h>
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <regex_match.h>
 
@@ -50,13 +50,13 @@ std::wstring CorrectVaMultipleMalloc::patch_file(const std::wstring &file)
 			return res;
 		}
 
-		DEBUG(format("%s at line %d", w2out(VA_MALLOC), get_linenum(res, pos)));
+		CPPDEBUG(format("%s at line %d", w2out(VA_MALLOC), get_linenum(res, pos)));
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if (!get_function(res, pos, start, end, &func, false)) {
-			DEBUG("unable to load VaMultipleMalloc function");
+			CPPDEBUG("unable to load VaMultipleMalloc function");
 			start_in_file = pos + VA_MALLOC.size();
 			continue;
 		}
@@ -87,7 +87,7 @@ std::wstring CorrectVaMultipleMalloc::patch_file(const std::wstring &file)
 
 					new_arg += arg.substr(int_pos + int_cast.size());
 
-					DEBUG( format("arg %d '%s' => '%s'", i, w2out(arg),	w2out(new_arg)));
+					CPPDEBUG( format("arg %d '%s' => '%s'", i, w2out(arg),	w2out(new_arg)));
 
 					arg = new_arg;
 
@@ -112,7 +112,7 @@ std::wstring CorrectVaMultipleMalloc::patch_file(const std::wstring &file)
 
 				new_arg += arg.substr(arg_pos + KEY_WORD.size());
 
-				DEBUG( format("arg %d '%s' => '%s'", i, w2out(arg), w2out(new_arg)) );
+				CPPDEBUG( format("arg %d '%s' => '%s'", i, w2out(arg), w2out(new_arg)) );
 
 				arg = new_arg;
 
@@ -142,7 +142,7 @@ std::wstring CorrectVaMultipleMalloc::patch_file(const std::wstring &file)
 				str << func.args[i];
 			}
 
-			DEBUG(str.str());
+			CPPDEBUG(str.str());
 
 			std::wstring second_part_of_file = res.substr(end);
 

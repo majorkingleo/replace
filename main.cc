@@ -733,14 +733,14 @@ int main( int argc, char **argv )
 	  search = unescape( search, L"\\t", L"\t" );
 	  search = unescape( search, L"\\n", L"\n" );
 
-	  DEBUG( format(  "unescaped search string: '%s'", dl.wString2output( search ) ) );;
+	  CPPDEBUG( format(  "unescaped search string: '%s'", dl.wString2output( search ) ) );;
 
 	  replace = dl.inputString2wString( o_replace.getValues()->at(1) );
 
 	  replace = unescape( replace, L"\\t", L"\t" );
 	  replace = unescape( replace, L"\\n", L"\n" );
 
-	  DEBUG( format(  "unescaped replace string: '%s'", dl.wString2output( replace ) ) );;
+	  CPPDEBUG( format(  "unescaped replace string: '%s'", dl.wString2output( replace ) ) );;
 
 	  show_diff = true;
   }
@@ -895,7 +895,7 @@ int main( int argc, char **argv )
 
 	  encoding = READ_FILE.getFileEncoding();
 
-	  DEBUG( format( "working on file %s encoding: %s",  it->getPath(), encoding ) );
+	  CPPDEBUG( format( "working on file %s encoding: %s",  it->getPath(), encoding ) );
 
 	  std::wstring file_erg = wfile;
 

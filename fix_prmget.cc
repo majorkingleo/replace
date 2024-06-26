@@ -8,7 +8,7 @@
 #include <format.h>
 #include "utils.h"
 #include "find_decl.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 #include "find_decl.h"
@@ -50,20 +50,20 @@ std::wstring FixPrmGet::patch_file( const std::wstring & file )
 			return res;
 		}
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(format("unable to load %s function", w2out(FUNCTION_NAME)) );
+			CPPDEBUG(format("unable to load %s function", w2out(FUNCTION_NAME)) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( format("function name is '%s'", w2out(func.name)) );
+			CPPDEBUG( format("function name is '%s'", w2out(func.name)) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -86,19 +86,19 @@ std::wstring FixPrmGet::patch_file( const std::wstring & file )
 			continue;
 		}
 
-		DEBUG( wformat( L"'%s' decl: '%s' line: %d pos: %d char: 0x%X (%c)",
+		CPPDEBUG( wformat( L"'%s' decl: '%s' line: %d pos: %d char: 0x%X (%c)",
 						var_name, decl, get_linenum(res,decl_pos), decl_pos, (int)res[decl_pos], res[decl_pos] ));
 
 		std::wstring line = get_whole_line( res, decl_pos );
 
-		DEBUG( wformat( L"line with decl: %s", line ) );
+		CPPDEBUG( wformat( L"line with decl: %s", line ) );
 
 		if( line.find( L"int" ) == std::string::npos ) {
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
-		DEBUG( wformat( L"found invalid use of %s at line: %d", FUNCTION_NAME, get_linenum(res,pos-1)) );
+		CPPDEBUG( wformat( L"found invalid use of %s at line: %d", FUNCTION_NAME, get_linenum(res,pos-1)) );
 
 		// wenn es sich um die Funktionsdefinition handelt, dann vorsichtig
 
@@ -107,7 +107,7 @@ std::wstring FixPrmGet::patch_file( const std::wstring & file )
 
 		std::wstring::size_type pfunc = line.find( L"(");
 		if( pfunc != std::string::npos ) {
-			DEBUG( "detected function" );
+			CPPDEBUG( "detected function" );
 
 			std::wstring::size_type pp = skip_spaces( line, pfunc, true );
 
@@ -131,7 +131,7 @@ std::wstring FixPrmGet::patch_file( const std::wstring & file )
 
 						if( already_replaced ) {
 							new_line = function_to_string( line, func, pp, end+1 );
-							DEBUG( wformat( L"new: %s", new_line ) );
+							CPPDEBUG( wformat( L"new: %s", new_line ) );
 						}
 					}
 				}
@@ -154,8 +154,8 @@ std::wstring FixPrmGet::patch_file( const std::wstring & file )
 		}
 
 		replace_line_from_start_of_line( res, decl_pos, new_line );
-		DEBUG( wformat( L"old: %s", line ) );
-		DEBUG( wformat( L"new: %s", new_line ) );
+		CPPDEBUG( wformat( L"old: %s", line ) );
+		CPPDEBUG( wformat( L"new: %s", new_line ) );
 
 		// Variable im ganzen File umbenennen, vermutlich ist das eh die richtige Taktik
 		// und wenn das nicht klappt, dann muss die Methode etwas verfeinert werden

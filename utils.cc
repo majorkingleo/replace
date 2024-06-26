@@ -7,9 +7,10 @@
 #include "string_utils.h"
 #include "cppdir.h"
 #include "xml.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <algorithm>
 #include "DetectLocale.h"
+#include <format.h>
 
 using namespace Tools;
 
@@ -60,7 +61,7 @@ std::wstring::size_type find_function( const std::wstring & function,
 {
     bool found = false;
 
-    DEBUG( format("try finding function '%s'", DETECT_LOCALE.wString2output(function)));
+    CPPDEBUG( format("try finding function '%s'", DETECT_LOCALE.wString2output(function)));
 
     while( !found )
     {   
@@ -72,7 +73,7 @@ std::wstring::size_type find_function( const std::wstring & function,
 		if( pos + function.size() >= s.size() )
 			return std::string::npos;
 
-		DEBUG( wformat( L"found %s at line %d => %s",
+		CPPDEBUG( wformat( L"found %s at line %d => %s",
 				function,
 				get_linenum(s,pos),
 				get_whole_line(s, pos) ));
@@ -679,7 +680,7 @@ std::wstring function_to_string( const std::wstring & res,
 
 	str << L")";
 
-	DEBUG( str.str() );
+	CPPDEBUG( str.str() );
 
 	std::wstring second_part_of_file = res.substr(end);
 

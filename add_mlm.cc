@@ -8,7 +8,7 @@
 #include <format.h>
 #include "utils.h"
 #include "find_decl.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 #include "find_decl.h"
@@ -24,7 +24,7 @@ bool AddMlM::PatchThisFunctionIfArgXequals::should_i_patch_this_function( const 
 		return false;
 	}
 
-	DEBUG( wformat( L"checking function: %s arg:%d = '%s' required '%s'", func.name, ARG_NUM,  func.args[ARG_NUM], VAR_NAME ) );
+	CPPDEBUG( wformat( L"checking function: %s arg:%d = '%s' required '%s'", func.name, ARG_NUM,  func.args[ARG_NUM], VAR_NAME ) );
 
 	if( func.args[ARG_NUM] == VAR_NAME ) {
 		return true;
@@ -74,13 +74,13 @@ std::wstring AddMlM::patch_file( const std::wstring & file )
 		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
+			CPPDEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -90,7 +90,7 @@ std::wstring AddMlM::patch_file( const std::wstring & file )
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( wformat(L"function name is '%s'", func.name) );
+			CPPDEBUG( wformat(L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}

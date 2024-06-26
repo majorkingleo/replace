@@ -7,7 +7,7 @@
 
 #include "format_string_handler.h"
 #include "stderr_exception.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include "getline.h"
 #include "utils.h"
 #include "string_utils.h"
@@ -40,7 +40,7 @@ void FormatStringHandler::read_compile_log_line( const std::wstring & line )
 		return;
 	}
 
-	DEBUG( wformat( L"reading line: %s", line ))
+	CPPDEBUG( wformat( L"reading line: %s", line ))
 
 	FormatWarnigs location = get_location_from_line( line );
 
@@ -69,20 +69,20 @@ void FormatStringHandler::read_compile_log_line( const std::wstring & line )
 	location.expected_type = line.substr( start + 4, end - (start + 4) );
 	location.expected_type = strip(location.expected_type, L"'‘’, " );
 
-	DEBUG( wformat( L"expected type: '%s'", location.expected_type ) );
+	CPPDEBUG( wformat( L"expected type: '%s'", location.expected_type ) );
 
 	start = line.find( L"argument", end );
 	end = line.find( L"has", start );
 
 	if( start == std::wstring::npos ||
 		end == std::wstring::npos ) {
-		DEBUG( "start or end not found" );
+		CPPDEBUG( "start or end not found" );
 		return;
 	}
 
 	location.argnum = s2x<int>(line.substr( start + 8, end - (start + 8) ), -1);
 	if( location.argnum < 0 ) {
-		DEBUG( format( "location arg number is %d", location.argnum ));
+		CPPDEBUG( format( "location arg number is %d", location.argnum ));
 		return;
 	}
 
@@ -90,14 +90,14 @@ void FormatStringHandler::read_compile_log_line( const std::wstring & line )
 	start = line.find( L"type", end );
 
 	if( start == std::string::npos ) {
-		DEBUG( "type not found" );
+		CPPDEBUG( "type not found" );
 		return;
 	}
 
 	location.target_type = line.substr( start + 4 );
 	location.target_type = strip(location.target_type, L"'‘’, " );
 
-	DEBUG( wformat( L"targe type: '%s'", location.target_type) );
+	CPPDEBUG( wformat( L"targe type: '%s'", location.target_type) );
 
 	strip_target_type( location );
 
@@ -128,7 +128,7 @@ void FormatStringHandler::read_compile_log_line( const std::wstring & line )
 
 	location.compile_log_line = line;
 
-	DEBUG( wformat( L"%s format string: '%s' expected type: '%d' target_type: '%d' argument: %d",
+	CPPDEBUG( wformat( L"%s format string: '%s' expected type: '%d' target_type: '%d' argument: %d",
 					location,
 					location.format,
 					location.expected_type,
@@ -174,7 +174,7 @@ void FormatStringHandler::report_unfixed_compile_logs()
 void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & content )
 {
 
-	DEBUG( format("Working now on '%s'", HandleFile::w2out(warning.compile_log_line)) );
+	CPPDEBUG( format("Working now on '%s'", HandleFile::w2out(warning.compile_log_line)) );
 
 	std::wstring::size_type pos = get_pos_for_line( content, warning.line );
 
@@ -190,7 +190,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 	*/
 	if( function_end == std::string::npos )
 	{
-		DEBUG( format("Cannot handle %s", HandleFile::w2out(warning.compile_log_line), __LINE__ ) );
+		CPPDEBUG( format("Cannot handle %s", HandleFile::w2out(warning.compile_log_line), __LINE__ ) );
 		return;
 	}
 
@@ -232,12 +232,12 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 
 
 	if( function_start == std::wstring::npos ) {
-		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		CPPDEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
 	if( function_end == std::string::npos ) {
-		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		CPPDEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -275,7 +275,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 	}
 
 	if( p <= 0 ) {
-		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		CPPDEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -284,17 +284,17 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 
 	if( !get_function( content, p, function_start, function_end, &func, false ) )
 	{
-		DEBUG( wformat(L"%s:%d get_function failed", warning.file, warning.line ));
+		CPPDEBUG( wformat(L"%s:%d get_function failed", warning.file, warning.line ));
 		return;
 	}
 
-	DEBUG( wformat(L"%s:%d %s", warning.file, warning.line, func.name ) );
+	CPPDEBUG( wformat(L"%s:%d %s", warning.file, warning.line, func.name ) );
 
 
 	std::wstring func_name = strip( func.name );
 
 	if( func_name.empty() ) {
-		DEBUG( "Function name is empty" );
+		CPPDEBUG( "Function name is empty" );
 		return;
 	}
 
@@ -320,14 +320,14 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 			if( fix_table[j].format == warning.format &&
 				fix_table[j].target_type == warning.target_type )
 			{
-				DEBUG( wformat( L"'%s' == '%s' && '%s' == '%s'",
+				CPPDEBUG( wformat( L"'%s' == '%s' && '%s' == '%s'",
 									   fix_table[j].format, warning.format,
 									   fix_table[j].target_type, warning.target_type ));
 
 				format_string_to_change = warning.argnum - (format_string_pos + 1);
 				fix_string = fix_table[j].correct_type;
 
-				DEBUG( wformat(L"%s:%d %s => format string at pos: %d pos %d %s", warning.file, warning.line, warning.compile_log_line,
+				CPPDEBUG( wformat(L"%s:%d %s => format string at pos: %d pos %d %s", warning.file, warning.line, warning.compile_log_line,
 						format_string_pos + 1,
 						format_string_to_change,
 						fix_table[j].correct_type) );
@@ -335,7 +335,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 				found = true;
 				break;
 			} else {
-				DEBUG( wformat( L"'%s' != '%s' && '%s' != '%s'",
+				CPPDEBUG( wformat( L"'%s' != '%s' && '%s' != '%s'",
 					   fix_table[j].format, warning.format,
 					   fix_table[j].target_type, warning.target_type ));
 			}
@@ -343,7 +343,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 
 		if( !found )
 		{
-			DEBUG( wformat(L"Cannot handle %s", warning.compile_log_line ) );
+			CPPDEBUG( wformat(L"Cannot handle %s", warning.compile_log_line ) );
 			return;
 		}
 
@@ -352,7 +352,7 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 
 
 	if( !found ) {
-		DEBUG( wformat(L"Cannot handle %s", warning.compile_log_line ) );
+		CPPDEBUG( wformat(L"Cannot handle %s", warning.compile_log_line ) );
 		return;
 	}
 
@@ -399,8 +399,8 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 	}
 
 	if( format_string_start_pos == std::string::npos ) {
-		DEBUG( wformat( L"no format_string_start_pos '%s'",  new_format_string_line ) );
-		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		CPPDEBUG( wformat( L"no format_string_start_pos '%s'",  new_format_string_line ) );
+		CPPDEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 
@@ -409,14 +409,14 @@ void FormatStringHandler::fix_warning( FormatWarnigs & warning, std::wstring & c
 
 	new_format_string_line = left + fix_string + right;
 
-	DEBUG( wformat( L"%s => %s", format_string_line_orig , new_format_string_line) );
+	CPPDEBUG( wformat( L"%s => %s", format_string_line_orig , new_format_string_line) );
 
 	// new replace the format string.
 
 	std::string::size_type format_string_start = content.find( format_string_line_orig, function_start );
 
 	if( format_string_start == std::string::npos ) {
-		DEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
+		CPPDEBUG( wformat(L"Cannot handle %s (%d)", warning.compile_log_line, __LINE__ ) );
 		return;
 	}
 

@@ -7,7 +7,7 @@
 #include "fix_conversion_null.h"
 #include <format.h>
 #include "utils.h"
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <sstream>
 #include <getline.h>
 #include <string_utils.h>
@@ -45,20 +45,20 @@ std::wstring FixConversionNull::patch_file( const std::wstring & file )
 		if( pos == std::wstring::npos )
 			return res;
 
-		DEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
+		CPPDEBUG( wformat( L"%s at line %d", FUNCTION_NAME, get_linenum(res,pos) ))
 
 		Function func;
 		std::wstring::size_type start, end;
 
 		if( !get_function(res,pos,start,end,&func, false) ) {
-			DEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
+			CPPDEBUG(wformat(L"unable to load %s function", FUNCTION_NAME) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
 		if( func.name != FUNCTION_NAME )
 		{
-			DEBUG( wformat(L"function name is '%s'", func.name) );
+			CPPDEBUG( wformat(L"function name is '%s'", func.name) );
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
@@ -70,14 +70,14 @@ std::wstring FixConversionNull::patch_file( const std::wstring & file )
 
 		std::wstring var_name = strip( func.args[LONG_ARG_NUM-1] );
 
-		DEBUG( wformat( L"Argument Value '%s' for ArrCreate/ArrSort at Line: %d", var_name, get_linenum(res,pos)) );
+		CPPDEBUG( wformat( L"Argument Value '%s' for ArrCreate/ArrSort at Line: %d", var_name, get_linenum(res,pos)) );
 
 		if (var_name.compare(L"NULL") != 0) {
 			start_in_file = pos + FUNCTION_NAME.size();
 			continue;
 		}
 
-		DEBUG( wformat( L"found invalid use of ArrCreate at line: %d", get_linenum(res,pos-1)) );
+		CPPDEBUG( wformat( L"found invalid use of ArrCreate at line: %d", get_linenum(res,pos-1)) );
 
         std::wstring first_part_of_file = res.substr(0,pos);
 
@@ -97,7 +97,7 @@ std::wstring FixConversionNull::patch_file( const std::wstring & file )
 			}
         }
 
-        DEBUG( str.str() );
+        CPPDEBUG( str.str() );
 
         std::wstring second_part_of_file = res.substr(end);
 

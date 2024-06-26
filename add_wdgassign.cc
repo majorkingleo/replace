@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "add_wdgassign.h"
 #include <format.h>
-#include "debug.h"
+#include "CpputilsDebug.h"
 #include <cppdir.h>
 #include <string_utils.h>
 
@@ -36,7 +36,7 @@ std::wstring AddWamasWdgAssignMenu::patch_file( const std::wstring & file )
 			break;
 		}
 
-		DEBUG( format( "found %s at line %d", w2out(SHELL_CREATE_FUNCTION), get_linenum(res,pos) ));
+		CPPDEBUG( format( "found %s at line %d", w2out(SHELL_CREATE_FUNCTION), get_linenum(res,pos) ));
 
 		std::wstring shell;
 		std::wstring::size_type assign_pos;
@@ -99,7 +99,7 @@ std::wstring AddWamasWdgAssignMenu::patch_file( const std::wstring & file )
 
 	} while( pos != std::wstring::npos && pos < res.size() );
 
-	DEBUG( format( "add_include_line %d", add_include_line));
+	CPPDEBUG( format( "add_include_line %d", add_include_line));
 
 	if( add_include_line )
 	{

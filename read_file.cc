@@ -5,7 +5,7 @@
  *      Author: martin
  */
 #include "read_file.h"
-#include <debug.h>
+#include <CpputilsDebug.h>
 #include <xml.h>
 #include <utf8_util.h>
 #include <iconv.h>
@@ -1236,7 +1236,7 @@ bool ReadFile::read_file( const std::string & name, std::wstring & content )
 
 	error = "cannot convert file";
 
-	DEBUG( "cannot convert file" );
+	CPPDEBUG( "cannot convert file" );
 
 	return false;
 }
