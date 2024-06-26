@@ -17,26 +17,14 @@
 #include "remove_versid_pdl.h"
 #include "remove_versid_rc.h"
 #include "remove_versid_pl.h"
-#include "PrimanList.h"
-#include "RestoreShell.h"
 
 #include "OutDebug.h"
-#include "OwCallback1.h"
-#include "fix_mlm.h"
-#include "correct_va_multiple_malloc.h"
 #include "remove_generic_cast.h"
 #include "fix_from_compile_log.h"
 #include "ColoredOutput.h"
-#include "add_wdgassign.h"
 #include "fix_sprintf.h"
-#include "fix_StrForm.h"
-#include "fix_scoped_c_str.h"
-#include "fix_prmget.h"
 #include "fix_c_headers.h"
 #include "add_cast.h"
-#include "fix_conversion_null.h"
-#include "add_mlm.h"
-#include "add_mlm_wbox.h"
 #include "DetectLocale.h"
 #include "read_file.h"
 #include "utf8_util.h"
@@ -272,77 +260,11 @@ int main( int argc, char **argv )
    oc_primanlist.setContinueOnFail(true);
    oc_primanlist.setContinueOnMatch(true);
 
-   Arg::FlagOption o_primanlist("primanlist");
-   o_primanlist.setDescription(co.good("add primanlist callbacks to Salomon lists"));
-   o_primanlist.setRequired(true);
-   oc_primanlist.addOptionR(&o_primanlist);
-
-   Arg::OptionChain oc_restoreshell;
-   arg.addChainR(&oc_restoreshell);
-   oc_restoreshell.setMinMatch(1);
-   oc_restoreshell.setContinueOnFail(true);
-   oc_restoreshell.setContinueOnMatch(true);
-
-   Arg::FlagOption o_restoreshell("restoreshell");
-   o_restoreshell.setDescription(co.good("add restore GuiNrestoreShell shell and GuiNmakeActiveShell to lists"));
-   o_restoreshell.setRequired(true);
-   oc_restoreshell.addOptionR(&o_restoreshell);
-
-   Arg::OptionChain oc_owcallback;
-   arg.addChainR(&oc_owcallback);
-   oc_owcallback.setMinMatch(1);
-   oc_owcallback.setContinueOnFail(true);
-   oc_owcallback.setContinueOnMatch(true);
-
-    Arg::FlagOption o_owcallback("owcallback");
-    o_owcallback.setDescription(co.good("correct missing OwCallback1"));
-    o_owcallback.setRequired(true);
-    oc_owcallback.addOptionR(&o_owcallback);
-
-    Arg::OptionChain oc_mlm;
-    arg.addChainR(&oc_mlm);
-    oc_mlm.setMinMatch(1);
-    oc_mlm.setContinueOnFail(true);
-    oc_mlm.setContinueOnMatch(true);
-
-     Arg::FlagOption o_mlm("mlm");
-     o_mlm.setDescription(co.good("correct MlM(%d) calls to MlMsg(%d)"));
-     o_mlm.setRequired(true);
-     oc_mlm.addOptionR(&o_mlm);
-
-
      Arg::OptionChain oc_assign;
      arg.addChainR(&oc_assign);
      oc_assign.setMinMatch(1);
      oc_assign.setContinueOnFail(true);
      oc_assign.setContinueOnMatch(true);
-
-     Arg::FlagOption o_assign("wamas_assign_menu");
-     o_assign.setDescription(co.good("add WamasWdgAssignMenu() after ApShellModalCreate()"));
-     o_assign.setRequired(true);
-     oc_assign.addOptionR(&o_assign);
-
-     Arg::OptionChain oc_correct_va_multiple_malloc_2015;
-     arg.addChainR(&oc_correct_va_multiple_malloc_2015);
-     oc_correct_va_multiple_malloc_2015.setMinMatch(1);
-     oc_correct_va_multiple_malloc_2015.setContinueOnFail(true);
-     oc_correct_va_multiple_malloc_2015.setContinueOnMatch(true);
-
-     Arg::FlagOption o_correct_va_multiple_malloc_2015("vamulmalloc2015");
-     o_correct_va_multiple_malloc_2015.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings (pre-TB2020 syntax)"));
-     o_correct_va_multiple_malloc_2015.setRequired(true);
-     oc_correct_va_multiple_malloc_2015.addOptionR(&o_correct_va_multiple_malloc_2015);
-
-     Arg::OptionChain oc_correct_va_multiple_malloc;
-     arg.addChainR(&oc_correct_va_multiple_malloc);
-     oc_correct_va_multiple_malloc.setMinMatch(1);
-     oc_correct_va_multiple_malloc.setContinueOnFail(true);
-     oc_correct_va_multiple_malloc.setContinueOnMatch(true);
-
-     Arg::FlagOption o_correct_va_multiple_malloc("vamulmalloc");
-     o_correct_va_multiple_malloc.setDescription(co.good("correct (void**) casts in VaMultipleMalloc to reduce warnings (TB2020 syntax)"));
-     o_correct_va_multiple_malloc.setRequired(true);
-     oc_correct_va_multiple_malloc.addOptionR(&o_correct_va_multiple_malloc);
 
      Arg::OptionChain oc_remove_generic_cast;
      arg.addChainR(&oc_remove_generic_cast);
@@ -430,34 +352,6 @@ int main( int argc, char **argv )
       oc_strform.setContinueOnFail(true);
       oc_strform.setContinueOnMatch(true);
 
-      Arg::FlagOption o_strform("strform");
-      o_strform.setDescription(co.bad("replace StrForm() with TO_CHAR(format( dest, ...)) in .cc files"));
-      o_strform.setRequired(true);
-      oc_strform.addOptionR(&o_strform);
-
-      Arg::OptionChain oc_scoped_cstr;
-      arg.addChainR(&oc_scoped_cstr);
-      oc_scoped_cstr.setMinMatch(1);
-      oc_scoped_cstr.setContinueOnFail(true);
-      oc_scoped_cstr.setContinueOnMatch(true);
-
-      Arg::FlagOption o_scoped_cstr("scoped_cstr");
-      o_scoped_cstr.setDescription(co.bad("replace scoped_cstr::form with wamas::platform::string::form( dest, ...).c_str() in .cc files"));
-      o_scoped_cstr.setRequired(true);
-      oc_scoped_cstr.addOptionR(&o_scoped_cstr);
-
-      Arg::OptionChain oc_prmget;
-      arg.addChainR(&oc_prmget);
-      oc_prmget.setMinMatch(1);
-      oc_prmget.setContinueOnFail(true);
-      oc_prmget.setContinueOnMatch(true);
-
-      Arg::FlagOption o_prmget("prmget");
-      o_prmget.setDescription(co.bad("fix PrmGetXParameter int <=> long issue in .c and .cc files"));
-      o_prmget.setRequired(true);
-      oc_prmget.addOptionR(&o_prmget);
-
-
       Arg::OptionChain oc_fix_c_header_file;
       arg.addChainR(&oc_fix_c_header_file);
       oc_fix_c_header_file.setMinMatch(1);
@@ -468,95 +362,6 @@ int main( int argc, char **argv )
       o_fix_c_header_file.setDescription(co.good("add extern \"C\" to C header files."));
       o_fix_c_header_file.setRequired(true);
       oc_fix_c_header_file.addOptionR(&o_fix_c_header_file);
-
-
-	  Arg::OptionChain oc_convnull;
-      arg.addChainR(&oc_convnull);
-      oc_convnull.setMinMatch(1);
-      oc_convnull.setContinueOnFail(true);
-      oc_convnull.setContinueOnMatch(true);
-
-      Arg::FlagOption o_convnull("convnull");
-      o_convnull.setDescription(co.good("fix ArrCreate/ArrSort/EfcbmInstByName "
-        "calls with NULL as last parameter (-Wconversion-null warning) in .c and .cc files"));
-      o_convnull.setRequired(true);
-      oc_convnull.addOptionR(&o_convnull);
-
-
-      // Add MlM chain
-      Arg::OptionChain oc_add_mlm;
-      arg.addChainR(&oc_add_mlm);
-      oc_add_mlm.setMinMatch(3);
-      oc_add_mlm.setContinueOnFail(true);
-      oc_add_mlm.setContinueOnMatch(true);
-
-      Arg::FlagOption o_add_mlm("add-mlm");
-      o_add_mlm.setDescription(co.good("add MlM(), or MlMsg() to specific function args"));
-      o_add_mlm.setRequired(true);
-      oc_add_mlm.addOptionR(&o_add_mlm);
-
-      Arg::StringOption o_add_mlm_function_name("function-name");
-      o_add_mlm_function_name.setDescription(co.good("-add-mlm -function-name maskSetMessage"));
-      o_add_mlm_function_name.setRequired(true);
-      o_add_mlm_function_name.setMinValues(1);
-      o_add_mlm_function_name.setMaxValues(1);
-      oc_add_mlm.addOptionR(&o_add_mlm_function_name);
-
-      Arg::StringOption o_add_mlm_function_arg("function-arg");
-      o_add_mlm_function_arg.setDescription(co.good("-add-mlm -function-name maskSetMessage -function-arg 3"));
-      o_add_mlm_function_arg.setRequired(true);
-      o_add_mlm_function_arg.setMinValues(1);
-      o_add_mlm_function_arg.setMaxValues(1);
-      oc_add_mlm.addOptionR(&o_add_mlm_function_arg);
-
-      Arg::StringOption o_add_mlm_function_call("function-call");
-      o_add_mlm_function_call.setDescription(co.good("-add-mlm -function-name maskSetMessage -function-arg 3 -function-call MlM"));
-      o_add_mlm_function_call.setRequired(true);
-      o_add_mlm_function_call.setMinValues(1);
-      o_add_mlm_function_call.setMaxValues(1);
-      oc_add_mlm.addOptionR(&o_add_mlm_function_call);
-
-      // Add MlM WamaBox chain
-      Arg::OptionChain oc_add_mlm_wbox;
-      arg.addChainR(&oc_add_mlm_wbox);
-      oc_add_mlm_wbox.setMinMatch(1);
-      oc_add_mlm_wbox.setContinueOnFail(true);
-      oc_add_mlm_wbox.setContinueOnMatch(true);
-
-      Arg::FlagOption o_add_mlm_wbox("add-mlm-wamas-box");
-      o_add_mlm_wbox.setDescription(co.good("add MlM(), or MlMsg() to WamasBoxes Args"));
-      o_add_mlm_wbox.setRequired(true);
-      oc_add_mlm_wbox.addOptionR(&o_add_mlm_wbox);
-
-
-
-      // Add fix-long chain
-      Arg::OptionChain oc_fix_long;
-      arg.addChainR(&oc_fix_long);
-      oc_fix_long.setMinMatch(2);
-      oc_fix_long.setContinueOnFail(true);
-      oc_fix_long.setContinueOnMatch(true);
-
-      Arg::FlagOption o_fix_long("fix-long");
-      o_fix_long.setDescription(co.good("replace an int var by to a long var"));
-      o_fix_long.setRequired(true);
-      oc_fix_long.addOptionR(&o_fix_long);
-
-      Arg::StringOption o_fix_long_function_name("function-name");
-      o_fix_long_function_name.setDescription(co.good("-fix-long -function-name KpIdx2Str"));
-      o_fix_long_function_name.setRequired(true);
-      o_fix_long_function_name.setMinValues(1);
-      o_fix_long_function_name.setMaxValues(1);
-      oc_fix_long.addOptionR(&o_fix_long_function_name);
-
-      Arg::StringOption o_fix_long_function_arg("function-arg");
-      o_fix_long_function_arg.setDescription(co.good("-fix-long -function-name KpIdx2Str -function-arg 1"));
-      o_fix_long_function_arg.setRequired(true);
-      o_fix_long_function_arg.setMinValues(1);
-      o_fix_long_function_arg.setMaxValues(1);
-      oc_fix_long.addOptionR(&o_fix_long_function_arg);
-
-
 
       Arg::OptionChain oc_reset_versid;
       arg.addChainR(&oc_reset_versid);
@@ -616,25 +421,11 @@ int main( int argc, char **argv )
   if( !o_replace.isSet() &&
 	  !o_versid_remove.isSet() &&
 	  !o_reset_versid.isSet() &&
-	  !o_primanlist.isSet() &&
-	  !o_mlm.isSet() &&
-	  !o_restoreshell.isSet() &&
-	  !o_correct_va_multiple_malloc_2015.isSet() &&
-	  !o_correct_va_multiple_malloc.isSet() &&
 	  !o_remove_generic_cast.isSet() &&
 	  !o_addcast.isSet() &&
 	  !o_compile_log.isSet() &&
-	  !o_assign.isSet() &&
 	  !o_sprintf.isSet() &&
-	  !o_strform.isSet() &&
-	  !o_scoped_cstr.isSet() &&
-	  !o_prmget.isSet() &&
-	  !o_fix_c_header_file.isSet() &&
-	  !o_owcallback.isSet() &&
-	  !o_convnull.isSet() &&
-	  !o_add_mlm.isSet() &&
-	  !o_add_mlm_wbox.isSet() &&
-	  !o_fix_long.isSet())
+	  !o_fix_c_header_file.isSet())
   {
 	  usage(argv[0]);
 	  std::cout << arg.getHelp(5,20,30, console_width ) << std::endl;
@@ -644,8 +435,7 @@ int main( int argc, char **argv )
   std::set<std::string> directories_to_ignore = {
 		  "CVS",
 		  ".svn",
-		  ".git",
-		  "prod"
+		  ".git"
   };
 
   if( o_ignore_directories.isSet() ) {
@@ -760,50 +550,9 @@ int main( int argc, char **argv )
 	  handlers.push_back( new ResetVersid() );
   }
 
-  if( o_primanlist.getState() ) {
-	  handlers.push_back( new PrimanList() );
-  }
-
-  if( o_owcallback.getState() ) {
-	  handlers.push_back( new OwCallback1() );
-  }
-
-  if( o_restoreshell.getState() ) {
-	  handlers.push_back( new RestoreShell() );
-  }
-
-  if( o_mlm.getState() ) {
-	  handlers.push_back( new FixMlM() );
-  }
-
   if( o_sprintf.getState() ) {
 	  handlers.push_back( new FixSprintf() );
   }
-
-  if( o_scoped_cstr.getState() ) {
-	  handlers.push_back( new FixScopedCStr() );
-  }
-
-  if( o_strform.getState() ) {
-	  handlers.push_back( new FixStrForm() );
-  }
-
-
-  if( o_assign.getState() ) {
-	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModelessCreate") );
-	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModalCreate" ) );
-	  handlers.push_back( new AddWamasWdgAssignMenu( L"ApShellModalCreateRel" ) );
-  }
-
-
-  if( o_correct_va_multiple_malloc_2015.getState() ) {
-	  handlers.push_back( new CorrectVaMultipleMalloc( false) );
-  }
-
-  if( o_correct_va_multiple_malloc.getState() ) {
-	  handlers.push_back( new CorrectVaMultipleMalloc( true ) );
-  }
-
   if( o_remove_generic_cast.getState() ) {
 	  handlers.push_back( new RemoveGenericCast() );
 	  handlers.push_back( new RemoveGenericCast( L"MskUpdateVar") );
@@ -816,46 +565,6 @@ int main( int argc, char **argv )
 	  handlers.push_back( new AddCast(L"ArrGetEle") );
 	  handlers.push_back( new AddCast(L"malloc") );
 	  handlers.push_back( new AddCast(L"realloc") );
-  }
-  if( o_prmget.getState() ) {
-	  handlers.push_back( new FixPrmGet() );
-	  handlers.push_back( new FixPrmGet( L"PrmGet2Parameter", 5 ) );
-	  handlers.push_back( new FixPrmGet( L"PrmGet3Parameter", 6 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get1Parameter", 4 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get2Parameter", 5 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get3Parameter", 6 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get1ParameterWp", 3 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get2ParameterWp", 4 ) );
-	  handlers.push_back( new FixPrmGet( L"ParamSIf_Get3ParameterWp", 5 ) );
-  }
-
-  if (o_convnull.getState() ) {
-    handlers.push_back ( new FixConversionNull() );
-    handlers.push_back ( new FixConversionNull( L"ArrSort", 3) );
-    handlers.push_back ( new FixConversionNull( L"EfcbmInstByName", 5) );
-  }
-
-  if( o_add_mlm.getState() ) {
-	  std::wstring function_name = DetectLocale::in2w(o_add_mlm_function_name.getValues()->at(0));
-	  unsigned function_arg = s2x<unsigned>(o_add_mlm_function_arg.getValues()->at(0));
-	  std::wstring function_call = DetectLocale::in2w( o_add_mlm_function_call.getValues()->at(0));
-
-	  handlers.push_back( new AddMlM( function_name, function_arg, function_call ));
-  }
-
-  if( o_add_mlm_wbox.getState() ) {
-	  handlers.push_back( new AddMlMWBox());
-	  handlers.push_back( new AddMlMWBox( L"WamasBoxAlert") );
-	  handlers.push_back( new AddMlMWBox( L"WamasBoxCommit") );
-	  handlers.push_back( new AddMlMWBox( L"WamasBoxInfo") );
-	  handlers.push_back( new AddMlMWBox( L"WamasBoxInput") );
-  }
-
-  if( o_fix_long.getState() ) {
-	  std::wstring function_name = DetectLocale::in2w(o_fix_long_function_name.getValues()->at(0));
-	  unsigned function_arg = s2x<unsigned>(o_fix_long_function_arg.getValues()->at(0));
-
-	  handlers.push_back( new FixPrmGet( function_name, function_arg ));
   }
 
   for( FILE_SEARCH_LIST::iterator it = files.begin(); it != files.end(); it++ )
