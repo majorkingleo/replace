@@ -1,7 +1,0 @@
-EXE=libcpputilsformat.a
-
-all: $(EXE)
-
-libcpputilsformat.a: $(OFILES)
-	ar r libcpputilsformat.a $(OFILES)
-

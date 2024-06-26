@@ -1,7 +1,0 @@
-EXE=libcpputilsshared.a
-
-all: $(EXE)
-
-libcpputilsshared.a: $(OFILES)
-	ar r libcpputilsshared.a $(OFILES)
-
