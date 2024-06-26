@@ -6,7 +6,6 @@ replace_SOURCES=\
 		ColoredOutput.cc\
 		ColoredOutput.h\
 		correct_va_multiple_malloc.cc\
-		file_option.cc\
 		find_decl.cc\
 		find_files.cc\
 		find_first_of.cc\
@@ -43,8 +42,6 @@ replace_SOURCES=\
 		fix_conversion_null.cc \
 		add_mlm.cc \
 		add_mlm_wbox.cc \
-		DetectLocale.cc \
-		DetectLocale.h \
 		read_file.h \
 		read_file.cc \
 		test_wformat.cc \
@@ -67,12 +64,14 @@ noinst_LIBRARIES=cpputils/io/libio.a \
 
 
 cpputils_cpputilsshared_libcpputilsshared_a_SOURCES= \
+		cpputils/cpputilsshared/arg.cc \
+		cpputils/cpputilsshared/arg.h \
+		cpputils/cpputilsshared/stderr_exception.h \
+		cpputils/cpputilsshared/stderr_exception.cc \
 		cpputils/cpputilsshared/backtrace.cc \
 		cpputils/cpputilsshared/cppdir.cc \
 		cpputils/cpputilsshared/leoini.cc \
-		cpputils/cpputilsshared/logtool2.cc \
 		cpputils/cpputilsshared/string_utils.cc \
-		cpputils/cpputilsshared/vec_utils.cc \
 		cpputils/cpputilsshared/xml.h \
 		cpputils/cpputilsshared/xml.cc \
 		cpputils/cpputilsshared/pairs.h \
@@ -83,7 +82,9 @@ cpputils_cpputilsshared_libcpputilsshared_a_SOURCES= \
 		cpputils/cpputilsshared/utf8/cpp11.h \
 		cpputils/cpputilsshared/utf8/cpp17.h \
 		cpputils/cpputilsshared/utf8_util.h \
-		cpputils/cpputilsshared/utf8_util.cc
+		cpputils/cpputilsshared/utf8_util.cc \
+		cpputils/cpputilsshared/file_option.cc \
+		cpputils/cpputilsshared/file_option.h
 
 
 cpputils_cpputilsshared_cpputilsformat_libcpputilsformat_a_SOURCES= \
